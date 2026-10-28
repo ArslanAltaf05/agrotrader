@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">AgroTrader Pro</string>
+    <string name="title_activity_main">AgroTrader Pro</string>
+    <string name="package_name">pk.agrisol.agrotrader</string>
+    <string name="custom_url_scheme">pk.agrisol.agrotrader</string>
+</resources>

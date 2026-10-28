@@ -1,0 +1,8 @@
+{
+  "appId": "pk.agrisol.agrotrader",
+  "appName": "AgroTrader Pro",
+  "webDir": "out",
+  "server": {
+    "androidScheme": "https"
+  }
+}
