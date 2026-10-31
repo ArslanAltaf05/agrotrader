@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { formatCurrency } from '../utils/formatters';
+import { formatCurrency, getExpiryDetails } from '../utils/formatters';
 
 export default function POSModal({ isOpen, onClose, onSaleComplete, resumedCart }) {
   const { products, customers, createSale, parkSale, hideAmounts, auth, staffPermissions, addCustomer } = useApp();
@@ -353,9 +353,11 @@ export default function POSModal({ isOpen, onClose, onSaleComplete, resumedCart 
                 <option value="">-- Choose Fertilizer, Seed or Chemical --</option>
                 {products.map(p => {
                   const avail = selectedSource === 'store' ? p.storeStock : p.shopStock;
+                  const exp = getExpiryDetails(p.expiryDate);
+                  const expWarning = exp?.isCritical ? ` [⚠️ ${exp.label}]` : '';
                   return (
                     <option key={p.id} value={p.id} disabled={avail <= 0}>
-                      {p.name} - Rs {p.salePrice} ({avail} {p.unit} in {selectedSource})
+                      {p.name} - Rs {p.salePrice} ({avail} {p.unit} in {selectedSource}){expWarning}
                     </option>
                   );
                 })}

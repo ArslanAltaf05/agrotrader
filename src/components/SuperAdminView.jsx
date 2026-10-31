@@ -59,6 +59,7 @@ export default function SuperAdminView() {
     name: '',
     subtitle: 'Agriculture & Crop Protection Store',
     ownerName: '',
+    username: '',
     email: '',
     phone: '',
     city: 'Sargodha',
@@ -195,12 +196,30 @@ export default function SuperAdminView() {
       alert('Business name and owner name are mandatory.');
       return;
     }
-    const created = createTenant(createStoreForm);
+    const cleanU = (createStoreForm.username || '').trim().toLowerCase();
+    if (!cleanU) {
+      alert('Store Login Username is required for logging into the store.');
+      return;
+    }
+    if (cleanU === 'superadmin' || cleanU.startsWith('superadmin_')) {
+      alert('Cannot use "superadmin" as a store username.');
+      return;
+    }
+    if (cleanU === 'staff' || cleanU.startsWith('staff_') || cleanU.startsWith('counter_')) {
+      alert('Store admin username cannot start with "staff" or "counter".');
+      return;
+    }
+    if (tenants.some(t => t.username && t.username.toLowerCase() === cleanU)) {
+      alert(`Username "${cleanU}" is already taken by another store. Please choose a unique username.`);
+      return;
+    }
+    const created = createTenant({ ...createStoreForm, username: cleanU });
     setShowCreateStoreModal(false);
     setCreateStoreForm({
       name: '',
       subtitle: 'Agriculture & Crop Protection Store',
       ownerName: '',
+      username: '',
       email: '',
       phone: '',
       city: 'Sargodha',
@@ -564,8 +583,14 @@ export default function SuperAdminView() {
                                 </span>
                               </button>
                             </div>
-                            <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
-                              Owner: <b>{t.ownerName}</b> &bull; Joined: {formatDate(t.joinedDate)}
+                            <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                              <span>Owner: <b>{t.ownerName}</b></span>
+                              <span>&bull;</span>
+                              <span style={{ background: 'var(--bg-hover)', padding: '1px 6px', borderRadius: '4px', fontFamily: 'monospace', fontWeight: 600, color: 'var(--primary)' }}>
+                                @{t.username || 'admin'}
+                              </span>
+                              <span>&bull;</span>
+                              <span>PIN: <code>{t.adminPin || '1234'}</code></span>
                             </div>
                           </td>
                           <td>
@@ -1160,11 +1185,38 @@ export default function SuperAdminView() {
                       className="input"
                       placeholder="e.g. Al-Rehman Agro Center"
                       value={createStoreForm.name}
-                      onChange={(e) => setCreateStoreForm({ ...createStoreForm, name: e.target.value })}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        const autoUser = val.toLowerCase().replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_').slice(0, 20);
+                        setCreateStoreForm(prev => ({
+                          ...prev,
+                          name: val,
+                          username: (!prev.username || prev.username === prev.name.toLowerCase().replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_').slice(0, 20))
+                            ? autoUser
+                            : prev.username
+                        }));
+                      }}
                       required
                     />
                   </div>
 
+                  <div className="input-group">
+                    <label className="input-label">Store Login Username <span className="req">*</span></label>
+                    <input
+                      type="text"
+                      className="input"
+                      placeholder="e.g. alrehman_agro"
+                      value={createStoreForm.username}
+                      onChange={(e) => setCreateStoreForm({ ...createStoreForm, username: e.target.value.toLowerCase().replace(/\s+/g, '_') })}
+                      required
+                    />
+                    <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>
+                      Admin will use this username to log in to this store portal
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
                   <div className="input-group">
                     <label className="input-label">Owner / Managing Partner <span className="req">*</span></label>
                     <input
@@ -1175,6 +1227,22 @@ export default function SuperAdminView() {
                       onChange={(e) => setCreateStoreForm({ ...createStoreForm, ownerName: e.target.value })}
                       required
                     />
+                  </div>
+
+                  <div className="input-group">
+                    <label className="input-label">Store Admin Master PIN <span className="req">*</span></label>
+                    <input
+                      type="text"
+                      maxLength={6}
+                      className="input"
+                      placeholder="e.g. 1234"
+                      value={createStoreForm.adminPin}
+                      onChange={(e) => setCreateStoreForm({ ...createStoreForm, adminPin: e.target.value })}
+                      required
+                    />
+                    <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>
+                      Security PIN used with the username for login
+                    </div>
                   </div>
                 </div>
 
@@ -1257,12 +1325,13 @@ export default function SuperAdminView() {
                   </div>
 
                   <div className="input-group">
-                    <label className="input-label">Store Admin Master PIN</label>
+                    <label className="input-label">NTN / Tax Number</label>
                     <input
                       type="text"
                       className="input"
-                      value={createStoreForm.adminPin}
-                      onChange={(e) => setCreateStoreForm({ ...createStoreForm, adminPin: e.target.value })}
+                      placeholder="e.g. 1234567-8"
+                      value={createStoreForm.ntn}
+                      onChange={(e) => setCreateStoreForm({ ...createStoreForm, ntn: e.target.value })}
                     />
                   </div>
                 </div>
@@ -1370,15 +1439,28 @@ export default function SuperAdminView() {
             </div>
             <form onSubmit={handleEditSubmit}>
               <div className="modal-body">
-                <div className="input-group" style={{ marginBottom: '12px' }}>
-                  <label className="input-label">Store Name</label>
-                  <input
-                    type="text"
-                    className="input"
-                    value={editingTenant.name}
-                    onChange={(e) => setEditingTenant({ ...editingTenant, name: e.target.value })}
-                    required
-                  />
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+                  <div className="input-group">
+                    <label className="input-label">Store Name</label>
+                    <input
+                      type="text"
+                      className="input"
+                      value={editingTenant.name}
+                      onChange={(e) => setEditingTenant({ ...editingTenant, name: e.target.value })}
+                      required
+                    />
+                  </div>
+
+                  <div className="input-group">
+                    <label className="input-label">Store Login Username</label>
+                    <input
+                      type="text"
+                      className="input"
+                      value={editingTenant.username || ''}
+                      onChange={(e) => setEditingTenant({ ...editingTenant, username: e.target.value.toLowerCase().replace(/\s+/g, '_') })}
+                      required
+                    />
+                  </div>
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
@@ -1606,12 +1688,16 @@ export default function SuperAdminView() {
                   <div style={{ fontWeight: 800, color: 'var(--primary)' }}>{formatCurrency(viewingTenant.monthlyFee)}/mo</div>
                 </div>
                 <div>
-                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>NTN Tax Number</div>
-                  <div style={{ fontWeight: 600 }}>{viewingTenant.ntn || 'Pending'}</div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Store Login Username</div>
+                  <div style={{ fontWeight: 700, color: 'var(--primary)', fontFamily: 'monospace' }}>@{viewingTenant.username || 'admin'}</div>
                 </div>
                 <div>
                   <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Master Admin PIN</div>
                   <div style={{ fontWeight: 700 }}><code>{viewingTenant.adminPin || '1234'}</code></div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>NTN Tax Number</div>
+                  <div style={{ fontWeight: 600 }}>{viewingTenant.ntn || 'Pending'}</div>
                 </div>
               </div>
 

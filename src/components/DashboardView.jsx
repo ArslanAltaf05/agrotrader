@@ -3,11 +3,12 @@
 import React, { useState, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { icons } from '../utils/icons';
-import { formatCurrency, formatNumber, formatDateShort } from '../utils/formatters';
+import { formatCurrency, formatNumber, formatDateShort, getExpiryDetails } from '../utils/formatters';
 
 export default function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
   const {
     metrics,
+    criticalExpiryProducts,
     hideAmounts,
     sales,
     products,
@@ -21,6 +22,7 @@ export default function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
   } = useApp();
 
   // Controls & Filters
+  const [isExpiryCardExpanded, setIsExpiryCardExpanded] = useState(true);
   const [chartMode, setChartMode] = useState('sales'); // 'sales' | 'profit'
   const [timeframe, setTimeframe] = useState('week'); // 'week' | 'month' | 'year'
   const [dateFilter, setDateFilter] = useState('today'); // 'today' | 'yesterday' | 'week' | 'month' | 'all' | 'custom'
@@ -354,6 +356,209 @@ export default function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
           </button>
         </div>
       </div>
+
+      {/* Inventory Expiry Alert Card (Expiring within 1 Week / 7 Days or Expired) */}
+      {criticalExpiryProducts && criticalExpiryProducts.length > 0 ? (
+        <div
+          className="card"
+          style={{
+            marginBottom: '20px',
+            border: '1px solid #fecaca',
+            background: 'linear-gradient(180deg, #fff5f5 0%, #ffffff 100%)',
+            boxShadow: '0 4px 14px rgba(220, 38, 38, 0.08)',
+            overflow: 'hidden'
+          }}
+        >
+          {/* Header */}
+          <div
+            style={{
+              padding: '14px 18px',
+              borderBottom: '1px solid #fee2e2',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '10px'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '32px',
+                  height: '32px',
+                  background: '#fee2e2',
+                  borderRadius: '8px',
+                  fontSize: '18px'
+                }}
+              >
+                ⚠️
+              </span>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                  <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#991b1b', margin: 0 }}>
+                    INVENTORY EXPIRY ALERT (CRITICAL: WITHIN 7 DAYS)
+                  </h3>
+                  <span
+                    className="badge badge-danger"
+                    style={{ fontSize: '11px', fontWeight: 800, padding: '2px 8px', borderRadius: '12px' }}
+                  >
+                    {criticalExpiryProducts.length} Item{criticalExpiryProducts.length > 1 ? 's' : ''} Need Action
+                  </span>
+                </div>
+                <div style={{ fontSize: '12px', color: '#7f1d1d', marginTop: '2px' }}>
+                  The following pesticides, seeds, or fertilizers expire within 1 week or are past their expiration date. Plan clearance sales or returns to supplier.
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <button
+                type="button"
+                className="btn btn-outline btn-sm"
+                style={{ fontSize: '11.5px', background: '#fff', borderColor: '#fca5a5', color: '#b91c1c' }}
+                onClick={() => setActiveTab('inventory')}
+              >
+                📦 Open Full Inventory
+              </button>
+              <button
+                type="button"
+                className="btn btn-outline btn-sm"
+                style={{ fontSize: '11.5px', background: '#fff', borderColor: '#fca5a5', color: '#b91c1c' }}
+                onClick={() => setIsExpiryCardExpanded(prev => !prev)}
+              >
+                {isExpiryCardExpanded ? 'Collapse ▲' : 'Expand ▼'}
+              </button>
+            </div>
+          </div>
+
+          {/* Table of Expiring Products */}
+          {isExpiryCardExpanded && (
+            <div className="table-responsive" style={{ maxHeight: '280px', overflowY: 'auto' }}>
+              <table className="data-table" style={{ margin: 0 }}>
+                <thead>
+                  <tr style={{ background: 'rgba(254, 226, 226, 0.4)' }}>
+                    <th style={{ fontSize: '11px', color: '#991b1b' }}>PRODUCT &amp; BATCH</th>
+                    <th style={{ fontSize: '11px', color: '#991b1b' }}>CATEGORY / COMPANY</th>
+                    <th style={{ fontSize: '11px', color: '#991b1b' }}>EXPIRY COUNTDOWN</th>
+                    <th style={{ fontSize: '11px', color: '#991b1b', textAlign: 'center' }}>STOCK ON HAND</th>
+                    <th style={{ fontSize: '11px', color: '#991b1b', textAlign: 'right' }}>VALUE AT RISK</th>
+                    <th style={{ fontSize: '11px', color: '#991b1b', textAlign: 'right' }}>QUICK ACTION</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {criticalExpiryProducts.map(p => {
+                    const expiry = getExpiryDetails(p.expiryDate);
+                    const totalUnits = (p.shopStock || 0) + (p.storeStock || 0);
+                    const riskVal = totalUnits * (p.costPrice || 0);
+
+                    return (
+                      <tr key={p.id}>
+                        <td>
+                          <div style={{ fontWeight: 700, fontSize: '13px', color: '#111827' }}>{p.name}</div>
+                          <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                            SKU: {p.sku} {p.batchNo && `• Batch: ${p.batchNo}`}
+                          </div>
+                        </td>
+                        <td>
+                          <span className="badge badge-neutral" style={{ fontSize: '11px' }}>
+                            {p.category}
+                          </span>
+                          <div style={{ fontSize: '10.5px', color: 'var(--text-muted)' }}>{p.manufacturer || 'General'}</div>
+                        </td>
+                        <td>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span
+                              className={`badge ${expiry?.badgeClass || 'badge-warning'}`}
+                              style={{
+                                fontSize: '11px',
+                                fontWeight: 700,
+                                background: expiry?.bg,
+                                color: expiry?.color,
+                                border: `1px solid ${expiry?.color}40`
+                              }}
+                            >
+                              {expiry?.isExpired ? '🔴 ' : '⏳ '}
+                              {expiry?.label || p.expiryDate}
+                            </span>
+                            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                              ({p.expiryDate})
+                            </span>
+                          </div>
+                        </td>
+                        <td style={{ textAlign: 'center' }}>
+                          <span
+                            className="badge"
+                            style={{
+                              fontWeight: 700,
+                              background: totalUnits > 0 ? '#fee2e2' : '#f3f4f6',
+                              color: totalUnits > 0 ? '#b91c1c' : '#6b7280'
+                            }}
+                          >
+                            {totalUnits} {p.unit} ({p.shopStock || 0} Shop / {p.storeStock || 0} Godown)
+                          </span>
+                        </td>
+                        <td style={{ textAlign: 'right', fontWeight: 700, color: '#dc2626' }}>
+                          {formatCurrency(riskVal, hideAmounts)}
+                        </td>
+                        <td style={{ textAlign: 'right' }}>
+                          <button
+                            type="button"
+                            className="btn btn-sm btn-primary"
+                            style={{ fontSize: '11px', padding: '3px 10px' }}
+                            onClick={() => onOpenNewSale && onOpenNewSale()}
+                            title="Ring up sale in POS with discount"
+                          >
+                            🛒 Sell in POS
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      ) : (
+        /* Status Card when all inventory is healthy */
+        <div
+          className="card"
+          style={{
+            marginBottom: '20px',
+            padding: '12px 18px',
+            background: 'linear-gradient(90deg, #f0fdf4 0%, #ffffff 100%)',
+            border: '1px solid #bbf7d0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '10px'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span style={{ fontSize: '18px' }}>🛡️</span>
+            <div>
+              <div style={{ fontSize: '13px', fontWeight: 700, color: '#166534' }}>
+                Inventory Expiry Health: All Current Batches Valid
+              </div>
+              <div style={{ fontSize: '11.5px', color: '#15803d' }}>
+                No inventory batches expire within the next 7 days. Automated countdown alerts will display here as stock approaches expiry.
+              </div>
+            </div>
+          </div>
+          <button
+            type="button"
+            className="btn btn-outline btn-sm"
+            style={{ fontSize: '11px', background: '#fff', borderColor: '#86efac', color: '#166534' }}
+            onClick={() => setActiveTab('inventory')}
+          >
+            Inspect Stock Expiries &rarr;
+          </button>
+        </div>
+      )}
 
       {/* 4 Main Dynamic KPI Cards */}
       <div className="kpi-grid">

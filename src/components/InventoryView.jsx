@@ -3,10 +3,11 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { icons } from '../utils/icons';
-import { formatCurrency, formatNumber } from '../utils/formatters';
+import { formatCurrency, formatNumber, getExpiryDetails } from '../utils/formatters';
 
 export default function InventoryView({ onOpenAddProduct, onEditProduct, onOpenTransfer }) {
-  const { products, categories, manufacturers, units, deleteProduct, hideAmounts, metrics } = useApp();
+  const { products, categories, manufacturers, units, deleteProduct, hideAmounts, metrics, auth } = useApp();
+  const isAdmin = auth.user?.role === 'admin' || auth.user?.role === 'superadmin';
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
@@ -45,6 +46,14 @@ export default function InventoryView({ onOpenAddProduct, onEditProduct, onOpenT
     if (selectedStatus === 'In Stock' && totalQty <= (p.alertQty || 10)) return false;
     if (selectedStatus === 'Low Stock' && (totalQty > (p.alertQty || 10) || totalQty === 0)) return false;
     if (selectedStatus === 'Out of Stock' && totalQty > 0) return false;
+    if (selectedStatus === 'Expiring Soon (≤ 7 Days)') {
+      const exp = getExpiryDetails(p.expiryDate);
+      if (!exp || !exp.isExpiringSoon) return false;
+    }
+    if (selectedStatus === 'Expired') {
+      const exp = getExpiryDetails(p.expiryDate);
+      if (!exp || !exp.isExpired) return false;
+    }
 
     // Flag filter
     if (selectedFlag === 'Narcotic' && !p.flags?.narcotic) return false;
@@ -173,6 +182,38 @@ export default function InventoryView({ onOpenAddProduct, onEditProduct, onOpenT
             <span>{metrics.categoryCount} categories</span>
           </div>
         </div>
+
+        {/* 7. Expiring Soon (<= 7 Days) */}
+        <div
+          className="kpi-card"
+          onClick={() => setSelectedStatus(selectedStatus === 'Expiring Soon (≤ 7 Days)' ? 'All' : 'Expiring Soon (≤ 7 Days)')}
+          style={{
+            cursor: 'pointer',
+            border: (metrics.expiringSoonCount || 0) + (metrics.expiredCount || 0) > 0 ? '1px solid #fecaca' : undefined,
+            background: (metrics.expiringSoonCount || 0) + (metrics.expiredCount || 0) > 0 ? '#fffbfb' : undefined
+          }}
+          title="Click to filter products expiring within 1 week or expired"
+        >
+          <div className="kpi-header">
+            <span className="kpi-title" style={{ color: (metrics.expiringSoonCount || 0) > 0 ? '#b91c1c' : undefined }}>
+              EXPIRING SOON (≤ 7D)
+            </span>
+            <span className="kpi-icon-pill" style={{ background: '#fef2f2', color: '#dc2626' }}>
+              ⏳
+            </span>
+          </div>
+          <div className="kpi-value" style={{ color: (metrics.expiringSoonCount || 0) + (metrics.expiredCount || 0) > 0 ? '#dc2626' : undefined }}>
+            {metrics.expiringSoonCount || 0}
+            {(metrics.expiredCount || 0) > 0 && (
+              <span style={{ fontSize: '13px', color: '#ef4444', marginLeft: '4px' }}>
+                ({metrics.expiredCount} exp)
+              </span>
+            )}
+          </div>
+          <div className="kpi-subtext" style={{ color: (metrics.expiringSoonCount || 0) > 0 ? '#dc2626' : undefined }}>
+            <span>{(metrics.expiringSoonCount || 0) + (metrics.expiredCount || 0) > 0 ? 'Action required' : 'All batches safe'}</span>
+          </div>
+        </div>
       </div>
 
       {/* Search & Multi-Filters Toolbar matching Screenshot 5 */}
@@ -203,7 +244,7 @@ export default function InventoryView({ onOpenAddProduct, onEditProduct, onOpenT
         {/* Status dropdown */}
         <select
           className="select"
-          style={{ width: 'auto', minWidth: '110px' }}
+          style={{ width: 'auto', minWidth: '130px' }}
           value={selectedStatus}
           onChange={(e) => setSelectedStatus(e.target.value)}
         >
@@ -211,6 +252,8 @@ export default function InventoryView({ onOpenAddProduct, onEditProduct, onOpenT
           <option value="In Stock">In Stock</option>
           <option value="Low Stock">Low Stock</option>
           <option value="Out of Stock">Out of Stock</option>
+          <option value="Expiring Soon (≤ 7 Days)">⏳ Expiring Soon (≤ 7 Days)</option>
+          <option value="Expired">⛔ Expired Batches</option>
         </select>
 
         {/* Batches dropdown */}
@@ -331,11 +374,35 @@ export default function InventoryView({ onOpenAddProduct, onEditProduct, onOpenT
                       </td>
                       <td>
                         <div style={{ fontWeight: 700, fontSize: '13.5px' }}>{p.name}</div>
-                        <div style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'flex', gap: '8px', marginTop: '2px' }}>
+                        <div style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'flex', gap: '8px', marginTop: '2px', flexWrap: 'wrap' }}>
                           <span>SKU: {p.sku}</span>
                           {p.batchNo && <span>&bull; Batch: {p.batchNo}</span>}
                           {p.manufacturer && <span>&bull; {p.manufacturer}</span>}
                         </div>
+                        {p.expiryDate && (
+                          <div style={{ marginTop: '3px' }}>
+                            {(() => {
+                              const exp = getExpiryDetails(p.expiryDate);
+                              if (!exp) return null;
+                              return (
+                                <span
+                                  className={`badge ${exp.badgeClass}`}
+                                  style={{
+                                    fontSize: '10.5px',
+                                    fontWeight: 700,
+                                    background: exp.bg,
+                                    color: exp.color,
+                                    border: `1px solid ${exp.color}40`,
+                                    padding: '1px 6px'
+                                  }}
+                                >
+                                  {exp.isExpired ? '🔴 ' : (exp.isCritical ? '⏳ ' : '📅 ')}
+                                  {exp.label} ({p.expiryDate})
+                                </span>
+                              );
+                            })()}
+                          </div>
+                        )}
                       </td>
                       <td>
                         <span className="badge badge-neutral" style={{ fontWeight: 600 }}>
@@ -391,20 +458,22 @@ export default function InventoryView({ onOpenAddProduct, onEditProduct, onOpenT
                             <span dangerouslySetInnerHTML={{ __html: icons.edit }} />
                           </button>
 
-                          {/* Delete Trash Icon */}
-                          <button
-                            type="button"
-                            className="btn btn-outline btn-icon-only"
-                            style={{ color: '#ef4444' }}
-                            title="Delete Product"
-                            onClick={() => {
-                              if (confirm(`Are you sure you want to delete ${p.name}?`)) {
-                                deleteProduct(p.id);
-                              }
-                            }}
-                          >
-                            <span dangerouslySetInnerHTML={{ __html: icons.trash }} />
-                          </button>
+                          {/* Delete Trash Icon (Admin Only) */}
+                          {isAdmin && (
+                            <button
+                              type="button"
+                              className="btn btn-outline btn-icon-only"
+                              style={{ color: '#ef4444' }}
+                              title="Delete Product"
+                              onClick={() => {
+                                if (confirm(`Are you sure you want to delete ${p.name}?`)) {
+                                  deleteProduct(p.id);
+                                }
+                              }}
+                            >
+                              <span dangerouslySetInnerHTML={{ __html: icons.trash }} />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>

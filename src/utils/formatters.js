@@ -69,3 +69,93 @@ export function generateBatchNumber() {
   const seq = String(Math.floor(1 + Math.random() * 9999)).padStart(4, '0');
   return `${dateStr}-${seq}`;
 }
+
+export function getExpiryDetails(expiryDate) {
+  if (!expiryDate) return null;
+  const exp = new Date(expiryDate);
+  if (isNaN(exp.getTime())) return null;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  exp.setHours(0, 0, 0, 0);
+
+  const diffTime = exp.getTime() - today.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+  if (diffDays < 0) {
+    return {
+      status: 'expired',
+      daysLeft: diffDays,
+      isExpired: true,
+      isExpiringSoon: false,
+      isCritical: true,
+      label: `Expired ${Math.abs(diffDays)}d ago`,
+      badgeClass: 'badge-danger',
+      color: '#dc2626',
+      bg: '#fee2e2'
+    };
+  }
+  if (diffDays === 0) {
+    return {
+      status: 'today',
+      daysLeft: 0,
+      isExpired: false,
+      isExpiringSoon: true,
+      isCritical: true,
+      label: 'Expires Today!',
+      badgeClass: 'badge-danger',
+      color: '#dc2626',
+      bg: '#fee2e2'
+    };
+  }
+  if (diffDays === 1) {
+    return {
+      status: 'tomorrow',
+      daysLeft: 1,
+      isExpired: false,
+      isExpiringSoon: true,
+      isCritical: true,
+      label: 'Expires Tomorrow',
+      badgeClass: 'badge-warning',
+      color: '#ea580c',
+      bg: '#ffedd5'
+    };
+  }
+  if (diffDays <= 7) {
+    return {
+      status: 'week',
+      daysLeft: diffDays,
+      isExpired: false,
+      isExpiringSoon: true,
+      isCritical: true,
+      label: `Expires in ${diffDays} days`,
+      badgeClass: 'badge-warning',
+      color: '#d97706',
+      bg: '#fef3c7'
+    };
+  }
+  if (diffDays <= 30) {
+    return {
+      status: 'month',
+      daysLeft: diffDays,
+      isExpired: false,
+      isExpiringSoon: false,
+      isCritical: false,
+      label: `Expires in ${diffDays} days`,
+      badgeClass: 'badge-info',
+      color: '#2563eb',
+      bg: '#eff6ff'
+    };
+  }
+  return {
+    status: 'safe',
+    daysLeft: diffDays,
+    isExpired: false,
+    isExpiringSoon: false,
+    isCritical: false,
+    label: `${diffDays} days left`,
+    badgeClass: 'badge-success',
+    color: '#16a34a',
+    bg: '#dcfce7'
+  };
+}

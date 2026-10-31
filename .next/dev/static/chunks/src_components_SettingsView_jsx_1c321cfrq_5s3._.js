@@ -18,11 +18,29 @@ var _s = __turbopack_context__.k.signature();
 ;
 function SettingsView() {
     _s();
-    const { storeProfile, setStoreProfile, theme, setTheme, branches, activeBranchId, switchBranch, saasPlan, auth, staffPermissions, updateStaffPermissions, resetAllData, showToast } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$context$2f$AppContext$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useApp"])();
+    const { storeProfile, setStoreProfile, theme, setTheme, branches, activeBranchId, switchBranch, saasPlan, auth, staffPermissions, updateStaffPermissions, resetPin, resetAllData, showToast } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$context$2f$AppContext$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useApp"])();
     const isAdmin = auth.user?.role === 'admin' || auth.user?.role === 'superadmin';
     const [profileForm, setProfileForm] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])({
         ...storeProfile
     });
+    const [adminPinInput, setAdminPinInput] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(auth.adminPin || '1234');
+    const [staffPinInput, setStaffPinInput] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(auth.staffPin || '0000');
+    const handleUpdateAdminPin = (e)=>{
+        e.preventDefault();
+        if (!adminPinInput.trim() || adminPinInput.length < 4) {
+            showToast('Admin PIN must be at least 4 digits.', 'warning');
+            return;
+        }
+        resetPin(adminPinInput.trim(), 'admin');
+    };
+    const handleUpdateStaffPin = (e)=>{
+        e.preventDefault();
+        if (!staffPinInput.trim() || staffPinInput.length < 4) {
+            showToast('Staff PIN must be at least 4 digits.', 'warning');
+            return;
+        }
+        resetPin(staffPinInput.trim(), 'staff');
+    };
     const handleProfileSave = (e)=>{
         e.preventDefault();
         if (!isAdmin) {
@@ -33,7 +51,7 @@ function SettingsView() {
         showToast('Store profile & bill header updated successfully!', 'success');
     };
     const handleExportBackup = ()=>{
-        const backupData = localStorage.getItem('agrotrader_saas_v3_dynamic') || localStorage.getItem('agrotrader_saas_v2') || '{}';
+        const backupData = localStorage.getItem('agrotrader_live_production_v1') || '{}';
         const blob = new Blob([
             backupData
         ], {
@@ -42,7 +60,7 @@ function SettingsView() {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `AgroTrader_Backup_${new Date().toISOString().split('T')[0]}.json`;
+        a.download = `AgroTrader_Live_Backup_${new Date().toISOString().split('T')[0]}.json`;
         a.click();
         URL.revokeObjectURL(url);
         showToast('Database backup downloaded!', 'success');
@@ -91,7 +109,7 @@ function SettingsView() {
                                                     children: "🌾"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                                    lineNumber: 58,
+                                                    lineNumber: 79,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
@@ -101,11 +119,11 @@ function SettingsView() {
                                                     },
                                                     children: [
                                                         saasPlan.name,
-                                                        " (SaaS Multi-Tenant Edition)"
+                                                        " (Production Edition)"
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                                    lineNumber: 59,
+                                                    lineNumber: 80,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -117,13 +135,13 @@ function SettingsView() {
                                                     children: saasPlan.status
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                                    lineNumber: 60,
+                                                    lineNumber: 81,
                                                     columnNumber: 17
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/SettingsView.jsx",
-                                            lineNumber: 57,
+                                            lineNumber: 78,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -131,20 +149,16 @@ function SettingsView() {
                                                 fontSize: '13px',
                                                 opacity: 0.9
                                             },
-                                            children: [
-                                                "Includes ",
-                                                saasPlan.branchLimit,
-                                                " store branches, real-time cloud sync, customer Khata recovery, and Android Mobile APK."
-                                            ]
-                                        }, void 0, true, {
+                                            children: "Production-ready offline & cloud ERP with Windows Desktop EXE and Android Mobile APK support."
+                                        }, void 0, false, {
                                             fileName: "[project]/src/components/SettingsView.jsx",
-                                            lineNumber: 64,
+                                            lineNumber: 85,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                    lineNumber: 56,
+                                    lineNumber: 77,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -153,37 +167,88 @@ function SettingsView() {
                                         gap: '10px',
                                         flexWrap: 'wrap'
                                     },
-                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                        style: {
-                                            background: 'rgba(255,255,255,0.15)',
-                                            padding: '6px 12px',
-                                            borderRadius: '6px',
-                                            fontSize: '12px'
-                                        },
-                                        children: [
-                                            "Build Command: ",
-                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("code", {
-                                                children: "npm run build:apk"
-                                            }, void 0, false, {
-                                                fileName: "[project]/src/components/SettingsView.jsx",
-                                                lineNumber: 71,
-                                                columnNumber: 32
-                                            }, this)
-                                        ]
-                                    }, void 0, true, {
-                                        fileName: "[project]/src/components/SettingsView.jsx",
-                                        lineNumber: 70,
-                                        columnNumber: 15
-                                    }, this)
-                                }, void 0, false, {
+                                    children: [
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("a", {
+                                            href: "/downloads/AgroTrader_Setup_v2.0.exe",
+                                            download: "AgroTrader_Setup_v2.0.exe",
+                                            className: "btn btn-sm",
+                                            style: {
+                                                background: '#ffffff',
+                                                color: '#1e3a8a',
+                                                fontWeight: 800,
+                                                fontSize: '12px',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '6px',
+                                                textDecoration: 'none'
+                                            },
+                                            children: [
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                    children: "💻"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/SettingsView.jsx",
+                                                    lineNumber: 106,
+                                                    columnNumber: 17
+                                                }, this),
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                    children: "Download Windows .EXE"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/SettingsView.jsx",
+                                                    lineNumber: 107,
+                                                    columnNumber: 17
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "[project]/src/components/SettingsView.jsx",
+                                            lineNumber: 91,
+                                            columnNumber: 15
+                                        }, this),
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("a", {
+                                            href: "/downloads/AgroTrader_v2.0.apk",
+                                            download: "AgroTrader_v2.0.apk",
+                                            className: "btn btn-sm",
+                                            style: {
+                                                background: 'rgba(255,255,255,0.2)',
+                                                color: '#ffffff',
+                                                fontWeight: 700,
+                                                fontSize: '12px',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '6px',
+                                                textDecoration: 'none',
+                                                border: '1px solid rgba(255,255,255,0.4)'
+                                            },
+                                            children: [
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                    children: "📱"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/SettingsView.jsx",
+                                                    lineNumber: 126,
+                                                    columnNumber: 17
+                                                }, this),
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                    children: "Download Android .APK"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/SettingsView.jsx",
+                                                    lineNumber: 127,
+                                                    columnNumber: 17
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "[project]/src/components/SettingsView.jsx",
+                                            lineNumber: 110,
+                                            columnNumber: 15
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                    lineNumber: 69,
+                                    lineNumber: 90,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/SettingsView.jsx",
-                            lineNumber: 55,
+                            lineNumber: 76,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -201,58 +266,48 @@ function SettingsView() {
                             children: [
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                     children: [
-                                        "Android Project Location: ",
+                                        "Offline-First Windows App: ",
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("code", {
-                                            children: "android/app/src/main"
+                                            children: "AgroTrader_Setup_v2.0.exe"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/SettingsView.jsx",
-                                            lineNumber: 77,
-                                            columnNumber: 45
+                                            lineNumber: 133,
+                                            columnNumber: 46
                                         }, this),
-                                        " • Package ID: ",
+                                        " • Android APK: ",
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("code", {
-                                            children: "pk.agrisol.agrotrader"
+                                            children: "AgroTrader_v2.0.apk"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/SettingsView.jsx",
-                                            lineNumber: 77,
-                                            columnNumber: 98
+                                            lineNumber: 133,
+                                            columnNumber: 105
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                    lineNumber: 77,
+                                    lineNumber: 133,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                     style: {
                                         color: '#fde68a'
                                     },
-                                    children: [
-                                        "Run ",
-                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("code", {
-                                            children: "npx cap open android"
-                                        }, void 0, false, {
-                                            fileName: "[project]/src/components/SettingsView.jsx",
-                                            lineNumber: 78,
-                                            columnNumber: 52
-                                        }, this),
-                                        " to open in Android Studio directly"
-                                    ]
-                                }, void 0, true, {
+                                    children: "Cloud Sync Active • Zero Demo Records"
+                                }, void 0, false, {
                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                    lineNumber: 78,
+                                    lineNumber: 134,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/SettingsView.jsx",
-                            lineNumber: 76,
+                            lineNumber: 132,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/SettingsView.jsx",
-                    lineNumber: 54,
+                    lineNumber: 75,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -269,25 +324,25 @@ function SettingsView() {
                                         }
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/SettingsView.jsx",
-                                        lineNumber: 86,
+                                        lineNumber: 142,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                         children: "Theme & Visual Styling"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/SettingsView.jsx",
-                                        lineNumber: 87,
+                                        lineNumber: 143,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/SettingsView.jsx",
-                                lineNumber: 85,
+                                lineNumber: 141,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/components/SettingsView.jsx",
-                            lineNumber: 84,
+                            lineNumber: 140,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -302,14 +357,14 @@ function SettingsView() {
                                     children: "Modern Sapphire & Golden Harvest"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                    lineNumber: 92,
+                                    lineNumber: 148,
                                     columnNumber: 98
                                 }, this),
                                 "."
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/SettingsView.jsx",
-                            lineNumber: 91,
+                            lineNumber: 147,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -347,7 +402,7 @@ function SettingsView() {
                                                     }
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                                    lineNumber: 109,
+                                                    lineNumber: 165,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -360,7 +415,7 @@ function SettingsView() {
                                                     }
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                                    lineNumber: 110,
+                                                    lineNumber: 166,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -373,13 +428,13 @@ function SettingsView() {
                                                     }
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                                    lineNumber: 111,
+                                                    lineNumber: 167,
                                                     columnNumber: 17
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/SettingsView.jsx",
-                                            lineNumber: 108,
+                                            lineNumber: 164,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -390,7 +445,7 @@ function SettingsView() {
                                             children: "✨ Modern Sapphire & Gold"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/SettingsView.jsx",
-                                            lineNumber: 113,
+                                            lineNumber: 169,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -402,13 +457,13 @@ function SettingsView() {
                                             children: "(New Theme - Clean & Premium)"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/SettingsView.jsx",
-                                            lineNumber: 114,
+                                            lineNumber: 170,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                    lineNumber: 97,
+                                    lineNumber: 153,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -438,7 +493,7 @@ function SettingsView() {
                                                     }
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                                    lineNumber: 131,
+                                                    lineNumber: 187,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -451,7 +506,7 @@ function SettingsView() {
                                                     }
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                                    lineNumber: 132,
+                                                    lineNumber: 188,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -464,13 +519,13 @@ function SettingsView() {
                                                     }
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                                    lineNumber: 133,
+                                                    lineNumber: 189,
                                                     columnNumber: 17
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/SettingsView.jsx",
-                                            lineNumber: 130,
+                                            lineNumber: 186,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -481,7 +536,7 @@ function SettingsView() {
                                             children: "🌲 Emerald Forest"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/SettingsView.jsx",
-                                            lineNumber: 135,
+                                            lineNumber: 191,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -493,13 +548,13 @@ function SettingsView() {
                                             children: "Classic Screenshot Look"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/SettingsView.jsx",
-                                            lineNumber: 136,
+                                            lineNumber: 192,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                    lineNumber: 120,
+                                    lineNumber: 176,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -530,7 +585,7 @@ function SettingsView() {
                                                     }
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                                    lineNumber: 154,
+                                                    lineNumber: 210,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -543,7 +598,7 @@ function SettingsView() {
                                                     }
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                                    lineNumber: 155,
+                                                    lineNumber: 211,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -556,13 +611,13 @@ function SettingsView() {
                                                     }
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                                    lineNumber: 156,
+                                                    lineNumber: 212,
                                                     columnNumber: 17
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/SettingsView.jsx",
-                                            lineNumber: 153,
+                                            lineNumber: 209,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -573,7 +628,7 @@ function SettingsView() {
                                             children: "🌑 Obsidian Dark Cockpit"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/SettingsView.jsx",
-                                            lineNumber: 158,
+                                            lineNumber: 214,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -585,13 +640,13 @@ function SettingsView() {
                                             children: "Night / Dim Ambient Lighting"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/SettingsView.jsx",
-                                            lineNumber: 159,
+                                            lineNumber: 215,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                    lineNumber: 142,
+                                    lineNumber: 198,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -621,7 +676,7 @@ function SettingsView() {
                                                     }
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                                    lineNumber: 176,
+                                                    lineNumber: 232,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -634,7 +689,7 @@ function SettingsView() {
                                                     }
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                                    lineNumber: 177,
+                                                    lineNumber: 233,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -647,13 +702,13 @@ function SettingsView() {
                                                     }
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                                    lineNumber: 178,
+                                                    lineNumber: 234,
                                                     columnNumber: 17
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/SettingsView.jsx",
-                                            lineNumber: 175,
+                                            lineNumber: 231,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -664,7 +719,7 @@ function SettingsView() {
                                             children: "❄️ Arctic Clean Slate"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/SettingsView.jsx",
-                                            lineNumber: 180,
+                                            lineNumber: 236,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -676,25 +731,25 @@ function SettingsView() {
                                             children: "High-Contrast Daylight"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/SettingsView.jsx",
-                                            lineNumber: 181,
+                                            lineNumber: 237,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                    lineNumber: 165,
+                                    lineNumber: 221,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/SettingsView.jsx",
-                            lineNumber: 95,
+                            lineNumber: 151,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/SettingsView.jsx",
-                    lineNumber: 83,
+                    lineNumber: 139,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -717,20 +772,20 @@ function SettingsView() {
                                             }
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/SettingsView.jsx",
-                                            lineNumber: 192,
+                                            lineNumber: 248,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                             children: "Store Profile & Bill Header Info"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/SettingsView.jsx",
-                                            lineNumber: 193,
+                                            lineNumber: 249,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                    lineNumber: 191,
+                                    lineNumber: 247,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -738,13 +793,13 @@ function SettingsView() {
                                     children: isAdmin ? 'Admin Editable' : '🔒 Locked (Admin Only)'
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                    lineNumber: 195,
+                                    lineNumber: 251,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/SettingsView.jsx",
-                            lineNumber: 190,
+                            lineNumber: 246,
                             columnNumber: 11
                         }, this),
                         !isAdmin && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -765,7 +820,7 @@ function SettingsView() {
                                     children: "🔒"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                    lineNumber: 215,
+                                    lineNumber: 271,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -774,20 +829,20 @@ function SettingsView() {
                                             children: "Access Restricted:"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/SettingsView.jsx",
-                                            lineNumber: 217,
+                                            lineNumber: 273,
                                             columnNumber: 17
                                         }, this),
                                         " Bill profile, store details, and receipt header info are protected. Only Administrators can modify billing credentials and legal headers."
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                    lineNumber: 216,
+                                    lineNumber: 272,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/SettingsView.jsx",
-                            lineNumber: 201,
+                            lineNumber: 257,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("form", {
@@ -809,7 +864,7 @@ function SettingsView() {
                                                     children: "Store / Business Name"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                                    lineNumber: 225,
+                                                    lineNumber: 281,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -824,13 +879,13 @@ function SettingsView() {
                                                     required: true
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                                    lineNumber: 226,
+                                                    lineNumber: 282,
                                                     columnNumber: 17
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/SettingsView.jsx",
-                                            lineNumber: 224,
+                                            lineNumber: 280,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -841,7 +896,7 @@ function SettingsView() {
                                                     children: "Business Subtitle"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                                    lineNumber: 237,
+                                                    lineNumber: 293,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -855,19 +910,19 @@ function SettingsView() {
                                                         })
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                                    lineNumber: 238,
+                                                    lineNumber: 294,
                                                     columnNumber: 17
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/SettingsView.jsx",
-                                            lineNumber: 236,
+                                            lineNumber: 292,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                    lineNumber: 223,
+                                    lineNumber: 279,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -886,7 +941,7 @@ function SettingsView() {
                                                     children: "Phone / WhatsApp"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                                    lineNumber: 250,
+                                                    lineNumber: 306,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -900,13 +955,13 @@ function SettingsView() {
                                                         })
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                                    lineNumber: 251,
+                                                    lineNumber: 307,
                                                     columnNumber: 17
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/SettingsView.jsx",
-                                            lineNumber: 249,
+                                            lineNumber: 305,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -917,7 +972,7 @@ function SettingsView() {
                                                     children: "Website"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                                    lineNumber: 261,
+                                                    lineNumber: 317,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -931,13 +986,13 @@ function SettingsView() {
                                                         })
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                                    lineNumber: 262,
+                                                    lineNumber: 318,
                                                     columnNumber: 17
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/SettingsView.jsx",
-                                            lineNumber: 260,
+                                            lineNumber: 316,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -948,7 +1003,7 @@ function SettingsView() {
                                                     children: "Tax / NTN Registration"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                                    lineNumber: 272,
+                                                    lineNumber: 328,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -962,19 +1017,19 @@ function SettingsView() {
                                                         })
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                                    lineNumber: 273,
+                                                    lineNumber: 329,
                                                     columnNumber: 17
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/SettingsView.jsx",
-                                            lineNumber: 271,
+                                            lineNumber: 327,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                    lineNumber: 248,
+                                    lineNumber: 304,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -988,7 +1043,7 @@ function SettingsView() {
                                             children: "Market Address"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/SettingsView.jsx",
-                                            lineNumber: 284,
+                                            lineNumber: 340,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -1002,13 +1057,13 @@ function SettingsView() {
                                                 })
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/SettingsView.jsx",
-                                            lineNumber: 285,
+                                            lineNumber: 341,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                    lineNumber: 283,
+                                    lineNumber: 339,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1022,7 +1077,7 @@ function SettingsView() {
                                             children: "Receipt Tagline"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/SettingsView.jsx",
-                                            lineNumber: 295,
+                                            lineNumber: 351,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -1036,13 +1091,13 @@ function SettingsView() {
                                                 })
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/SettingsView.jsx",
-                                            lineNumber: 296,
+                                            lineNumber: 352,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                    lineNumber: 294,
+                                    lineNumber: 350,
                                     columnNumber: 13
                                 }, this),
                                 isAdmin ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1051,7 +1106,7 @@ function SettingsView() {
                                     children: "Save Store Profile & Bill Header"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                    lineNumber: 306,
+                                    lineNumber: 362,
                                     columnNumber: 15
                                 }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                     style: {
@@ -1068,24 +1123,24 @@ function SettingsView() {
                                         children: "🔒 Locked • Read-Only for Staff"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/SettingsView.jsx",
-                                        lineNumber: 311,
+                                        lineNumber: 367,
                                         columnNumber: 17
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                    lineNumber: 310,
+                                    lineNumber: 366,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/SettingsView.jsx",
-                            lineNumber: 222,
+                            lineNumber: 278,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/SettingsView.jsx",
-                    lineNumber: 189,
+                    lineNumber: 245,
                     columnNumber: 9
                 }, this),
                 isAdmin && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1106,20 +1161,20 @@ function SettingsView() {
                                             children: "🛡️"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/SettingsView.jsx",
-                                            lineNumber: 324,
+                                            lineNumber: 380,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                             children: "Staff Access Control & Role Permissions"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/SettingsView.jsx",
-                                            lineNumber: 325,
+                                            lineNumber: 381,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                    lineNumber: 323,
+                                    lineNumber: 379,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1127,13 +1182,13 @@ function SettingsView() {
                                     children: "Admin Control Active"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                    lineNumber: 327,
+                                    lineNumber: 383,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/SettingsView.jsx",
-                            lineNumber: 322,
+                            lineNumber: 378,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1145,7 +1200,7 @@ function SettingsView() {
                             children: "Configure granular permissions for counter staff, cashiers, and godown operators. Only Store Administrators can modify these settings."
                         }, void 0, false, {
                             fileName: "[project]/src/components/SettingsView.jsx",
-                            lineNumber: 330,
+                            lineNumber: 386,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1181,7 +1236,7 @@ function SettingsView() {
                                                             children: "📋 Allow Staff to View System Activity Logs"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/SettingsView.jsx",
-                                                            lineNumber: 349,
+                                                            lineNumber: 405,
                                                             columnNumber: 19
                                                         }, this),
                                                         staffPermissions?.canViewLogs && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1189,13 +1244,13 @@ function SettingsView() {
                                                             children: "Enabled"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/SettingsView.jsx",
-                                                            lineNumber: 350,
+                                                            lineNumber: 406,
                                                             columnNumber: 53
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                                    lineNumber: 348,
+                                                    lineNumber: 404,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1207,13 +1262,13 @@ function SettingsView() {
                                                     children: "When disabled, only Admins can view audit logs. When enabled, counter staff can view terminal audit trails."
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                                    lineNumber: 352,
+                                                    lineNumber: 408,
                                                     columnNumber: 17
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/SettingsView.jsx",
-                                            lineNumber: 347,
+                                            lineNumber: 403,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
@@ -1239,7 +1294,7 @@ function SettingsView() {
                                                     }
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                                    lineNumber: 358,
+                                                    lineNumber: 414,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1268,24 +1323,24 @@ function SettingsView() {
                                                         }
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/SettingsView.jsx",
-                                                        lineNumber: 378,
+                                                        lineNumber: 434,
                                                         columnNumber: 19
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                                    lineNumber: 365,
+                                                    lineNumber: 421,
                                                     columnNumber: 17
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/SettingsView.jsx",
-                                            lineNumber: 357,
+                                            lineNumber: 413,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                    lineNumber: 336,
+                                    lineNumber: 392,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1314,7 +1369,7 @@ function SettingsView() {
                                                             children: "📊 Allow Staff to View Financial P&L Reports"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/SettingsView.jsx",
-                                                            lineNumber: 409,
+                                                            lineNumber: 465,
                                                             columnNumber: 19
                                                         }, this),
                                                         staffPermissions?.canViewReports && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1322,13 +1377,13 @@ function SettingsView() {
                                                             children: "Enabled"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/SettingsView.jsx",
-                                                            lineNumber: 410,
+                                                            lineNumber: 466,
                                                             columnNumber: 56
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                                    lineNumber: 408,
+                                                    lineNumber: 464,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1340,13 +1395,13 @@ function SettingsView() {
                                                     children: "Restricts executive profit/loss and product margins from unauthorized counter personnel."
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                                    lineNumber: 412,
+                                                    lineNumber: 468,
                                                     columnNumber: 17
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/SettingsView.jsx",
-                                            lineNumber: 407,
+                                            lineNumber: 463,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
@@ -1372,7 +1427,7 @@ function SettingsView() {
                                                     }
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                                    lineNumber: 418,
+                                                    lineNumber: 474,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1401,24 +1456,24 @@ function SettingsView() {
                                                         }
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/SettingsView.jsx",
-                                                        lineNumber: 438,
+                                                        lineNumber: 494,
                                                         columnNumber: 19
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                                    lineNumber: 425,
+                                                    lineNumber: 481,
                                                     columnNumber: 17
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/SettingsView.jsx",
-                                            lineNumber: 417,
+                                            lineNumber: 473,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                    lineNumber: 396,
+                                    lineNumber: 452,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1447,7 +1502,7 @@ function SettingsView() {
                                                             children: "🏷️ Allow Staff to Modify Unit Prices in Cart"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/SettingsView.jsx",
-                                                            lineNumber: 469,
+                                                            lineNumber: 525,
                                                             columnNumber: 19
                                                         }, this),
                                                         staffPermissions?.canEditPrices && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1455,13 +1510,13 @@ function SettingsView() {
                                                             children: "Enabled"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/SettingsView.jsx",
-                                                            lineNumber: 470,
+                                                            lineNumber: 526,
                                                             columnNumber: 55
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                                    lineNumber: 468,
+                                                    lineNumber: 524,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1473,13 +1528,13 @@ function SettingsView() {
                                                     children: "When disabled, prices are locked to default catalog rates and cannot be overridden by staff."
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                                    lineNumber: 472,
+                                                    lineNumber: 528,
                                                     columnNumber: 17
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/SettingsView.jsx",
-                                            lineNumber: 467,
+                                            lineNumber: 523,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
@@ -1505,7 +1560,7 @@ function SettingsView() {
                                                     }
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                                    lineNumber: 478,
+                                                    lineNumber: 534,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1534,37 +1589,441 @@ function SettingsView() {
                                                         }
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/SettingsView.jsx",
-                                                        lineNumber: 498,
+                                                        lineNumber: 554,
                                                         columnNumber: 19
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                                    lineNumber: 485,
+                                                    lineNumber: 541,
                                                     columnNumber: 17
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/SettingsView.jsx",
-                                            lineNumber: 477,
+                                            lineNumber: 533,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                    lineNumber: 456,
+                                    lineNumber: 512,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/SettingsView.jsx",
-                            lineNumber: 334,
+                            lineNumber: 390,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/SettingsView.jsx",
-                    lineNumber: 321,
+                    lineNumber: 377,
                     columnNumber: 9
+                }, this),
+                isAdmin && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                    className: "card",
+                    children: [
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                            className: "card-header",
+                            children: [
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                    className: "card-title",
+                                    children: [
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                            children: "🛡️"
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/components/SettingsView.jsx",
+                                            lineNumber: 579,
+                                            columnNumber: 17
+                                        }, this),
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                            children: "Role Segregation & Security Middleware"
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/components/SettingsView.jsx",
+                                            lineNumber: 580,
+                                            columnNumber: 17
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "[project]/src/components/SettingsView.jsx",
+                                    lineNumber: 578,
+                                    columnNumber: 15
+                                }, this),
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                    className: "badge badge-success",
+                                    children: "Middleware Active"
+                                }, void 0, false, {
+                                    fileName: "[project]/src/components/SettingsView.jsx",
+                                    lineNumber: 582,
+                                    columnNumber: 15
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "[project]/src/components/SettingsView.jsx",
+                            lineNumber: 577,
+                            columnNumber: 13
+                        }, this),
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                            style: {
+                                fontSize: '13px',
+                                color: 'var(--text-muted)',
+                                marginBottom: '16px',
+                                lineHeight: 1.5
+                            },
+                            children: "Strict role separation guarantees that Admin and Staff cannot enter each other's portals, access restricted views, or cross-authenticate using each other's credentials."
+                        }, void 0, false, {
+                            fileName: "[project]/src/components/SettingsView.jsx",
+                            lineNumber: 585,
+                            columnNumber: 13
+                        }, this),
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                            style: {
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                                gap: '16px',
+                                marginBottom: '20px'
+                            },
+                            children: [
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                    style: {
+                                        padding: '16px',
+                                        background: 'var(--bg-hover)',
+                                        border: '1px solid var(--border-color)',
+                                        borderRadius: 'var(--radius-sm)'
+                                    },
+                                    children: [
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                            style: {
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '8px',
+                                                marginBottom: '8px'
+                                            },
+                                            children: [
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                    style: {
+                                                        fontSize: '18px'
+                                                    },
+                                                    children: "👑"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/SettingsView.jsx",
+                                                    lineNumber: 593,
+                                                    columnNumber: 19
+                                                }, this),
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                    style: {
+                                                        fontWeight: 700,
+                                                        fontSize: '14px'
+                                                    },
+                                                    children: "Admin Master PIN"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/SettingsView.jsx",
+                                                    lineNumber: 594,
+                                                    columnNumber: 19
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "[project]/src/components/SettingsView.jsx",
+                                            lineNumber: 592,
+                                            columnNumber: 17
+                                        }, this),
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                            style: {
+                                                fontSize: '12px',
+                                                color: 'var(--text-muted)',
+                                                marginBottom: '12px'
+                                            },
+                                            children: "Used to enter Admin Portal (Full store control, settings, audit trails, and financial reports)."
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/components/SettingsView.jsx",
+                                            lineNumber: 596,
+                                            columnNumber: 17
+                                        }, this),
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("form", {
+                                            onSubmit: handleUpdateAdminPin,
+                                            style: {
+                                                display: 'flex',
+                                                gap: '8px'
+                                            },
+                                            children: [
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
+                                                    type: "password",
+                                                    maxLength: 6,
+                                                    className: "input",
+                                                    value: adminPinInput,
+                                                    onChange: (e)=>setAdminPinInput(e.target.value),
+                                                    style: {
+                                                        letterSpacing: '3px',
+                                                        fontWeight: 700
+                                                    },
+                                                    required: true
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/SettingsView.jsx",
+                                                    lineNumber: 600,
+                                                    columnNumber: 19
+                                                }, this),
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                                    type: "submit",
+                                                    className: "btn btn-primary",
+                                                    style: {
+                                                        whiteSpace: 'nowrap'
+                                                    },
+                                                    children: "Save Admin PIN"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/SettingsView.jsx",
+                                                    lineNumber: 609,
+                                                    columnNumber: 19
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "[project]/src/components/SettingsView.jsx",
+                                            lineNumber: 599,
+                                            columnNumber: 17
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "[project]/src/components/SettingsView.jsx",
+                                    lineNumber: 591,
+                                    columnNumber: 15
+                                }, this),
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                    style: {
+                                        padding: '16px',
+                                        background: 'var(--bg-hover)',
+                                        border: '1px solid var(--border-color)',
+                                        borderRadius: 'var(--radius-sm)'
+                                    },
+                                    children: [
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                            style: {
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '8px',
+                                                marginBottom: '8px'
+                                            },
+                                            children: [
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                    style: {
+                                                        fontSize: '18px'
+                                                    },
+                                                    children: "👤"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/SettingsView.jsx",
+                                                    lineNumber: 618,
+                                                    columnNumber: 19
+                                                }, this),
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                    style: {
+                                                        fontWeight: 700,
+                                                        fontSize: '14px'
+                                                    },
+                                                    children: "Counter Staff PIN"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/SettingsView.jsx",
+                                                    lineNumber: 619,
+                                                    columnNumber: 19
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "[project]/src/components/SettingsView.jsx",
+                                            lineNumber: 617,
+                                            columnNumber: 17
+                                        }, this),
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                            style: {
+                                                fontSize: '12px',
+                                                color: 'var(--text-muted)',
+                                                marginBottom: '12px'
+                                            },
+                                            children: "Used for counter personnel. Locked to assigned station with restricted privileges."
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/components/SettingsView.jsx",
+                                            lineNumber: 621,
+                                            columnNumber: 17
+                                        }, this),
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("form", {
+                                            onSubmit: handleUpdateStaffPin,
+                                            style: {
+                                                display: 'flex',
+                                                gap: '8px'
+                                            },
+                                            children: [
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
+                                                    type: "password",
+                                                    maxLength: 6,
+                                                    className: "input",
+                                                    value: staffPinInput,
+                                                    onChange: (e)=>setStaffPinInput(e.target.value),
+                                                    style: {
+                                                        letterSpacing: '3px',
+                                                        fontWeight: 700
+                                                    },
+                                                    required: true
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/SettingsView.jsx",
+                                                    lineNumber: 625,
+                                                    columnNumber: 19
+                                                }, this),
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                                    type: "submit",
+                                                    className: "btn btn-accent",
+                                                    style: {
+                                                        whiteSpace: 'nowrap'
+                                                    },
+                                                    children: "Save Staff PIN"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/SettingsView.jsx",
+                                                    lineNumber: 634,
+                                                    columnNumber: 19
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "[project]/src/components/SettingsView.jsx",
+                                            lineNumber: 624,
+                                            columnNumber: 17
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "[project]/src/components/SettingsView.jsx",
+                                    lineNumber: 616,
+                                    columnNumber: 15
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "[project]/src/components/SettingsView.jsx",
+                            lineNumber: 589,
+                            columnNumber: 13
+                        }, this),
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                            style: {
+                                padding: '14px 16px',
+                                borderRadius: '8px',
+                                background: 'rgba(22, 163, 74, 0.05)',
+                                border: '1px solid rgba(22, 163, 74, 0.2)'
+                            },
+                            children: [
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                    style: {
+                                        fontWeight: 700,
+                                        fontSize: '13px',
+                                        color: '#15803d',
+                                        marginBottom: '8px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '6px'
+                                    },
+                                    children: [
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                            children: "🔒"
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/components/SettingsView.jsx",
+                                            lineNumber: 644,
+                                            columnNumber: 17
+                                        }, this),
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                            children: "Active Middleware Safeguards"
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/components/SettingsView.jsx",
+                                            lineNumber: 645,
+                                            columnNumber: 17
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "[project]/src/components/SettingsView.jsx",
+                                    lineNumber: 643,
+                                    columnNumber: 15
+                                }, this),
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("ul", {
+                                    style: {
+                                        margin: 0,
+                                        paddingLeft: '18px',
+                                        fontSize: '12px',
+                                        color: 'var(--text-muted)',
+                                        lineHeight: 1.6
+                                    },
+                                    children: [
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
+                                            children: [
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("b", {
+                                                    children: "Credential Boundary:"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/SettingsView.jsx",
+                                                    lineNumber: 648,
+                                                    columnNumber: 21
+                                                }, this),
+                                                " Staff credentials cannot log into Admin Portal, and Admin credentials cannot log into Staff Counter."
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "[project]/src/components/SettingsView.jsx",
+                                            lineNumber: 648,
+                                            columnNumber: 17
+                                        }, this),
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
+                                            children: [
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("b", {
+                                                    children: "Navigation Guard:"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/SettingsView.jsx",
+                                                    lineNumber: 649,
+                                                    columnNumber: 21
+                                                }, this),
+                                                " Staff accounts attempting to access Settings, Logs, or Reports are redirected to Dashboard with security alerts."
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "[project]/src/components/SettingsView.jsx",
+                                            lineNumber: 649,
+                                            columnNumber: 17
+                                        }, this),
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
+                                            children: [
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("b", {
+                                                    children: "Branch Isolation:"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/SettingsView.jsx",
+                                                    lineNumber: 650,
+                                                    columnNumber: 21
+                                                }, this),
+                                                " Staff members are permanently locked to their assigned store branch and cannot access other branch data."
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "[project]/src/components/SettingsView.jsx",
+                                            lineNumber: 650,
+                                            columnNumber: 17
+                                        }, this),
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
+                                            children: [
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("b", {
+                                                    children: "Action Protection:"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/SettingsView.jsx",
+                                                    lineNumber: 651,
+                                                    columnNumber: 21
+                                                }, this),
+                                                " Inventory product deletion, sales invoice voiding, and system resets are restricted to Administrator only."
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "[project]/src/components/SettingsView.jsx",
+                                            lineNumber: 651,
+                                            columnNumber: 17
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "[project]/src/components/SettingsView.jsx",
+                                    lineNumber: 647,
+                                    columnNumber: 15
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "[project]/src/components/SettingsView.jsx",
+                            lineNumber: 642,
+                            columnNumber: 13
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "[project]/src/components/SettingsView.jsx",
+                    lineNumber: 576,
+                    columnNumber: 11
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                     className: "card",
@@ -1578,25 +2037,25 @@ function SettingsView() {
                                         children: "💾"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/SettingsView.jsx",
-                                        lineNumber: 522,
+                                        lineNumber: 661,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                         children: "Data Security & Backup"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/SettingsView.jsx",
-                                        lineNumber: 523,
+                                        lineNumber: 662,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/SettingsView.jsx",
-                                lineNumber: 521,
+                                lineNumber: 660,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/components/SettingsView.jsx",
-                            lineNumber: 520,
+                            lineNumber: 659,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1613,7 +2072,7 @@ function SettingsView() {
                                     children: "📥 Download Complete Database Backup (JSON)"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                    lineNumber: 528,
+                                    lineNumber: 667,
                                     columnNumber: 13
                                 }, this),
                                 isAdmin && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1623,41 +2082,41 @@ function SettingsView() {
                                         color: '#ef4444'
                                     },
                                     onClick: ()=>{
-                                        if (confirm('Reset all transactions, products and khata to default demo dataset?')) {
+                                        if (confirm('Initialize clean production database? This will clear all transactions, products, and customer khata to start fresh.')) {
                                             resetAllData();
                                         }
                                     },
-                                    children: "🔄 Reset to Sample Agriculture Data"
+                                    children: "🧹 Initialize Clean Database (Fresh Start)"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/SettingsView.jsx",
-                                    lineNumber: 537,
+                                    lineNumber: 676,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/SettingsView.jsx",
-                            lineNumber: 527,
+                            lineNumber: 666,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/SettingsView.jsx",
-                    lineNumber: 519,
+                    lineNumber: 658,
                     columnNumber: 9
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/src/components/SettingsView.jsx",
-            lineNumber: 52,
+            lineNumber: 73,
             columnNumber: 7
         }, this)
     }, void 0, false, {
         fileName: "[project]/src/components/SettingsView.jsx",
-        lineNumber: 51,
+        lineNumber: 72,
         columnNumber: 5
     }, this);
 }
-_s(SettingsView, "s4Gv2oD144+PG4wID4QWXUIXJqc=", false, function() {
+_s(SettingsView, "8XG1kUca0haeE6OFWIKyd8kDXeE=", false, function() {
     return [
         __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$context$2f$AppContext$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useApp"]
     ];

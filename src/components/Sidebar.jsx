@@ -32,10 +32,16 @@ export default function Sidebar({ isOpenMobile, onCloseMobile }) {
 
   const isSuperAdmin = auth.user?.role === 'superadmin' || !!impersonatingTenant;
   const isAdmin = auth.user?.role === 'admin' || isSuperAdmin;
+  const isStaff = auth.user?.role === 'staff';
   const canViewLogs = isAdmin || staffPermissions?.canViewLogs;
+  const canViewReports = isAdmin || staffPermissions?.canViewReports;
 
   const visibleMenuItems = menuItems.filter(item => {
-    if (item.id === 'logs' && !canViewLogs) return false;
+    if (isStaff) {
+      if (item.id === 'settings') return false;
+      if (item.id === 'logs' && !canViewLogs) return false;
+      if (item.id === 'reports' && !canViewReports) return false;
+    }
     return true;
   });
 

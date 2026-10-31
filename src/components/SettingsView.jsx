@@ -17,6 +17,7 @@ export default function SettingsView() {
     auth,
     staffPermissions,
     updateStaffPermissions,
+    resetPin,
     resetAllData,
     showToast
   } = useApp();
@@ -24,6 +25,26 @@ export default function SettingsView() {
   const isAdmin = auth.user?.role === 'admin' || auth.user?.role === 'superadmin';
 
   const [profileForm, setProfileForm] = useState({ ...storeProfile });
+  const [adminPinInput, setAdminPinInput] = useState(auth.adminPin || '1234');
+  const [staffPinInput, setStaffPinInput] = useState(auth.staffPin || '0000');
+
+  const handleUpdateAdminPin = (e) => {
+    e.preventDefault();
+    if (!adminPinInput.trim() || adminPinInput.length < 4) {
+      showToast('Admin PIN must be at least 4 digits.', 'warning');
+      return;
+    }
+    resetPin(adminPinInput.trim(), 'admin');
+  };
+
+  const handleUpdateStaffPin = (e) => {
+    e.preventDefault();
+    if (!staffPinInput.trim() || staffPinInput.length < 4) {
+      showToast('Staff PIN must be at least 4 digits.', 'warning');
+      return;
+    }
+    resetPin(staffPinInput.trim(), 'staff');
+  };
 
   const handleProfileSave = (e) => {
     e.preventDefault();
@@ -36,12 +57,12 @@ export default function SettingsView() {
   };
 
   const handleExportBackup = () => {
-    const backupData = localStorage.getItem('agrotrader_saas_v3_dynamic') || localStorage.getItem('agrotrader_saas_v2') || '{}';
+    const backupData = localStorage.getItem('agrotrader_live_production_v1') || '{}';
     const blob = new Blob([backupData], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `AgroTrader_Backup_${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `AgroTrader_Live_Backup_${new Date().toISOString().split('T')[0]}.json`;
     a.click();
     URL.revokeObjectURL(url);
     showToast('Database backup downloaded!', 'success');
@@ -50,32 +71,67 @@ export default function SettingsView() {
   return (
     <div className="page-body">
       <div style={{ maxWidth: '960px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '24px' }}>
-        {/* SaaS Subscription & APK Card */}
+        {/* SaaS Subscription & Desktop / Mobile Software Downloads Card */}
         <div className="card" style={{ background: 'var(--primary-gradient)', color: '#fff' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
                 <span style={{ fontSize: '20px' }}>🌾</span>
-                <h3 style={{ fontSize: '18px', fontWeight: 800 }}>{saasPlan.name} (SaaS Multi-Tenant Edition)</h3>
+                <h3 style={{ fontSize: '18px', fontWeight: 800 }}>{saasPlan.name} (Production Edition)</h3>
                 <span className="badge" style={{ background: 'rgba(255,255,255,0.25)', color: '#fff' }}>
                   {saasPlan.status}
                 </span>
               </div>
               <p style={{ fontSize: '13px', opacity: 0.9 }}>
-                Includes {saasPlan.branchLimit} store branches, real-time cloud sync, customer Khata recovery, and Android Mobile APK.
+                Production-ready offline &amp; cloud ERP with Windows Desktop EXE and Android Mobile APK support.
               </p>
             </div>
 
             <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-              <div style={{ background: 'rgba(255,255,255,0.15)', padding: '6px 12px', borderRadius: '6px', fontSize: '12px' }}>
-                Build Command: <code>npm run build:apk</code>
-              </div>
+              <a
+                href="/downloads/AgroTrader_Setup_v2.0.exe"
+                download="AgroTrader_Setup_v2.0.exe"
+                className="btn btn-sm"
+                style={{
+                  background: '#ffffff',
+                  color: '#1e3a8a',
+                  fontWeight: 800,
+                  fontSize: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  textDecoration: 'none'
+                }}
+              >
+                <span>💻</span>
+                <span>Download Windows .EXE</span>
+              </a>
+
+              <a
+                href="/downloads/AgroTrader_v2.0.apk"
+                download="AgroTrader_v2.0.apk"
+                className="btn btn-sm"
+                style={{
+                  background: 'rgba(255,255,255,0.2)',
+                  color: '#ffffff',
+                  fontWeight: 700,
+                  fontSize: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  textDecoration: 'none',
+                  border: '1px solid rgba(255,255,255,0.4)'
+                }}
+              >
+                <span>📱</span>
+                <span>Download Android .APK</span>
+              </a>
             </div>
           </div>
 
           <div style={{ marginTop: '14px', paddingTop: '12px', borderTop: '1px solid rgba(255,255,255,0.2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', fontSize: '12px' }}>
-            <span>Android Project Location: <code>android/app/src/main</code> &bull; Package ID: <code>pk.agrisol.agrotrader</code></span>
-            <span style={{ color: '#fde68a' }}>Run <code>npx cap open android</code> to open in Android Studio directly</span>
+            <span>Offline-First Windows App: <code>AgroTrader_Setup_v2.0.exe</code> &bull; Android APK: <code>AgroTrader_v2.0.apk</code></span>
+            <span style={{ color: '#fde68a' }}>Cloud Sync Active &bull; Zero Demo Records</span>
           </div>
         </div>
 
@@ -515,6 +571,89 @@ export default function SettingsView() {
         </div>
         )}
 
+        {/* Role Segregation & Security Middleware Settings (Admin Only) */}
+        {isAdmin && (
+          <div className="card">
+            <div className="card-header">
+              <div className="card-title">
+                <span>🛡️</span>
+                <span>Role Segregation &amp; Security Middleware</span>
+              </div>
+              <span className="badge badge-success">Middleware Active</span>
+            </div>
+
+            <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '16px', lineHeight: 1.5 }}>
+              Strict role separation guarantees that Admin and Staff cannot enter each other&apos;s portals, access restricted views, or cross-authenticate using each other&apos;s credentials.
+            </p>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px', marginBottom: '20px' }}>
+              {/* Admin Portal PIN */}
+              <div style={{ padding: '16px', background: 'var(--bg-hover)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '18px' }}>👑</span>
+                  <div style={{ fontWeight: 700, fontSize: '14px' }}>Admin Master PIN</div>
+                </div>
+                <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '12px' }}>
+                  Used to enter Admin Portal (Full store control, settings, audit trails, and financial reports).
+                </div>
+                <form onSubmit={handleUpdateAdminPin} style={{ display: 'flex', gap: '8px' }}>
+                  <input
+                    type="password"
+                    maxLength={6}
+                    className="input"
+                    value={adminPinInput}
+                    onChange={(e) => setAdminPinInput(e.target.value)}
+                    style={{ letterSpacing: '3px', fontWeight: 700 }}
+                    required
+                  />
+                  <button type="submit" className="btn btn-primary" style={{ whiteSpace: 'nowrap' }}>
+                    Save Admin PIN
+                  </button>
+                </form>
+              </div>
+
+              {/* Staff Counter PIN */}
+              <div style={{ padding: '16px', background: 'var(--bg-hover)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '18px' }}>👤</span>
+                  <div style={{ fontWeight: 700, fontSize: '14px' }}>Counter Staff PIN</div>
+                </div>
+                <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '12px' }}>
+                  Used for counter personnel. Locked to assigned station with restricted privileges.
+                </div>
+                <form onSubmit={handleUpdateStaffPin} style={{ display: 'flex', gap: '8px' }}>
+                  <input
+                    type="password"
+                    maxLength={6}
+                    className="input"
+                    value={staffPinInput}
+                    onChange={(e) => setStaffPinInput(e.target.value)}
+                    style={{ letterSpacing: '3px', fontWeight: 700 }}
+                    required
+                  />
+                  <button type="submit" className="btn btn-accent" style={{ whiteSpace: 'nowrap' }}>
+                    Save Staff PIN
+                  </button>
+                </form>
+              </div>
+            </div>
+
+            {/* Enforced Middleware Rules List */}
+            <div style={{ padding: '14px 16px', borderRadius: '8px', background: 'rgba(22, 163, 74, 0.05)', border: '1px solid rgba(22, 163, 74, 0.2)' }}>
+              <div style={{ fontWeight: 700, fontSize: '13px', color: '#15803d', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span>🔒</span>
+                <span>Active Middleware Safeguards</span>
+              </div>
+              <ul style={{ margin: 0, paddingLeft: '18px', fontSize: '12px', color: 'var(--text-muted)', lineHeight: 1.6 }}>
+                <li><b>Credential Boundary:</b> Staff credentials cannot log into Admin Portal, and Admin credentials cannot log into Staff Counter.</li>
+                <li><b>Navigation Guard:</b> Staff accounts attempting to access Settings, Logs, or Reports are redirected to Dashboard with security alerts.</li>
+                <li><b>Branch Isolation:</b> Staff members are permanently locked to their assigned store branch and cannot access other branch data.</li>
+                <li><b>Action Protection:</b> Inventory product deletion, sales invoice voiding, and system resets are restricted to Administrator only.</li>
+              </ul>
+            </div>
+          </div>
+        )}
+
         {/* Database Backup & Reset */}
         <div className="card">
           <div className="card-header">
@@ -539,12 +678,12 @@ export default function SettingsView() {
                 className="btn btn-outline"
                 style={{ color: '#ef4444' }}
                 onClick={() => {
-                  if (confirm('Reset all transactions, products and khata to default demo dataset?')) {
+                  if (confirm('Initialize clean production database? This will clear all transactions, products, and customer khata to start fresh.')) {
                     resetAllData();
                   }
                 }}
               >
-                🔄 Reset to Sample Agriculture Data
+                🧹 Initialize Clean Database (Fresh Start)
               </button>
             )}
           </div>

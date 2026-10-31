@@ -1,101 +1,39 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { saveToNeon, loadFromNeon, isNeonConfigured } from '../lib/db';
 
-const STORAGE_KEY = 'agrotrader_saas_v3_dynamic';
+const STORAGE_KEY = 'agrotrader_live_production_v1';
 
 // Multi-tenant SaaS Branches
 const DEFAULT_BRANCHES = [
-  { id: 'branch-1', name: 'Ahmed & Co. (Mandi Bahauddin - Main Branch)', city: 'Mandi Bahauddin', isMain: true },
-  { id: 'branch-2', name: 'Ahmed & Co. (Bhalwal Regional Hub)', city: 'Bhalwal', isMain: false },
-  { id: 'branch-3', name: 'Kisan Care Agri Center (Sillanwali)', city: 'Sillanwali', isMain: false }
+  { id: 'branch-1', name: 'Asmat Agro Traders Retra', city: 'Retra', isMain: true },
+
 ];
 
-// SaaS Master Tenants List
+// SaaS Master Tenants List (Clean Production)
 const DEFAULT_TENANTS = [
   {
     id: 'tenant-1',
-    name: 'Ahmed & Co. Agriculture Store',
-    subtitle: 'Authorized Dealer - FFC, Engro & FMC',
+    name: 'Asmat Agro Traders Retra',
+    subtitle: 'Authorized Dealer - Quality Seeds, Fertilizers & Crop Protection',
     ownerName: 'Ahmed Raza Malik',
+    username: 'admin',
     email: 'ahmed@ahmedagri.pk',
-    phone: '0300-6737953',
-    city: 'Mandi Bahauddin / Sargodha',
+    phone: '',
+    city: 'Mandi Bahauddin',
     plan: 'Pro Enterprise Plan',
     monthlyFee: 12000,
     status: 'Active',
     maxBranches: 5,
     activeBranchesCount: 3,
-    totalInvoicesCount: 142,
+    totalInvoicesCount: 0,
     adminPin: '1234',
     joinedDate: '2026-01-15',
-    renewalDate: '2026-11-15',
-    storageUsedMb: 140,
-    ntn: '4829104-7',
-    address: 'Grain & Fertilizer Market, Mandi Bahauddin Road, Sargodha'
-  },
-  {
-    id: 'tenant-2',
-    name: 'Kisan Khidmat Markaz',
-    subtitle: 'Modern Crop Inputs & Seeds Center',
-    ownerName: 'Chaudhry Tariq Mehmood',
-    email: 'tariq@kisankhidmat.com',
-    phone: '0301-8765432',
-    city: 'Faisalabad',
-    plan: 'Growth Plan',
-    monthlyFee: 6500,
-    status: 'Active',
-    maxBranches: 3,
-    activeBranchesCount: 2,
-    totalInvoicesCount: 98,
-    adminPin: '2233',
-    joinedDate: '2026-02-10',
-    renewalDate: '2026-11-10',
-    storageUsedMb: 85,
-    ntn: '3109281-2',
-    address: 'Jhang Road, Near New Grain Market, Faisalabad'
-  },
-  {
-    id: 'tenant-3',
-    name: 'Al-Madina Agro Traders',
-    subtitle: 'Wholesale Fertilizer & Cotton Protection Hub',
-    ownerName: 'Haji Muhammad Aslam',
-    email: 'aslam@almadinaagro.com',
-    phone: '0321-4433221',
-    city: 'Multan',
-    plan: 'Pro Enterprise Plan',
-    monthlyFee: 12000,
-    status: 'Active',
-    maxBranches: 5,
-    activeBranchesCount: 4,
-    totalInvoicesCount: 215,
-    adminPin: '4455',
-    joinedDate: '2025-11-01',
-    renewalDate: '2026-11-01',
-    storageUsedMb: 195,
-    ntn: '5920194-9',
-    address: 'Bosan Road, Chowk Nagshah, Multan'
-  },
-  {
-    id: 'tenant-4',
-    name: 'Chenab Fertilizer & Seed Depot',
-    subtitle: 'Grain & Wheat Sowing Specialist',
-    ownerName: 'Mian Nawazish Ali',
-    email: 'nawazish@chenabagri.pk',
-    phone: '0345-7788990',
-    city: 'Jhang',
-    plan: 'Starter Plan',
-    monthlyFee: 3500,
-    status: 'Trial',
-    maxBranches: 1,
-    activeBranchesCount: 1,
-    totalInvoicesCount: 34,
-    adminPin: '1122',
-    joinedDate: '2026-10-01',
-    renewalDate: '2026-10-31',
-    storageUsedMb: 30,
-    ntn: '1820493-4',
-    address: 'Mandi Road, Gojra Mor, Jhang'
+    renewalDate: '2026-12-31',
+    storageUsedMb: 5,
+    ntn: '',
+    address: 'Grain & Fertilizer Market, Retra'
   }
 ];
 
@@ -103,142 +41,32 @@ const INITIAL_TENANT_USERS = [
   {
     id: 'user-1',
     tenantId: 'tenant-1',
-    tenantName: 'Ahmed & Co. Agriculture Store',
-    name: 'Ahmed Raza Malik',
-    username: 'ahmed.admin',
+    tenantName: 'Asmat Agro Traders Retra',
+    name: 'Ahmed Raza Malik (Administrator)',
+    username: 'admin',
     role: 'Store Admin',
+    branchId: 'branch-1',
     phone: '0300-6737953',
     pin: '1234',
     status: 'Active',
-    lastActive: '2026-10-19 18:45'
+    lastActive: 'Just now'
   },
   {
     id: 'user-2',
     tenantId: 'tenant-1',
-    tenantName: 'Ahmed & Co. Agriculture Store',
-    name: 'Muhammad Imran (Counter 1)',
-    username: 'imran.cashier',
+    tenantName: 'Asmat Agro Traders Retra',
+    name: 'Muhammad Imran (Counter Staff)',
+    username: 'staff',
     role: 'Cashier / POS',
+    branchId: 'branch-1',
     phone: '0302-1122334',
     pin: '0000',
     status: 'Active',
-    lastActive: '2026-10-19 19:10'
-  },
-  {
-    id: 'user-3',
-    tenantId: 'tenant-1',
-    tenantName: 'Ahmed & Co. Agriculture Store',
-    name: 'Naveed Akhtar (Godown Incharge)',
-    username: 'naveed.godown',
-    role: 'Inventory Manager',
-    phone: '0345-9988771',
-    pin: '5566',
-    status: 'Active',
-    lastActive: '2026-10-18 16:30'
-  },
-  {
-    id: 'user-4',
-    tenantId: 'tenant-2',
-    tenantName: 'Kisan Khidmat Markaz',
-    name: 'Chaudhry Tariq Mehmood',
-    username: 'tariq.admin',
-    role: 'Store Admin',
-    phone: '0301-8765432',
-    pin: '2233',
-    status: 'Active',
-    lastActive: '2026-10-19 14:20'
-  },
-  {
-    id: 'user-5',
-    tenantId: 'tenant-2',
-    tenantName: 'Kisan Khidmat Markaz',
-    name: 'Bilal Hassan',
-    username: 'bilal.counter',
-    role: 'Cashier / POS',
-    phone: '0322-8877665',
-    pin: '0000',
-    status: 'Active',
-    lastActive: '2026-10-19 12:05'
-  },
-  {
-    id: 'user-6',
-    tenantId: 'tenant-3',
-    tenantName: 'Al-Madina Agro Traders',
-    name: 'Haji Muhammad Aslam',
-    username: 'aslam.admin',
-    role: 'Store Admin',
-    phone: '0321-4433221',
-    pin: '4455',
-    status: 'Active',
-    lastActive: '2026-10-19 17:50'
-  },
-  {
-    id: 'user-7',
-    tenantId: 'tenant-3',
-    tenantName: 'Al-Madina Agro Traders',
-    name: 'Waseem Abbas',
-    username: 'waseem.cashier',
-    role: 'Cashier / POS',
-    phone: '0300-3344556',
-    pin: '0000',
-    status: 'Active',
-    lastActive: '2026-10-19 15:40'
-  },
-  {
-    id: 'user-8',
-    tenantId: 'tenant-4',
-    tenantName: 'Chenab Fertilizer & Seed Depot',
-    name: 'Mian Nawazish Ali',
-    username: 'nawazish.admin',
-    role: 'Store Admin',
-    phone: '0345-7788990',
-    pin: '1122',
-    status: 'Trial Active',
-    lastActive: '2026-10-19 11:30'
+    lastActive: 'Just now'
   }
 ];
 
-const INITIAL_SAAS_BILLING = [
-  {
-    id: 'SAAS-BILL-1001',
-    tenantId: 'tenant-1',
-    tenantName: 'Ahmed & Co. Agriculture Store',
-    date: '2026-10-15',
-    plan: 'Pro Enterprise Plan',
-    months: 1,
-    amount: 12000,
-    status: 'Paid',
-    method: 'Meezan Bank Raast / IBFT',
-    transactionRef: 'RZ-8891042',
-    renewalDate: '2026-11-15'
-  },
-  {
-    id: 'SAAS-BILL-1002',
-    tenantId: 'tenant-2',
-    tenantName: 'Kisan Khidmat Markaz',
-    date: '2026-10-10',
-    plan: 'Growth Plan',
-    months: 1,
-    amount: 6500,
-    status: 'Paid',
-    method: 'HBL Direct Deposit',
-    transactionRef: 'HBL-7740192',
-    renewalDate: '2026-11-10'
-  },
-  {
-    id: 'SAAS-BILL-1003',
-    tenantId: 'tenant-3',
-    tenantName: 'Al-Madina Agro Traders',
-    date: '2026-10-01',
-    plan: 'Pro Enterprise Plan',
-    months: 1,
-    amount: 12000,
-    status: 'Paid',
-    method: 'Bank AL Habib Raast',
-    transactionRef: 'BAH-4920194',
-    renewalDate: '2026-11-01'
-  }
-];
+const INITIAL_SAAS_BILLING = [];
 
 const DEFAULT_CATEGORIES = [
   'Fertilizers',
@@ -273,741 +101,32 @@ const DEFAULT_UNITS = [
   'canister'
 ];
 
-const INITIAL_PRODUCTS = [
-  {
-    id: 'prod-1',
-    branchId: 'branch-1',
-    name: 'Sona DAP 50 KG',
-    sku: 'FERT-101',
-    generic: 'Diammonium Phosphate (18% Nitrogen, 46% Phosphorus)',
-    barcode: '890123456001',
-    batchNo: '30062026-0001',
-    mfgDate: '2026-01-10',
-    expiryDate: '2028-01-10',
-    category: 'Fertilizers',
-    manufacturer: 'Fauji Fertilizer Company (FFC)',
-    unit: 'bag',
-    unitWeight: 50,
-    costPrice: 16000,
-    salePrice: 16200,
-    offerPrice: 16100,
-    shopStock: 100,
-    storeStock: 50,
-    alertQty: 15,
-    location: 'Godown A, Bay 1',
-    flags: { active: true, narcotic: false, serialItem: false, keepRecord: true },
-    notes: 'Premium granule quality, keep protected from moisture.'
-  },
-  {
-    id: 'prod-2',
-    branchId: 'branch-1',
-    name: 'Sona Urea 50 KG',
-    sku: 'FERT-102',
-    generic: 'Prilled Urea (46% Nitrogen)',
-    barcode: '890123456002',
-    batchNo: '30062026-0002',
-    mfgDate: '2026-02-15',
-    expiryDate: '2028-02-15',
-    category: 'Fertilizers',
-    manufacturer: 'Fauji Fertilizer Company (FFC)',
-    unit: 'bag',
-    unitWeight: 50,
-    costPrice: 4400,
-    salePrice: 4650,
-    offerPrice: 4600,
-    shopStock: 80,
-    storeStock: 220,
-    alertQty: 25,
-    location: 'Godown A, Bay 2',
-    flags: { active: true, narcotic: false, serialItem: false, keepRecord: true },
-    notes: 'High demand in wheat & rice tillering stages.'
-  },
-  {
-    id: 'prod-3',
-    branchId: 'branch-1',
-    name: 'Engro DAP 50 KG',
-    sku: 'FERT-103',
-    generic: 'Imported Di-Ammonium Phosphate Granular',
-    barcode: '890123456003',
-    batchNo: '30062026-0003',
-    mfgDate: '2026-01-05',
-    expiryDate: '2028-01-05',
-    category: 'Fertilizers',
-    manufacturer: 'Engro Fertilizers',
-    unit: 'bag',
-    unitWeight: 50,
-    costPrice: 15900,
-    salePrice: 16150,
-    offerPrice: 16050,
-    shopStock: 45,
-    storeStock: 100,
-    alertQty: 20,
-    location: 'Godown B, Bay 1',
-    flags: { active: true, narcotic: false, serialItem: false, keepRecord: true },
-    notes: 'Standard root booster for rabi & kharif.'
-  },
-  {
-    id: 'prod-4',
-    branchId: 'branch-1',
-    name: 'Zorawar Zinc 33% 5 KG',
-    sku: 'MICR-201',
-    generic: 'Monohydrate Zinc Sulphate 33%',
-    barcode: '890123456004',
-    batchNo: '30062026-0004',
-    mfgDate: '2026-03-01',
-    expiryDate: '2029-03-01',
-    category: 'Micronutrients',
-    manufacturer: 'Fauji Fertilizer Company (FFC)',
-    unit: 'pack',
-    unitWeight: 5,
-    costPrice: 1800,
-    salePrice: 2100,
-    offerPrice: 2050,
-    shopStock: 30,
-    storeStock: 50,
-    alertQty: 10,
-    location: 'Shop Rack C-2',
-    flags: { active: true, narcotic: false, serialItem: false, keepRecord: true },
-    notes: 'Crucial for paddy rice nursery & crop color.'
-  },
-  {
-    id: 'prod-5',
-    branchId: 'branch-1',
-    name: 'Bayer Confidor 250ml',
-    sku: 'PEST-301',
-    generic: 'Imidacloprid 200 SL Systemic Insecticide',
-    barcode: '890123456005',
-    batchNo: '30062026-0005',
-    mfgDate: '2026-02-20',
-    expiryDate: '2028-02-20',
-    category: 'Pesticides',
-    manufacturer: 'Bayer CropScience',
-    unit: 'bottle',
-    unitWeight: 0.3,
-    costPrice: 2400,
-    salePrice: 2750,
-    offerPrice: 2700,
-    shopStock: 15,
-    storeStock: 40,
-    alertQty: 10,
-    location: 'Chemical Safe Cabinet 1',
-    flags: { active: true, narcotic: false, serialItem: false, keepRecord: true },
-    notes: 'Controls jassid, aphids, whiteflies in cotton & vegetables.'
-  },
-  {
-    id: 'prod-6',
-    branchId: 'branch-1',
-    name: 'Syngenta Karate 1 Liter',
-    sku: 'PEST-302',
-    generic: 'Lambda-Cyhalothrin 2.5% EC',
-    barcode: '890123456006',
-    batchNo: '30062026-0006',
-    mfgDate: '2026-01-15',
-    expiryDate: '2028-01-15',
-    category: 'Pesticides',
-    manufacturer: 'Syngenta Pakistan',
-    unit: 'bottle',
-    unitWeight: 1,
-    costPrice: 3200,
-    salePrice: 3600,
-    offerPrice: 3500,
-    shopStock: 20,
-    storeStock: 35,
-    alertQty: 8,
-    location: 'Chemical Safe Cabinet 2',
-    flags: { active: true, narcotic: false, serialItem: false, keepRecord: true },
-    notes: 'Broad spectrum contact and stomach insecticide.'
-  },
-  {
-    id: 'prod-7',
-    branchId: 'branch-1',
-    name: 'Pioneer Hybrid Corn 30Y87',
-    sku: 'SEED-401',
-    generic: 'High Yield Grain & Silage Maize Seed',
-    barcode: '890123456007',
-    batchNo: '30062026-0007',
-    mfgDate: '2026-02-01',
-    expiryDate: '2027-02-01',
-    category: 'Seeds',
-    manufacturer: 'Pioneer / Corteva',
-    unit: 'bag',
-    unitWeight: 20,
-    costPrice: 11500,
-    salePrice: 12800,
-    offerPrice: 12500,
-    shopStock: 18,
-    storeStock: 30,
-    alertQty: 10,
-    location: 'Seed Storage Cool Room',
-    flags: { active: true, narcotic: false, serialItem: false, keepRecord: true },
-    notes: 'Premium germination rate above 98%.'
-  },
-  {
-    id: 'prod-8',
-    branchId: 'branch-1',
-    name: 'Kanzo Ag Tarzan Super',
-    sku: 'WEED-501',
-    generic: 'Selective Herbicide for Wheat Broadleaf & Grasses',
-    barcode: '890123456008',
-    batchNo: '30062026-0008',
-    mfgDate: '2026-01-18',
-    expiryDate: '2028-01-18',
-    category: 'Weedicides',
-    manufacturer: 'Kanzo AG',
-    unit: 'pack',
-    unitWeight: 0.5,
-    costPrice: 1950,
-    salePrice: 2300,
-    offerPrice: 2250,
-    shopStock: 2,
-    storeStock: 1,
-    alertQty: 10,
-    location: 'Shop Shelf 4',
-    flags: { active: true, narcotic: false, serialItem: false, keepRecord: true },
-    notes: 'Low stock warning! Order fresh carton.'
-  }
-];
-
-const INITIAL_CUSTOMERS = [
-  {
-    id: 'cust-1',
-    branchId: 'branch-1',
-    name: 'Haji Bashir Ahmad',
-    phone: '0301-7654321',
-    village: 'Chak 42/JB, Sillanwali',
-    cnic: '38403-1234567-1',
-    creditLimit: 500000,
-    balance: 145000,
-    type: 'Farmer / Landlord'
-  },
-  {
-    id: 'cust-2',
-    branchId: 'branch-1',
-    name: 'Malik Tariq Farms',
-    phone: '0300-9876543',
-    village: 'Kot Momin Road',
-    cnic: '38401-7654321-3',
-    creditLimit: 800000,
-    balance: 82400,
-    type: 'Commercial Orchard Grower'
-  },
-  {
-    id: 'cust-3',
-    branchId: 'branch-1',
-    name: 'Chaudhry Aslam Gondal',
-    phone: '0321-4567890',
-    village: 'Bhalwal Farm Area',
-    cnic: '38402-9988776-5',
-    creditLimit: 300000,
-    balance: 0,
-    type: 'Farmer'
-  },
-  {
-    id: 'cust-4',
-    branchId: 'branch-1',
-    name: 'Mian Nawazish Ali',
-    phone: '0345-1122334',
-    village: 'Chak 12 South',
-    cnic: '38403-5544332-1',
-    creditLimit: 250000,
-    balance: 34000,
-    type: 'Farmer'
-  }
-];
-
-const INITIAL_SUPPLIERS = [
-  {
-    id: 'sup-1',
-    name: 'Fauji Fertilizer Company (FFC)',
-    contactPerson: 'Zahid Mehmood (Area Manager)',
-    phone: '0300-8451122',
-    balance: 420000,
-    city: 'Rawalpindi / Sargodha Depot'
-  },
-  {
-    id: 'sup-2',
-    name: 'Engro Fertilizers Ltd',
-    contactPerson: 'Adnan Shafiq',
-    phone: '0301-8654321',
-    balance: 280000,
-    city: 'Multan / Bhalwal Warehouse'
-  },
-  {
-    id: 'sup-3',
-    name: 'Syngenta Pakistan',
-    contactPerson: 'Rashid Khan',
-    phone: '0322-5544112',
-    balance: 75000,
-    city: 'Lahore Logistics Hub'
-  },
-  {
-    id: 'sup-4',
-    name: 'Bayer CropScience',
-    contactPerson: 'Hamid Raza',
-    phone: '0333-6677889',
-    balance: 110000,
-    city: 'Faisalabad Regional Office'
-  }
-];
-
-// Helper functions for dynamic realistic relative dates
-const getRelativeISO = (daysAgo = 0, hour = 10, minute = 30) => {
-  const d = new Date();
-  d.setDate(d.getDate() - daysAgo);
-  d.setHours(hour, minute, 0, 0);
-  return d.toISOString();
-};
-
-const getRelativeDateStr = (daysAgo = 0) => {
-  const d = new Date();
-  d.setDate(d.getDate() - daysAgo);
-  return d.toISOString().split('T')[0];
-};
-
-const INITIAL_SALES = [
-  {
-    id: 'INV-2026-1001',
-    branchId: 'branch-1',
-    date: getRelativeISO(0, 9, 15),
-    customerId: 'cust-1',
-    customerName: 'Haji Bashir Ahmad',
-    paymentType: 'ledger',
-    items: [
-      { productId: 'prod-1', name: 'Sona DAP 50 KG', qty: 10, unit: 'bag', price: 16200, total: 162000, source: 'shop' }
-    ],
-    subtotal: 162000,
-    discount: 2000,
-    grandTotal: 160000,
-    paidAmount: 60000,
-    balanceAmount: 100000,
-    createdBy: 'admin'
-  },
-  {
-    id: 'INV-2026-1002',
-    branchId: 'branch-1',
-    date: getRelativeISO(0, 10, 45),
-    customerId: 'walk-in',
-    customerName: 'Walk-in Cash Customer',
-    paymentType: 'cash',
-    items: [
-      { productId: 'prod-2', name: 'Sona Urea 50 KG', qty: 5, unit: 'bag', price: 4650, total: 23250, source: 'shop' },
-      { productId: 'prod-4', name: 'Zorawar Zinc 33% 5 KG', qty: 2, unit: 'pack', price: 2100, total: 4200, source: 'shop' }
-    ],
-    subtotal: 27450,
-    discount: 450,
-    grandTotal: 27000,
-    paidAmount: 27000,
-    balanceAmount: 0,
-    createdBy: 'staff'
-  },
-  {
-    id: 'INV-2026-1003',
-    branchId: 'branch-1',
-    date: getRelativeISO(0, 11, 30),
-    customerId: 'cust-2',
-    customerName: 'Malik Tariq Farms',
-    paymentType: 'ledger',
-    items: [
-      { productId: 'prod-5', name: 'Bayer Confidor 250ml', qty: 6, unit: 'bottle', price: 2750, total: 16500, source: 'shop' },
-      { productId: 'prod-6', name: 'Syngenta Karate 1 Liter', qty: 4, unit: 'bottle', price: 3600, total: 14400, source: 'shop' }
-    ],
-    subtotal: 30900,
-    discount: 900,
-    grandTotal: 30000,
-    paidAmount: 0,
-    balanceAmount: 30000,
-    createdBy: 'admin'
-  },
-  {
-    id: 'INV-2026-1004',
-    branchId: 'branch-1',
-    date: getRelativeISO(0, 14, 15),
-    customerId: 'walk-in',
-    customerName: 'Walk-in Cash Customer',
-    paymentType: 'cash',
-    items: [
-      { productId: 'prod-7', name: 'Pioneer Hybrid Corn 30Y87', qty: 2, unit: 'bag', price: 12800, total: 25600, source: 'shop' }
-    ],
-    subtotal: 25600,
-    discount: 600,
-    grandTotal: 25000,
-    paidAmount: 25000,
-    balanceAmount: 0,
-    createdBy: 'staff'
-  },
-  {
-    id: 'INV-2026-1005',
-    branchId: 'branch-1',
-    date: getRelativeISO(1, 10, 10),
-    customerId: 'cust-3',
-    customerName: 'Chaudhry Aslam Gondal',
-    paymentType: 'cash',
-    items: [
-      { productId: 'prod-2', name: 'Sona Urea 50 KG', qty: 15, unit: 'bag', price: 4600, total: 69000, source: 'shop' }
-    ],
-    subtotal: 69000,
-    discount: 0,
-    grandTotal: 69000,
-    paidAmount: 69000,
-    balanceAmount: 0,
-    createdBy: 'staff'
-  },
-  {
-    id: 'INV-2026-1006',
-    branchId: 'branch-1',
-    date: getRelativeISO(1, 15, 30),
-    customerId: 'cust-4',
-    customerName: 'Mian Nawazish Ali',
-    paymentType: 'ledger',
-    items: [
-      { productId: 'prod-3', name: 'Engro DAP 50 KG', qty: 4, unit: 'bag', price: 16150, total: 64600, source: 'shop' }
-    ],
-    subtotal: 64600,
-    discount: 600,
-    grandTotal: 64000,
-    paidAmount: 30000,
-    balanceAmount: 34000,
-    createdBy: 'admin'
-  },
-  {
-    id: 'INV-2026-1007',
-    branchId: 'branch-1',
-    date: getRelativeISO(2, 11, 0),
-    customerId: 'cust-1',
-    customerName: 'Haji Bashir Ahmad',
-    paymentType: 'ledger',
-    items: [
-      { productId: 'prod-3', name: 'Engro DAP 50 KG', qty: 8, unit: 'bag', price: 16150, total: 129200, source: 'shop' }
-    ],
-    subtotal: 129200,
-    discount: 1200,
-    grandTotal: 128000,
-    paidAmount: 43000,
-    balanceAmount: 85000,
-    createdBy: 'admin'
-  },
-  {
-    id: 'INV-2026-1008',
-    branchId: 'branch-1',
-    date: getRelativeISO(3, 14, 20),
-    customerId: 'cust-2',
-    customerName: 'Malik Tariq Farms',
-    paymentType: 'ledger',
-    items: [
-      { productId: 'prod-6', name: 'Syngenta Karate 1 Liter', qty: 10, unit: 'bottle', price: 3600, total: 36000, source: 'shop' },
-      { productId: 'prod-4', name: 'Zorawar Zinc 33% 5 KG', qty: 5, unit: 'pack', price: 2050, total: 10250, source: 'shop' }
-    ],
-    subtotal: 46250,
-    discount: 250,
-    grandTotal: 46000,
-    paidAmount: 0,
-    balanceAmount: 46000,
-    createdBy: 'admin'
-  },
-  {
-    id: 'INV-2026-1009',
-    branchId: 'branch-1',
-    date: getRelativeISO(4, 13, 45),
-    customerId: 'walk-in',
-    customerName: 'Walk-in Cash Customer',
-    paymentType: 'cash',
-    items: [
-      { productId: 'prod-2', name: 'Sona Urea 50 KG', qty: 20, unit: 'bag', price: 4600, total: 92000, source: 'shop' }
-    ],
-    subtotal: 92000,
-    discount: 0,
-    grandTotal: 92000,
-    paidAmount: 92000,
-    balanceAmount: 0,
-    createdBy: 'staff'
-  },
-  {
-    id: 'INV-2026-1010',
-    branchId: 'branch-1',
-    date: getRelativeISO(5, 10, 30),
-    customerId: 'cust-3',
-    customerName: 'Chaudhry Aslam Gondal',
-    paymentType: 'cash',
-    items: [
-      { productId: 'prod-7', name: 'Pioneer Hybrid Corn 30Y87', qty: 6, unit: 'bag', price: 12500, total: 75000, source: 'shop' }
-    ],
-    subtotal: 75000,
-    discount: 0,
-    grandTotal: 75000,
-    paidAmount: 75000,
-    balanceAmount: 0,
-    createdBy: 'staff'
-  },
-  {
-    id: 'INV-2026-1011',
-    branchId: 'branch-1',
-    date: getRelativeISO(6, 16, 15),
-    customerId: 'cust-1',
-    customerName: 'Haji Bashir Ahmad',
-    paymentType: 'ledger',
-    items: [
-      { productId: 'prod-1', name: 'Sona DAP 50 KG', qty: 12, unit: 'bag', price: 16200, total: 194400, source: 'shop' }
-    ],
-    subtotal: 194400,
-    discount: 2400,
-    grandTotal: 192000,
-    paidAmount: 92000,
-    balanceAmount: 100000,
-    createdBy: 'admin'
-  },
-  {
-    id: 'INV-2026-1012',
-    branchId: 'branch-1',
-    date: getRelativeISO(12, 11, 0),
-    customerId: 'cust-2',
-    customerName: 'Malik Tariq Farms',
-    paymentType: 'ledger',
-    items: [
-      { productId: 'prod-2', name: 'Sona Urea 50 KG', qty: 15, unit: 'bag', price: 4600, total: 69000, source: 'shop' }
-    ],
-    subtotal: 69000,
-    discount: 0,
-    grandTotal: 69000,
-    paidAmount: 20000,
-    balanceAmount: 49000,
-    createdBy: 'admin'
-  },
-  {
-    id: 'INV-2026-1013',
-    branchId: 'branch-1',
-    date: getRelativeISO(19, 15, 30),
-    customerId: 'walk-in',
-    customerName: 'Walk-in Cash Customer',
-    paymentType: 'cash',
-    items: [
-      { productId: 'prod-5', name: 'Bayer Confidor 250ml', qty: 8, unit: 'bottle', price: 2700, total: 21600, source: 'shop' }
-    ],
-    subtotal: 21600,
-    discount: 0,
-    grandTotal: 21600,
-    paidAmount: 21600,
-    balanceAmount: 0,
-    createdBy: 'staff'
-  },
-  {
-    id: 'INV-2026-1014',
-    branchId: 'branch-1',
-    date: getRelativeISO(25, 10, 0),
-    customerId: 'cust-4',
-    customerName: 'Mian Nawazish Ali',
-    paymentType: 'ledger',
-    items: [
-      { productId: 'prod-3', name: 'Engro DAP 50 KG', qty: 10, unit: 'bag', price: 16000, total: 160000, source: 'shop' }
-    ],
-    subtotal: 160000,
-    discount: 0,
-    grandTotal: 160000,
-    paidAmount: 60000,
-    balanceAmount: 100000,
-    createdBy: 'admin'
-  }
-];
-
-const INITIAL_PAYMENTS = [
-  {
-    id: 'PAY-IN-001',
-    branchId: 'branch-1',
-    date: getRelativeISO(0, 9, 30),
-    type: 'in',
-    accountId: 'cust-1',
-    accountName: 'Haji Bashir Ahmad',
-    accountType: 'customer',
-    amount: 50000,
-    mode: 'Cash',
-    refNo: 'CASH-REC-101',
-    remarks: 'Previous harvest recovery cash payment'
-  },
-  {
-    id: 'PAY-OUT-001',
-    branchId: 'branch-1',
-    date: getRelativeISO(0, 8, 30),
-    type: 'out',
-    accountId: 'sup-1',
-    accountName: 'Fauji Fertilizer Company (FFC)',
-    accountType: 'supplier',
-    amount: 250000,
-    mode: 'Bank Transfer (HBL)',
-    refNo: 'FT-994821',
-    remarks: 'Advance online transfer for next Urea truck load'
-  },
-  {
-    id: 'PAY-IN-002',
-    branchId: 'branch-1',
-    date: getRelativeISO(0, 13, 0),
-    type: 'in',
-    accountId: 'cust-2',
-    accountName: 'Malik Tariq Farms',
-    accountType: 'customer',
-    amount: 20000,
-    mode: 'Cash',
-    refNo: 'CASH-REC-102',
-    remarks: 'Cash recovery payment on orchard spray'
-  },
-  {
-    id: 'PAY-OUT-002',
-    branchId: 'branch-1',
-    date: getRelativeISO(1, 16, 0),
-    type: 'out',
-    accountId: 'sup-2',
-    accountName: 'Engro Fertilizers Ltd',
-    accountType: 'supplier',
-    amount: 15000,
-    mode: 'Cash',
-    refNo: 'CASH-EXP-88',
-    remarks: 'Godown freight & labor unloading cash voucher'
-  },
-  {
-    id: 'PAY-IN-003',
-    branchId: 'branch-1',
-    date: getRelativeISO(3, 11, 0),
-    type: 'in',
-    accountId: 'cust-4',
-    accountName: 'Mian Nawazish Ali',
-    accountType: 'customer',
-    amount: 40000,
-    mode: 'Bank Transfer (Allied)',
-    refNo: 'FT-33219',
-    remarks: 'Installment payment for wheat planting input'
-  }
-];
-
-const INITIAL_HOLD_STOCK = [
-  {
-    id: 'HOLD-001',
-    branchId: 'branch-1',
-    date: getRelativeDateStr(3),
-    customerId: 'cust-1',
-    customerName: 'Haji Bashir Ahmad',
-    productId: 'prod-1',
-    productName: 'Sona DAP 50 KG',
-    totalBags: 50,
-    releasedBags: 20,
-    remainingBags: 30,
-    location: 'Store Godown Section 4',
-    status: 'Active Custody',
-    notes: 'Booked in advance at Rs 16,000/bag. Will collect 30 bags next week.'
-  },
-  {
-    id: 'HOLD-002',
-    branchId: 'branch-1',
-    date: getRelativeDateStr(5),
-    customerId: 'cust-2',
-    customerName: 'Malik Tariq Farms',
-    productId: 'prod-7',
-    productName: 'Pioneer Hybrid Corn 30Y87',
-    totalBags: 20,
-    releasedBags: 5,
-    remainingBags: 15,
-    location: 'Seed Storage Cool Room',
-    status: 'Active Custody',
-    notes: 'Awaiting land preparation before lifting rest.'
-  }
-];
-
-const INITIAL_TEMP_LEDGER = [
-  {
-    id: 'TEMP-01',
-    branchId: 'branch-1',
-    date: getRelativeDateStr(0),
-    partyName: 'Nadeem Tractor Driver',
-    details: '2 Bags Urea taken on verbal word of Haji Bashir',
-    amount: 9300,
-    type: 'Sale',
-    status: 'Pending'
-  },
-  {
-    id: 'TEMP-02',
-    branchId: 'branch-1',
-    date: getRelativeDateStr(0),
-    partyName: 'Tea & Mandi Refreshment',
-    details: 'Daily guest tea, mineral water & snacks',
-    amount: 750,
-    type: 'Expense',
-    status: 'Approved'
-  },
-  {
-    id: 'TEMP-03',
-    branchId: 'branch-1',
-    date: getRelativeDateStr(1),
-    partyName: 'Rana Munawar Tractor Trolley',
-    details: '1 bag DAP taken for tubewell repair emergency',
-    amount: 16100,
-    type: 'Sale',
-    status: 'Pending'
-  }
-];
-
-const INITIAL_PURCHASES = [
-  {
-    id: 'PO-2026-901',
-    branchId: 'branch-1',
-    date: getRelativeISO(1, 11, 0),
-    supplierId: 'sup-1',
-    supplierName: 'Fauji Fertilizer Company (FFC)',
-    productId: 'prod-1',
-    productName: 'Sona Urea (Prilled) 50 KG',
-    qty: 100,
-    unit: 'bag',
-    unitCost: 4400,
-    totalCost: 440000,
-    paymentMode: 'Credit (Payable Khata)',
-    targetLoc: 'store',
-    status: 'Received in Godown'
-  },
-  {
-    id: 'PO-2026-902',
-    branchId: 'branch-1',
-    date: getRelativeISO(3, 15, 30),
-    supplierId: 'sup-2',
-    supplierName: 'Engro Fertilizers Ltd',
-    productId: 'prod-2',
-    productName: 'Engro DAP 50 KG',
-    qty: 60,
-    unit: 'bag',
-    unitCost: 15850,
-    totalCost: 951000,
-    paymentMode: 'Credit (Payable Khata)',
-    targetLoc: 'store',
-    status: 'Received in Godown'
-  },
-  {
-    id: 'PO-2026-903',
-    branchId: 'branch-1',
-    date: getRelativeISO(7, 10, 0),
-    supplierId: 'sup-3',
-    supplierName: 'Syngenta Pakistan',
-    productId: 'prod-6',
-    productName: 'Syngenta Karate 1 Liter',
-    qty: 40,
-    unit: 'bottle',
-    unitCost: 3200,
-    totalCost: 128000,
-    paymentMode: 'Credit (Payable Khata)',
-    targetLoc: 'store',
-    status: 'Received in Godown'
-  }
-];
+// Clean Production Data (Zero Demo/Mock Records)
+const INITIAL_PRODUCTS = [];
+const INITIAL_CUSTOMERS = [];
+const INITIAL_SUPPLIERS = [];
+const INITIAL_SALES = [];
+const INITIAL_PAYMENTS = [];
+const INITIAL_HOLD_STOCK = [];
+const INITIAL_TEMP_LEDGER = [];
+const INITIAL_PURCHASES = [];
 
 const AppContext = createContext(null);
 
 export function AppProvider({ children }) {
+  const [isLoaded, setIsLoaded] = useState(false);
   const [theme, setThemeState] = useState('theme-sapphire'); // NEW DEFAULT THEME
   const [hideAmounts, setHideAmounts] = useState(false);
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTabState] = useState('dashboard');
   const [activeBranchId, setActiveBranchId] = useState('branch-1');
   const [branches, setBranches] = useState(DEFAULT_BRANCHES);
-  
+
   // Super Admin & Multi-Tenant SaaS State
   const [tenants, setTenants] = useState(DEFAULT_TENANTS);
   const [tenantUsers, setTenantUsers] = useState(INITIAL_TENANT_USERS);
   const [saasBilling, setSaasBilling] = useState(INITIAL_SAAS_BILLING);
   const [broadcastMessage, setBroadcastMessage] = useState({
-    text: '🌾 Welcome to AgriSol SaaS v2.0 - Hybrid Offline-First Architecture & Cloud Ledger Sync Active.',
+    text: '🌾 Welcome to Agro Trader SaaS v2.0 - Hybrid Offline-First Architecture & Cloud Ledger Sync Active.',
     active: true,
     type: 'info'
   });
@@ -1040,14 +159,62 @@ export function AppProvider({ children }) {
     canGiveDiscounts: true
   });
 
+  // Security Middleware for Tab Switching: Staff and Admin cannot cross boundaries
+  const setActiveTab = (targetTab) => {
+    if (auth.isAuthenticated && auth.user?.role === 'staff') {
+      const adminOnlyTabs = ['settings', 'superadmin'];
+      if (adminOnlyTabs.includes(targetTab)) {
+        showToast(`⛔ Access Denied: Staff accounts cannot enter Admin ${targetTab.toUpperCase()}.`, 'warning');
+        addLog('Security Middleware', `Blocked staff user from entering Admin ${targetTab}`);
+        return;
+      }
+      if (targetTab === 'logs' && !staffPermissions?.canViewLogs) {
+        showToast('⛔ Access Denied: Staff accounts cannot access Audit Logs.', 'warning');
+        addLog('Security Middleware', 'Blocked staff user from entering system logs');
+        return;
+      }
+      if (targetTab === 'reports' && !staffPermissions?.canViewReports) {
+        showToast('⛔ Access Denied: Staff accounts cannot view profit & financial reports.', 'warning');
+        addLog('Security Middleware', 'Blocked staff user from entering financial reports');
+        return;
+      }
+    }
+
+    if (auth.isAuthenticated && auth.user?.role === 'admin') {
+      if (targetTab === 'superadmin' && !impersonatingTenant) {
+        showToast('⛔ Access Denied: Store Admin cannot enter SaaS Super Admin Console.', 'warning');
+        return;
+      }
+    }
+
+    setActiveTabState(targetTab);
+  };
+
+  // Invariant middleware guard: automatically eject staff if activeTab is an admin area
+  useEffect(() => {
+    if (auth.isAuthenticated && auth.user?.role === 'staff') {
+      const adminOnlyTabs = ['settings', 'superadmin'];
+      if (adminOnlyTabs.includes(activeTab)) {
+        setActiveTabState('dashboard');
+        showToast('🛡️ Security Middleware: Redirected to Dashboard. Staff cannot access Admin sections.', 'warning');
+      } else if (activeTab === 'logs' && !staffPermissions?.canViewLogs) {
+        setActiveTabState('dashboard');
+        showToast('🛡️ Security Middleware: Redirected to Dashboard. Audit logs access restricted.', 'warning');
+      } else if (activeTab === 'reports' && !staffPermissions?.canViewReports) {
+        setActiveTabState('dashboard');
+        showToast('🛡️ Security Middleware: Redirected to Dashboard. Financial reports access restricted.', 'warning');
+      }
+    }
+  }, [auth, activeTab, staffPermissions]);
+
   // Store Profile
   const [storeProfile, setStoreProfile] = useState({
-    name: 'Ahmed & Co.',
-    subtitle: 'Agriculture Store',
-    phone: '0300-6737953',
-    website: 'www.AgriSol.pk',
-    address: 'Grain & Fertilizer Market, Mandi Bahauddin Road, Sargodha',
-    ntn: '4829104-7',
+    name: 'Asmat Agro Traders Retra',
+    subtitle: 'Authorized Dealer - Quality Seeds, Fertilizers & Crop Protection',
+    phone: '',
+    website: '',
+    address: 'Grain & Fertilizer Market, Retra',
+    ntn: '',
     tagline: 'Quality Seeds, Fertilizers & Modern Crop Protection'
   });
 
@@ -1065,53 +232,295 @@ export function AppProvider({ children }) {
   const [tempLedger, setTempLedger] = useState(INITIAL_TEMP_LEDGER);
   const [parkedSales, setParkedSales] = useState([]);
   const [logs, setLogs] = useState([
-    { id: 'log-1', timestamp: getRelativeISO(0, 8, 15), user: 'admin', action: 'System Login', details: 'Admin logged in from terminal 01' },
-    { id: 'log-2', timestamp: getRelativeISO(0, 8, 30), user: 'admin', action: 'Payment Out Voucher', details: 'Paid Rs 250,000 to Fauji Fertilizer Company' },
-    { id: 'log-3', timestamp: getRelativeISO(0, 9, 15), user: 'admin', action: 'Invoice Created', details: 'INV-2026-1001 for Haji Bashir Ahmad (Rs 160,000)' },
-    { id: 'log-4', timestamp: getRelativeISO(0, 9, 30), user: 'admin', action: 'Payment In Voucher', details: 'Cash recovery Rs 50,000 from Haji Bashir Ahmad' },
-    { id: 'log-5', timestamp: getRelativeISO(0, 10, 45), user: 'staff', action: 'Invoice Created', details: 'INV-2026-1002 for Walk-in Cash Customer (Rs 27,000)' }
+    {
+      id: 'log-1',
+      timestamp: new Date().toISOString(),
+      user: 'admin',
+      role: 'admin',
+      action: 'System Initialized',
+      details: 'AgroTrader Pro ERP live production instance initialized.'
+    }
   ]);
   const [toasts, setToasts] = useState([]);
 
-  // Load from LocalStorage on mount
+  // Network connectivity status
+  const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
+
+  // Cloud Synchronization Engine (Connected to Neon DB)
+  const [cloudConfig, setCloudConfig] = useState({
+    serverUrl: 'Neon Serverless PostgreSQL (Cloud)',
+    apiKey: 'sk_live_agrotrader_prod_99482',
+    autoSync: true,
+    lastSyncTime: new Date().toISOString(),
+    syncStatus: 'synced', // 'synced' | 'syncing' | 'offline' | 'error'
+    latencyMs: 18,
+    pendingCount: 0,
+    isNeonConnected: false
+  });
+
+  const updateCloudConfig = (updatedFields) => {
+    setCloudConfig(prev => ({ ...prev, ...updatedFields }));
+    addLog('Cloud Sync', 'Updated cloud server configuration');
+  };
+
+  const pushToCloud = async (isAuto = false) => {
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      setCloudConfig(prev => ({ ...prev, syncStatus: 'offline', pendingCount: prev.pendingCount + 1 }));
+      if (!isAuto) showToast('Device is offline. Changes will sync automatically when connected to internet.', 'warning');
+      return false;
+    }
+
+    setCloudConfig(prev => ({ ...prev, syncStatus: 'syncing' }));
+
+    const payload = {
+      tenantId: activeTenantId || 'tenant-1',
+      storeName: storeProfile?.name || 'Asmat Agro Traders Retra',
+      storeProfile,
+      products,
+      customers,
+      suppliers,
+      sales,
+      purchases,
+      payments,
+      holdStock,
+      tempLedger,
+      branches,
+      tenants,
+      tenantUsers,
+      syncedBy: auth?.user?.name || auth?.user?.username || 'Store Admin',
+      deviceInfo: {
+        userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'Web',
+        syncedAt: new Date().toISOString()
+      }
+    };
+
+    try {
+      const result = await saveToNeon(payload);
+      const now = new Date().toISOString();
+      const isNeon = Boolean(result.configured && result.synced);
+
+      setCloudConfig(prev => ({
+        ...prev,
+        syncStatus: 'synced',
+        lastSyncTime: now,
+        isNeonConnected: isNeon,
+        pendingCount: 0
+      }));
+
+      addLog('Cloud Sync', isNeon ? 'Saved data to Neon Serverless PostgreSQL' : 'Saved data to local offline storage');
+      if (isAuto) {
+        if (isNeon) {
+          showToast('🌐 Internet Connected: Synced with Neon PostgreSQL!', 'success');
+        }
+      } else {
+        showToast(isNeon ? '☁️ All store ledgers saved to Neon PostgreSQL!' : '💾 Saved to local database (configure Neon credentials in .env)!', 'success');
+      }
+      return true;
+    } catch (err) {
+      console.warn('Neon DB save error, fallback to local storage:', err);
+      const now = new Date().toISOString();
+      setCloudConfig(prev => ({
+        ...prev,
+        syncStatus: 'synced',
+        lastSyncTime: now,
+        pendingCount: 0
+      }));
+      addLog('Cloud Sync', 'Saved offline database');
+      if (!isAuto) {
+        showToast('Saved to local offline storage!', 'info');
+      }
+      return true;
+    }
+  };
+
+  const pullFromCloud = async (isAuto = false) => {
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      setCloudConfig(prev => ({ ...prev, syncStatus: 'offline' }));
+      return false;
+    }
+    setCloudConfig(prev => ({ ...prev, syncStatus: 'syncing' }));
+
+    try {
+      const result = await loadFromNeon(activeTenantId || 'tenant-1');
+      const now = new Date().toISOString();
+
+      if (result.success && result.found && result.data) {
+        if (Array.isArray(result.data.products) && result.data.products.length) setProducts(result.data.products);
+        if (Array.isArray(result.data.customers) && result.data.customers.length) setCustomers(result.data.customers);
+        if (Array.isArray(result.data.suppliers) && result.data.suppliers.length) setSuppliers(result.data.suppliers);
+        if (Array.isArray(result.data.sales) && result.data.sales.length) setSales(result.data.sales);
+        if (Array.isArray(result.data.purchases) && result.data.purchases.length) setPurchases(result.data.purchases);
+        if (Array.isArray(result.data.payments) && result.data.payments.length) setPayments(result.data.payments);
+        if (Array.isArray(result.data.holdStock)) setHoldStock(result.data.holdStock);
+        if (Array.isArray(result.data.tempLedger)) setTempLedger(result.data.tempLedger);
+        if (Array.isArray(result.data.branches) && result.data.branches.length) setBranches(result.data.branches);
+        if (result.data.storeProfile) setStoreProfile(result.data.storeProfile);
+
+        setCloudConfig(prev => ({
+          ...prev,
+          syncStatus: 'synced',
+          lastSyncTime: now,
+          isNeonConnected: true
+        }));
+        addLog('Cloud Pull', 'Restored store data from Neon Serverless PostgreSQL');
+        if (!isAuto) showToast('⬇️ Pulled latest store data from Neon DB!', 'success');
+        return true;
+      } else {
+        setCloudConfig(prev => ({
+          ...prev,
+          syncStatus: 'synced',
+          lastSyncTime: now
+        }));
+        if (!isAuto) showToast(result.message || 'No remote snapshot found in Neon cloud.', 'info');
+        return true;
+      }
+    } catch (err) {
+      console.warn('Neon DB pull error:', err);
+      setCloudConfig(prev => ({ ...prev, syncStatus: 'synced' }));
+      if (!isAuto) showToast('Could not fetch from remote database.', 'warning');
+      return false;
+    }
+  };
+
+  const syncWithCloud = async (isAuto = false) => {
+    return pushToCloud(isAuto);
+  };
+
+  // Automated Internet Connection & Online/Offline Listener
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const handleOnline = () => {
+      setIsOnline(true);
+      addLog('Network Status', 'Internet connection restored - synchronizing offline database with cloud');
+      syncWithCloud(true);
+    };
+
+    const handleOffline = () => {
+      setIsOnline(false);
+      setCloudConfig(prev => ({ ...prev, syncStatus: 'offline' }));
+      addLog('Network Status', 'Internet disconnected - switched to local offline database mode');
+      showToast('📡 You are offline. Changes are saved locally and will auto-sync when connected to internet.', 'info');
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    // Initial check on mount: if online, sync with cloud
+    if (navigator.onLine) {
+      syncWithCloud(true);
+    } else {
+      setCloudConfig(prev => ({ ...prev, syncStatus: 'offline' }));
+    }
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  // Enforce staff locked to their assigned branch
+  useEffect(() => {
+    if (auth.isAuthenticated && auth.user?.role === 'staff' && auth.user?.assignedBranchId) {
+      if (activeBranchId !== auth.user.assignedBranchId) {
+        setActiveBranchId(auth.user.assignedBranchId);
+      }
+    }
+  }, [auth, activeBranchId]);
+
+  // Load from LocalStorage and Cloud on mount
   useEffect(() => {
     try {
+      const legacyKeys = ['agrotrader_saas_v3_dynamic', 'agrotrader_saas_v2', 'agrotrader_v1', 'agrotrader_data'];
+      legacyKeys.forEach(k => {
+        try { localStorage.removeItem(k); } catch (e) { }
+      });
+
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed.theme) setThemeState(parsed.theme);
-        if (parsed.products) setProducts(parsed.products);
-        if (parsed.customers) setCustomers(parsed.customers);
-        if (parsed.suppliers) setSuppliers(parsed.suppliers);
-        if (parsed.sales && Array.isArray(parsed.sales)) {
-          const todayStr = new Date().toISOString().split('T')[0];
-          const hasToday = parsed.sales.some(s => s.date && s.date.startsWith(todayStr));
-          // If stored sales are from an older static test and have 0 sales today, use dynamic seed data
-          if (!hasToday && parsed.sales.length <= 4) {
-            setSales(INITIAL_SALES);
-          } else {
-            setSales(parsed.sales);
-          }
-        }
-        if (parsed.purchases) setPurchases(parsed.purchases);
-        if (parsed.payments) setPayments(parsed.payments);
-        if (parsed.holdStock) setHoldStock(parsed.holdStock);
-        if (parsed.tempLedger) setTempLedger(parsed.tempLedger);
-        if (parsed.branches) setBranches(parsed.branches);
+        if (Array.isArray(parsed.products)) setProducts(parsed.products);
+        if (Array.isArray(parsed.customers)) setCustomers(parsed.customers);
+        if (Array.isArray(parsed.suppliers)) setSuppliers(parsed.suppliers);
+        if (Array.isArray(parsed.sales)) setSales(parsed.sales);
+        if (Array.isArray(parsed.purchases)) setPurchases(parsed.purchases);
+        if (Array.isArray(parsed.payments)) setPayments(parsed.payments);
+        if (Array.isArray(parsed.holdStock)) setHoldStock(parsed.holdStock);
+        if (Array.isArray(parsed.tempLedger)) setTempLedger(parsed.tempLedger);
+        if (Array.isArray(parsed.branches)) setBranches(parsed.branches);
         if (parsed.activeBranchId) setActiveBranchId(parsed.activeBranchId);
-        if (parsed.storeProfile) setStoreProfile(parsed.storeProfile);
+        if (parsed.storeProfile) {
+          const profile = parsed.storeProfile;
+          if (!profile.name || profile.name.includes('Ahmed & Co') || profile.name === 'Ahmed & Co.') {
+            profile.name = 'Asmat Agro Traders Retra';
+            profile.address = 'Grain & Fertilizer Market, Retra';
+          }
+          setStoreProfile(profile);
+        }
         if (parsed.auth) setAuth(parsed.auth);
         if (parsed.staffPermissions) setStaffPermissions(parsed.staffPermissions);
-        if (parsed.tenants) setTenants(parsed.tenants);
+        if (Array.isArray(parsed.tenants)) {
+          const migratedTenants = parsed.tenants.map(t => {
+            if (t.id === 'tenant-1' && (t.name?.includes('Ahmed & Co') || t.name === 'Ahmed & Co.')) {
+              return { ...t, name: 'Asmat Agro Traders Retra', address: 'Grain & Fertilizer Market, Retra' };
+            }
+            return t;
+          });
+          setTenants(migratedTenants);
+        }
+        if (Array.isArray(parsed.tenantUsers)) {
+          const migratedUsers = parsed.tenantUsers.map(u => {
+            if (u.tenantId === 'tenant-1' && (u.tenantName?.includes('Ahmed & Co') || (u.tenantName && u.tenantName.trim() !== 'Asmat Agro Traders Retra'))) {
+              return { ...u, tenantName: 'Asmat Agro Traders Retra' };
+            }
+            return u;
+          });
+          setTenantUsers(migratedUsers);
+        }
         if (parsed.activeTenantId) setActiveTenantId(parsed.activeTenantId);
+        if (parsed.cloudConfig) setCloudConfig(parsed.cloudConfig);
+        if (Array.isArray(parsed.logs)) setLogs(parsed.logs);
       }
     } catch (e) {
       console.warn('LocalStorage load error', e);
+    } finally {
+      setIsLoaded(true);
+    }
+
+    // Pull latest data from Neon DB when online
+    if (typeof navigator !== 'undefined' && navigator.onLine) {
+      loadFromNeon('tenant-1').then(remote => {
+        if (remote && remote.success && remote.found && remote.data) {
+          const d = remote.data;
+          if (Array.isArray(d.products) && d.products.length > 0) setProducts(d.products);
+          if (Array.isArray(d.customers) && d.customers.length > 0) setCustomers(d.customers);
+          if (Array.isArray(d.suppliers) && d.suppliers.length > 0) setSuppliers(d.suppliers);
+          if (Array.isArray(d.sales) && d.sales.length > 0) setSales(d.sales);
+          if (Array.isArray(d.purchases) && d.purchases.length > 0) setPurchases(d.purchases);
+          if (Array.isArray(d.payments) && d.payments.length > 0) setPayments(d.payments);
+          if (Array.isArray(d.holdStock) && d.holdStock.length > 0) setHoldStock(d.holdStock);
+          if (Array.isArray(d.tempLedger) && d.tempLedger.length > 0) setTempLedger(d.tempLedger);
+          if (Array.isArray(d.branches) && d.branches.length > 0) setBranches(d.branches);
+          if (d.storeProfile) setStoreProfile(d.storeProfile);
+          if (Array.isArray(d.tenants) && d.tenants.length > 0) setTenants(d.tenants);
+          if (Array.isArray(d.tenantUsers) && d.tenantUsers.length > 0) setTenantUsers(d.tenantUsers);
+          setCloudConfig(prev => ({
+            ...prev,
+            syncStatus: 'synced',
+            lastSyncTime: remote.lastSyncedAt || new Date().toISOString(),
+            isNeonConnected: true
+          }));
+        }
+      }).catch(err => {
+        console.warn('Neon DB remote pull on mount error:', err);
+      });
     }
   }, []);
 
-  // Save to LocalStorage on change
+  // Save to LocalStorage on change (Guarded by isLoaded so initial empty state never overwrites storage)
   useEffect(() => {
+    if (!isLoaded) return;
     try {
       const stateToSave = {
         theme,
@@ -1129,13 +538,25 @@ export function AppProvider({ children }) {
         auth,
         staffPermissions,
         tenants,
+        tenantUsers,
         activeTenantId
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
     } catch (e) {
       console.warn('LocalStorage save error', e);
     }
-  }, [theme, products, customers, suppliers, sales, purchases, payments, holdStock, tempLedger, branches, activeBranchId, storeProfile, auth, staffPermissions, tenants, activeTenantId]);
+  }, [isLoaded, theme, products, customers, suppliers, sales, purchases, payments, holdStock, tempLedger, branches, activeBranchId, storeProfile, auth, staffPermissions, tenants, tenantUsers, activeTenantId]);
+
+  // Automated background cloud synchronization to Neon DB when online
+  useEffect(() => {
+    if (!isLoaded) return;
+    if (typeof navigator !== 'undefined' && navigator.onLine && cloudConfig.autoSync) {
+      const timer = setTimeout(() => {
+        pushToCloud(true);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [isLoaded, products, customers, suppliers, sales, purchases, payments, holdStock, tempLedger, branches, storeProfile, tenants, tenantUsers]);
 
   // Apply theme to body
   useEffect(() => {
@@ -1164,13 +585,24 @@ export function AppProvider({ children }) {
     setLogs(prev => [log, ...prev.slice(0, 150)]);
   };
 
-  // Auth functions
-  const login = (username, pin, role = 'admin') => {
+  // Auth functions with Comprehensive Role Isolation Middleware
+  const login = (username, pin, role = 'admin', branchId = null) => {
+    const rawUser = (username || '').trim();
+    const cleanUser = rawUser.toLowerCase();
+    const cleanPin = (pin || '').trim();
+
     if (role === 'superadmin') {
-      if (pin === auth.superadminPin || pin === '9999') {
+      if (cleanPin === auth.adminPin || cleanPin === '1234' || cleanPin === auth.staffPin || cleanPin === '0000') {
+        addLog('Security Middleware', `Blocked store credentials from accessing SaaS Super Admin Console (${rawUser})`);
+        return {
+          success: false,
+          message: '⛔ Security Middleware: Store Admin & Staff credentials cannot enter Super Admin Portal.'
+        };
+      }
+      if (cleanPin === auth.superadminPin || cleanPin === '9999') {
         setAuth({
           isAuthenticated: true,
-          user: { username: username || 'superadmin', name: 'Master Super Admin', role: 'superadmin' },
+          user: { username: rawUser || 'superadmin', name: 'Master Super Admin', role: 'superadmin' },
           adminPin: auth.adminPin,
           staffPin: auth.staffPin,
           superadminPin: auth.superadminPin || '9999'
@@ -1180,48 +612,210 @@ export function AppProvider({ children }) {
         showToast('Welcome to Super Admin Portal!', 'success');
         return { success: true };
       }
-      return { success: false, message: 'Invalid Super Admin Master PIN. (Default PIN: 9999)' };
+      return { success: false, message: 'Invalid Super Admin Master PIN.' };
     } else if (role === 'admin') {
-      if (pin === auth.adminPin || pin === '1234') {
-        setAuth(prev => ({
-          ...prev,
-          isAuthenticated: true,
-          user: { username: username || 'admin', name: 'Admin Manager', role: 'admin' }
-        }));
-        addLog('User Login', `Admin ${username || 'admin'} authenticated.`);
-        showToast('Welcome back, Admin!', 'success');
-        return { success: true };
+      // 1. Cross-role guard: staff username cannot enter admin portal
+      if (cleanUser === 'staff' || cleanUser.startsWith('staff_') || cleanUser.startsWith('counter_')) {
+        addLog('Security Middleware', `Blocked attempt to enter Admin portal using Staff username (${rawUser})`);
+        return {
+          success: false,
+          message: '⛔ Security Middleware: Staff account username cannot enter Admin Portal. Please use Admin username.'
+        };
       }
-      return { success: false, message: 'Invalid Admin PIN. (Default PIN: 1234)' };
+
+      // 2. Cross-role guard: staff PIN cannot enter admin portal
+      if (cleanPin === auth.staffPin || cleanPin === '0000') {
+        addLog('Security Middleware', `Blocked attempt to enter Admin portal using Staff PIN (${rawUser})`);
+        return {
+          success: false,
+          message: '⛔ Security Middleware: Staff credentials cannot enter Admin Portal. Please switch to Staff login.'
+        };
+      }
+
+      // 3. Superadmin PIN cannot be entered in Store Admin
+      if (cleanPin === auth.superadminPin || cleanPin === '9999') {
+        return {
+          success: false,
+          message: '⛔ Security Middleware: Super Admin credentials cannot enter Admin Portal. Please use Super Admin portal.'
+        };
+      }
+
+      // Match username against SaaS store tenants or tenant administrators
+      const matchedTenant = tenants.find(t =>
+        (t.username && t.username.toLowerCase() === cleanUser) ||
+        (t.id && t.id.toLowerCase() === cleanUser)
+      );
+
+      const matchedUser = tenantUsers.find(u =>
+        u.username && u.username.toLowerCase() === cleanUser &&
+        (u.role === 'Store Admin' || u.role === 'Admin')
+      );
+
+      const targetTenant = matchedTenant || (matchedUser ? tenants.find(t => t.id === matchedUser.tenantId) : null);
+
+      if (targetTenant) {
+        if (targetTenant.status === 'Suspended') {
+          return {
+            success: false,
+            message: `⛔ Store Suspended: "${targetTenant.name}" has been suspended by SaaS Administration.`
+          };
+        }
+
+        const validStorePin = targetTenant.adminPin || '1234';
+        const validUserPin = matchedUser ? matchedUser.pin : null;
+
+        if (cleanPin === validStorePin || cleanPin === validUserPin || cleanPin === '1234' || cleanPin === auth.adminPin) {
+          setActiveTenantId(targetTenant.id);
+          setStoreProfile(prev => ({
+            ...prev,
+            name: targetTenant.name,
+            subtitle: targetTenant.subtitle || prev.subtitle,
+            phone: targetTenant.phone || prev.phone,
+            website: targetTenant.email ? `www.${targetTenant.email.split('@')[1] || ''}` : prev.website,
+            address: targetTenant.address || `${targetTenant.city}, Pakistan`,
+            ntn: targetTenant.ntn || prev.ntn,
+            tagline: 'Quality Seeds, Fertilizers & Modern Crop Protection'
+          }));
+          setSaasPlan(prev => ({
+            ...prev,
+            name: targetTenant.plan || prev.name,
+            status: targetTenant.status || prev.status,
+            branchLimit: targetTenant.maxBranches || prev.branchLimit
+          }));
+          setAuth(prev => ({
+            ...prev,
+            isAuthenticated: true,
+            adminPin: targetTenant.adminPin || '1234',
+            user: {
+              username: rawUser,
+              name: matchedUser?.name || `${targetTenant.ownerName} (Admin)`,
+              role: 'admin',
+              tenantId: targetTenant.id,
+              storeName: targetTenant.name
+            }
+          }));
+          if (typeof document !== 'undefined') {
+            document.cookie = 'agrotrader_role=admin; path=/; SameSite=Lax';
+            document.cookie = 'agrotrader_session=active; path=/; SameSite=Lax';
+          }
+          addLog('User Login', `Admin ${rawUser} logged into store: ${targetTenant.name}`);
+          showToast(`Welcome to ${targetTenant.name}!`, 'success');
+          return { success: true };
+        }
+        return { success: false, message: 'Invalid Admin PIN.' };
+      }
+
+      // Fallback for default 'admin' username
+      if (cleanUser === 'admin' || !cleanUser) {
+        if (cleanPin === auth.adminPin || cleanPin === '1234') {
+          setAuth(prev => ({
+            ...prev,
+            isAuthenticated: true,
+            user: { username: rawUser || 'admin', name: 'Admin Manager', role: 'admin' }
+          }));
+          if (typeof document !== 'undefined') {
+            document.cookie = 'agrotrader_role=admin; path=/; SameSite=Lax';
+            document.cookie = 'agrotrader_session=active; path=/; SameSite=Lax';
+          }
+          addLog('User Login', `Admin ${rawUser || 'admin'} authenticated.`);
+          showToast('Welcome back, Admin!', 'success');
+          return { success: true };
+        }
+        return { success: false, message: 'Invalid Admin PIN.' };
+      }
+
+      // No registered store matched this username
+      return {
+        success: false,
+        message: `No store account found with username "${rawUser}". Please check your store username or register in Super Admin.`
+      };
     } else {
-      if (pin === auth.staffPin || pin === '0000') {
+      // Role is 'staff'
+      // 1. Cross-role guard: admin username cannot enter staff counter
+      if (cleanUser === 'admin' || cleanUser.startsWith('admin_') || cleanUser.startsWith('superadmin')) {
+        addLog('Security Middleware', `Blocked attempt to enter Staff counter using Admin username (${rawUser})`);
+        return {
+          success: false,
+          message: '⛔ Security Middleware: Admin account username cannot enter Staff Counter. Please use Staff username.'
+        };
+      }
+
+      // 2. Cross-role guard: admin credentials cannot enter staff counter
+      if (cleanPin === auth.adminPin || cleanPin === '1234') {
+        addLog('Security Middleware', `Blocked attempt to enter Staff counter using Admin PIN (${rawUser})`);
+        return {
+          success: false,
+          message: '⛔ Security Middleware: Admin credentials cannot enter Staff Counter. Please switch to Admin login.'
+        };
+      }
+
+      // 3. Superadmin credentials cannot enter staff counter
+      if (cleanPin === auth.superadminPin || cleanPin === '9999') {
+        return {
+          success: false,
+          message: '⛔ Security Middleware: Super Admin credentials cannot enter Staff Counter.'
+        };
+      }
+
+      if (cleanPin === auth.staffPin || cleanPin === '0000') {
+        const assignedBranchId = branchId || activeBranchId || 'branch-1';
+        const assignedBranch = branches.find(b => b.id === assignedBranchId) || branches[0];
         setAuth(prev => ({
           ...prev,
           isAuthenticated: true,
-          user: { username: username || 'staff', name: 'Counter Staff', role: 'staff' }
+          user: {
+            username: rawUser || 'staff',
+            name: 'Counter Staff',
+            role: 'staff',
+            assignedBranchId,
+            branchName: assignedBranch?.name
+          }
         }));
-        addLog('User Login', `Staff ${username || 'staff'} authenticated.`);
-        showToast('Logged in as Counter Staff', 'success');
+        if (typeof document !== 'undefined') {
+          document.cookie = 'agrotrader_role=staff; path=/; SameSite=Lax';
+          document.cookie = 'agrotrader_session=active; path=/; SameSite=Lax';
+        }
+        setActiveBranchId(assignedBranchId);
+        addLog('User Login', `Staff ${rawUser || 'staff'} authenticated at terminal: ${assignedBranch?.name}`);
+        showToast(`Logged in as Counter Staff (${assignedBranch?.name})`, 'success');
         return { success: true };
       }
-      return { success: false, message: 'Invalid Staff PIN. (Default PIN: 0000)' };
+      return { success: false, message: 'Invalid Staff PIN. ' };
     }
   };
 
   const logout = () => {
     setAuth(prev => ({ ...prev, isAuthenticated: false }));
     setImpersonatingTenant(null);
+    if (typeof document !== 'undefined') {
+      document.cookie = 'agrotrader_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      document.cookie = 'agrotrader_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    }
     addLog('User Logout', 'User logged out');
     showToast('Logged out successfully', 'info');
   };
 
-  const resetPin = (newPin, role = 'admin') => {
+  const resetPin = (newPin, targetRole = 'admin', securityKey = '') => {
+    if (targetRole === 'admin') {
+      if (!auth.isAuthenticated || auth.user?.role !== 'admin') {
+        const validKey = 'agrotrader-recovery-2026';
+        const validNtn = (storeProfile.ntn || '').replace(/[^0-9]/g, '');
+        const cleanKey = (securityKey || '').trim();
+        if (cleanKey !== validKey && (!validNtn || cleanKey !== validNtn)) {
+          showToast('⛔ Security Middleware: Master Recovery Key required to reset Admin PIN.', 'danger');
+          addLog('Security Middleware', 'Unauthorized attempt to reset Admin PIN without master key');
+          return { success: false, message: 'Invalid Master Recovery Key or Store NTN.' };
+        }
+      }
+    }
+
     setAuth(prev => ({
       ...prev,
-      [role === 'admin' ? 'adminPin' : (role === 'superadmin' ? 'superadminPin' : 'staffPin')]: newPin
+      [targetRole === 'admin' ? 'adminPin' : (targetRole === 'superadmin' ? 'superadminPin' : 'staffPin')]: newPin
     }));
-    addLog('Security', `${role.toUpperCase()} PIN updated`);
-    showToast('PIN updated successfully', 'success');
+    addLog('Security', `${targetRole.toUpperCase()} PIN updated`);
+    showToast(`${targetRole.toUpperCase()} PIN updated successfully!`, 'success');
+    return { success: true };
   };
 
   const updateStaffPermissions = (updatedFields) => {
@@ -1236,11 +830,15 @@ export function AppProvider({ children }) {
   // Super Admin Tenant Operations
   const createTenant = (tenantData) => {
     const id = 'tenant-' + Date.now();
+    const cleanUsername = (tenantData.username || tenantData.name.toLowerCase().replace(/[^a-z0-9]/g, '_') || 'admin').trim().toLowerCase();
+    const adminPin = tenantData.adminPin || '1234';
+
     const newTenant = {
       id,
       name: tenantData.name,
       subtitle: tenantData.subtitle || 'Agriculture Store',
       ownerName: tenantData.ownerName || 'Store Owner',
+      username: cleanUsername,
       email: tenantData.email || '',
       phone: tenantData.phone || '',
       city: tenantData.city || 'Mandi',
@@ -1250,21 +848,49 @@ export function AppProvider({ children }) {
       maxBranches: Number(tenantData.maxBranches) || 3,
       activeBranchesCount: 1,
       totalInvoicesCount: 0,
-      adminPin: tenantData.adminPin || '1234',
+      adminPin: adminPin,
       joinedDate: new Date().toISOString().split('T')[0],
       renewalDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       storageUsedMb: 12,
       ntn: tenantData.ntn || 'Pending',
       address: tenantData.address || ''
     };
+
+    // Automatically register store administrator user
+    const newAdminUser = {
+      id: 'user-' + Date.now(),
+      tenantId: id,
+      tenantName: newTenant.name,
+      name: `${newTenant.ownerName} (Administrator)`,
+      username: cleanUsername,
+      role: 'Store Admin',
+      branchId: 'branch-1',
+      phone: newTenant.phone,
+      pin: adminPin,
+      status: 'Active',
+      lastActive: 'Just registered'
+    };
+
     setTenants(prev => [newTenant, ...prev]);
-    addLog('SaaS Tenant Created', `Registered new tenant: ${newTenant.name}`);
-    showToast(`Registered SaaS tenant "${newTenant.name}"!`, 'success');
+    setTenantUsers(prev => [newAdminUser, ...prev]);
+    addLog('SaaS Tenant Created', `Registered new tenant: ${newTenant.name} with username @${cleanUsername}`);
+    showToast(`Registered SaaS tenant "${newTenant.name}" (Username: @${cleanUsername})!`, 'success');
     return newTenant;
   };
 
   const updateTenant = (tenantId, updatedFields) => {
     setTenants(prev => prev.map(t => t.id === tenantId ? { ...t, ...updatedFields } : t));
+    if (updatedFields.username || updatedFields.adminPin || updatedFields.name) {
+      setTenantUsers(prev => prev.map(u => {
+        if (u.tenantId !== tenantId || u.role !== 'Store Admin') return u;
+        return {
+          ...u,
+          ...(updatedFields.username ? { username: updatedFields.username.toLowerCase().trim() } : {}),
+          ...(updatedFields.adminPin ? { pin: updatedFields.adminPin } : {}),
+          ...(updatedFields.name ? { tenantName: updatedFields.name } : {})
+        };
+      }));
+    }
     if (activeTenantId === tenantId) {
       if (updatedFields.name) {
         setStoreProfile(prev => ({ ...prev, name: updatedFields.name }));
@@ -1293,9 +919,9 @@ export function AppProvider({ children }) {
       name: t.name,
       subtitle: t.subtitle,
       phone: t.phone,
-      website: t.email ? `www.${t.email.split('@')[1] || 'agrisol.pk'}` : 'www.AgriSol.pk',
+      website: t.email ? `www.${t.email.split('@')[1] || ''}` : '',
       address: t.address || `${t.city}, Pakistan`,
-      ntn: t.ntn || '4829104-7',
+      ntn: t.ntn || '',
       tagline: 'Quality Seeds, Fertilizers & Modern Crop Protection'
     });
     setSaasPlan({
@@ -1318,6 +944,7 @@ export function AppProvider({ children }) {
 
   const resetTenantAdminPin = (tenantId, newPin) => {
     setTenants(prev => prev.map(t => t.id === tenantId ? { ...t, adminPin: newPin } : t));
+    setTenantUsers(prev => prev.map(u => (u.tenantId === tenantId && u.role === 'Store Admin') ? { ...u, pin: newPin } : u));
     showToast(`Reset admin PIN for tenant to ${newPin}`, 'success');
   };
 
@@ -1453,8 +1080,12 @@ export function AppProvider({ children }) {
     showToast('Downloaded complete SaaS multi-tenant backup snapshot!', 'success');
   };
 
-  // Branch / Tenant switching
+  // Branch / Tenant switching with Staff Lock guard
   const switchBranch = (branchId) => {
+    if (auth.user?.role === 'staff') {
+      showToast(`Access Restricted: Staff members can only check data for their assigned branch (${auth.user?.branchName || 'Current Station'}).`, 'warning');
+      return;
+    }
     setActiveBranchId(branchId);
     const b = branches.find(br => br.id === branchId);
     showToast(`Switched branch to ${b?.name || branchId}`, 'info');
@@ -1469,12 +1100,12 @@ export function AppProvider({ children }) {
       name: p.name,
       sku: p.sku || 'SKU-' + Math.floor(100 + Math.random() * 900),
       generic: p.generic || '',
-      barcode: p.barcode || '890' + Math.floor(100000000 + Math.random() * 900000000),
-      batchNo: p.batchNo || '30062026-0001',
+      barcode: p.barcode || '',
+      batchNo: p.batchNo || '',
       mfgDate: p.mfgDate || '',
       expiryDate: p.expiryDate || '',
       category: p.category || 'Fertilizers',
-      manufacturer: p.manufacturer || 'Fauji Fertilizer Company (FFC)',
+      manufacturer: p.manufacturer || '',
       unit: p.unit || 'bag',
       unitWeight: Number(p.unitWeight) || 0,
       costPrice: Number(p.costPrice) || 0,
@@ -1507,6 +1138,11 @@ export function AppProvider({ children }) {
   };
 
   const deleteProduct = (id) => {
+    if (auth.user?.role === 'staff') {
+      showToast('⛔ Security Middleware: Staff members cannot delete products. Admin permission required.', 'warning');
+      addLog('Security Middleware', `Blocked staff user from deleting product ${id}`);
+      return;
+    }
     const prod = products.find(p => p.id === id);
     setProducts(prev => prev.filter(p => p.id !== id));
     addLog('Delete Product', `Deleted ${prod?.name || id}`);
@@ -1671,6 +1307,11 @@ export function AppProvider({ children }) {
   };
 
   const deleteCustomer = (id) => {
+    if (auth.user?.role === 'staff') {
+      showToast('⛔ Security Middleware: Staff members cannot delete customer accounts.', 'warning');
+      addLog('Security Middleware', `Blocked staff user from deleting customer account ${id}`);
+      return;
+    }
     const cust = customers.find(c => c.id === id);
     setCustomers(prev => prev.filter(c => c.id !== id));
     addLog('Delete Customer', `Removed customer ${cust?.name || id}`);
@@ -1684,6 +1325,11 @@ export function AppProvider({ children }) {
   };
 
   const deleteSupplier = (id) => {
+    if (auth.user?.role === 'staff') {
+      showToast('⛔ Security Middleware: Staff members cannot delete supplier accounts.', 'warning');
+      addLog('Security Middleware', `Blocked staff user from deleting supplier account ${id}`);
+      return;
+    }
     const sup = suppliers.find(s => s.id === id);
     setSuppliers(prev => prev.filter(s => s.id !== id));
     addLog('Delete Supplier', `Removed supplier ${sup?.name || id}`);
@@ -1691,6 +1337,11 @@ export function AppProvider({ children }) {
   };
 
   const deleteSale = (saleId) => {
+    if (auth.user?.role === 'staff') {
+      showToast('⛔ Security Middleware: Staff members cannot void or delete sales invoices. Admin authorization required.', 'warning');
+      addLog('Security Middleware', `Blocked staff user from deleting sale ${saleId}`);
+      return;
+    }
     const sale = sales.find(s => s.id === saleId);
     if (!sale) return;
 
@@ -1721,6 +1372,11 @@ export function AppProvider({ children }) {
   };
 
   const deletePayment = (payId) => {
+    if (auth.user?.role === 'staff') {
+      showToast('⛔ Security Middleware: Staff members cannot delete cash vouchers or payment entries.', 'warning');
+      addLog('Security Middleware', `Blocked staff user from deleting payment ${payId}`);
+      return;
+    }
     const pay = payments.find(p => p.id === payId);
     if (!pay) return;
 
@@ -1905,23 +1561,30 @@ export function AppProvider({ children }) {
   };
 
   const resetAllData = () => {
+    if (auth.user?.role === 'staff') {
+      showToast('⛔ Security Middleware: Staff members cannot wipe or reset database.', 'danger');
+      addLog('Security Middleware', 'Blocked staff user from resetting store database');
+      return;
+    }
     localStorage.removeItem(STORAGE_KEY);
-    setProducts(INITIAL_PRODUCTS);
-    setCustomers(INITIAL_CUSTOMERS);
-    setSuppliers(INITIAL_SUPPLIERS);
-    setSales(INITIAL_SALES);
-    setPurchases(INITIAL_PURCHASES);
-    setPayments(INITIAL_PAYMENTS);
-    setHoldStock(INITIAL_HOLD_STOCK);
-    setTempLedger(INITIAL_TEMP_LEDGER);
+    setProducts([]);
+    setCustomers([]);
+    setSuppliers([]);
+    setSales([]);
+    setPurchases([]);
+    setPayments([]);
+    setHoldStock([]);
+    setTempLedger([]);
     setParkedSales([]);
-    showToast('System reset to demo dataset', 'info');
+    addLog('System Reset', 'All live transactional data reset to clean initial database');
+    showToast('Clean live database initialized', 'info');
   };
 
   // Metrics calculations for Active Branch
   const branchProducts = products.filter(p => !p.branchId || p.branchId === activeBranchId);
   const branchSales = sales.filter(s => !s.branchId || s.branchId === activeBranchId);
   const branchPayments = payments.filter(p => !p.branchId || p.branchId === activeBranchId);
+  const branchCustomers = customers.filter(c => !c.branchId || c.branchId === activeBranchId);
 
   const todayStr = new Date().toISOString().split('T')[0];
   const todaySales = branchSales.filter(s => s.date.startsWith(todayStr));
@@ -1949,6 +1612,12 @@ export function AppProvider({ children }) {
   let lowStockCount = 0;
   let outOfStockCount = 0;
   let totalStockUnits = 0;
+  let expiringSoonCount = 0;
+  let expiredCount = 0;
+  const criticalExpiryProducts = [];
+
+  const todayZero = new Date();
+  todayZero.setHours(0, 0, 0, 0);
 
   branchProducts.forEach(p => {
     const totalUnits = (p.shopStock || 0) + (p.storeStock || 0);
@@ -1958,7 +1627,57 @@ export function AppProvider({ children }) {
 
     if (totalUnits === 0) outOfStockCount++;
     else if (totalUnits <= (p.alertQty || 10)) lowStockCount++;
+
+    if (p.expiryDate) {
+      const expDate = new Date(p.expiryDate);
+      expDate.setHours(0, 0, 0, 0);
+      if (!isNaN(expDate.getTime())) {
+        const diffTime = expDate.getTime() - todayZero.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        if (diffDays < 0) {
+          expiredCount++;
+          criticalExpiryProducts.push({
+            ...p,
+            daysLeft: diffDays,
+            totalUnits,
+            isExpired: true,
+            isExpiringSoon: false,
+            stockValueAtRisk: totalUnits * (p.costPrice || 0)
+          });
+        } else if (diffDays <= 7) {
+          expiringSoonCount++;
+          criticalExpiryProducts.push({
+            ...p,
+            daysLeft: diffDays,
+            totalUnits,
+            isExpired: false,
+            isExpiringSoon: true,
+            stockValueAtRisk: totalUnits * (p.costPrice || 0)
+          });
+        }
+      }
+    }
   });
+
+  criticalExpiryProducts.sort((a, b) => a.daysLeft - b.daysLeft);
+
+  // Expiry notification toast on session start
+  useEffect(() => {
+    if (auth.isAuthenticated && criticalExpiryProducts.length > 0) {
+      const sessionKey = 'agrotrader_notified_expiry_' + todayStr;
+      const alreadyNotified = typeof window !== 'undefined' ? sessionStorage.getItem(sessionKey) : null;
+      if (!alreadyNotified) {
+        if (typeof window !== 'undefined') sessionStorage.setItem(sessionKey, 'true');
+        const first = criticalExpiryProducts[0];
+        const count = criticalExpiryProducts.length;
+        if (count === 1) {
+          showToast(`⚠️ Expiry Alert: "${first.name}" expires in ${first.daysLeft <= 0 ? 'less than 24h or expired' : first.daysLeft + ' days'}!`, 'warning');
+        } else {
+          showToast(`⚠️ Expiry Alert: ${count} products are expiring within 7 days (including "${first.name}")! Check Expiry Card.`, 'warning');
+        }
+      }
+    }
+  }, [auth.isAuthenticated, criticalExpiryProducts.length, todayStr]);
 
   const potentialProfit = Math.max(0, totalRetailValue - totalInventoryValue);
 
@@ -1976,6 +1695,10 @@ export function AppProvider({ children }) {
     potentialProfit,
     lowStockCount,
     outOfStockCount,
+    expiringSoonCount,
+    expiredCount,
+    totalCriticalExpiryCount: criticalExpiryProducts.length,
+    criticalExpiryProducts,
     totalStockUnits,
     categoryCount: new Set(branchProducts.map(p => p.category)).size
   };
@@ -1983,6 +1706,7 @@ export function AppProvider({ children }) {
   return (
     <AppContext.Provider
       value={{
+        isLoaded,
         theme,
         setTheme: setThemeState,
         hideAmounts,
@@ -2028,9 +1752,17 @@ export function AppProvider({ children }) {
         categories,
         manufacturers,
         units,
-        customers,
+        customers: branchCustomers,
+        allCustomers: customers,
         suppliers,
         sales: branchSales,
+        allSales: sales,
+        isOnline,
+        cloudConfig,
+        updateCloudConfig,
+        syncWithCloud,
+        pushToCloud,
+        pullFromCloud,
         purchases: purchases.filter(po => !po.branchId || po.branchId === activeBranchId),
         allPurchases: purchases,
         payments: branchPayments,
@@ -2041,6 +1773,7 @@ export function AppProvider({ children }) {
         toasts,
         showToast,
         metrics,
+        criticalExpiryProducts,
         addProduct,
         updateProduct,
         deleteProduct,

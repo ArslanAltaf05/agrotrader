@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { generateBarcode, generateBatchNumber, generateSKU } from '../utils/formatters';
+import { generateSKU } from '../utils/formatters';
 
 export default function AddProductModal({ isOpen, onClose, editingProduct = null }) {
   const { addProduct, updateProduct, categories, manufacturers, units } = useApp();
@@ -15,8 +15,8 @@ export default function AddProductModal({ isOpen, onClose, editingProduct = null
     batchNo: '',
     mfgDate: '',
     expiryDate: '',
-    category: 'Fertilizers',
-    manufacturer: 'Fauji Fertilizer Company (FFC)',
+    category: categories[0] || 'Fertilizers',
+    manufacturer: manufacturers[0] || '',
     unit: 'bag',
     unitWeight: '50',
     costPrice: '',
@@ -51,8 +51,8 @@ export default function AddProductModal({ isOpen, onClose, editingProduct = null
         batchNo: editingProduct.batchNo || '',
         mfgDate: editingProduct.mfgDate || '',
         expiryDate: editingProduct.expiryDate || '',
-        category: editingProduct.category || 'Fertilizers',
-        manufacturer: editingProduct.manufacturer || 'Fauji Fertilizer Company (FFC)',
+        category: editingProduct.category || categories[0] || 'Fertilizers',
+        manufacturer: editingProduct.manufacturer || '',
         unit: editingProduct.unit || 'bag',
         unitWeight: editingProduct.unitWeight?.toString() || '50',
         costPrice: editingProduct.costPrice?.toString() || '',
@@ -70,12 +70,12 @@ export default function AddProductModal({ isOpen, onClose, editingProduct = null
         name: '',
         sku: 'Auto',
         generic: '',
-        barcode: generateBarcode(),
-        batchNo: generateBatchNumber(),
+        barcode: '',
+        batchNo: '',
         mfgDate: new Date().toISOString().split('T')[0],
         expiryDate: '',
-        category: 'Fertilizers',
-        manufacturer: 'Fauji Fertilizer Company (FFC)',
+        category: categories[0] || 'Fertilizers',
+        manufacturer: manufacturers[0] || '',
         unit: 'bag',
         unitWeight: '50',
         costPrice: '',
@@ -193,34 +193,13 @@ export default function AddProductModal({ isOpen, onClose, editingProduct = null
                   <div className="form-section-title">BARCODE / BATCH / DATES</div>
                   <div className="input-group" style={{ marginBottom: '12px' }}>
                     <label className="input-label">Barcode / Article No.</label>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      <input
-                        type="text"
-                        className="input"
-                        placeholder="Scan or enter barcode"
-                        value={formData.barcode}
-                        onChange={(e) => setFormData({ ...formData, barcode: e.target.value })}
-                      />
-                      <button
-                        type="button"
-                        className="btn btn-outline"
-                        style={{ whiteSpace: 'nowrap', fontSize: '12px' }}
-                        onClick={() => {
-                          const code = '890' + Math.floor(100000000 + Math.random() * 900000000);
-                          setFormData({ ...formData, barcode: code });
-                        }}
-                      >
-                        ||| Scan
-                      </button>
-                      <button
-                        type="button"
-                        className="btn btn-outline"
-                        style={{ whiteSpace: 'nowrap', fontSize: '12px' }}
-                        onClick={() => setFormData({ ...formData, barcode: generateBarcode() })}
-                      >
-                        ||| Generate
-                      </button>
-                    </div>
+                    <input
+                      type="text"
+                      className="input"
+                      placeholder="Scan with barcode gun or enter article no."
+                      value={formData.barcode}
+                      onChange={(e) => setFormData({ ...formData, barcode: e.target.value })}
+                    />
                   </div>
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr', gap: '10px' }}>
@@ -229,7 +208,7 @@ export default function AddProductModal({ isOpen, onClose, editingProduct = null
                       <input
                         type="text"
                         className="input"
-                        placeholder="30062026-0001"
+                        placeholder="Batch / Lot (optional)"
                         value={formData.batchNo}
                         onChange={(e) => setFormData({ ...formData, batchNo: e.target.value })}
                       />

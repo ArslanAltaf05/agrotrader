@@ -25,6 +25,9 @@ import SettingsView from '../components/SettingsView';
 import SuperAdminView from '../components/SuperAdminView';
 import SalesView from '../components/SalesView';
 import MobileBottomNav from '../components/MobileBottomNav';
+import CloudSyncModal from '../components/CloudSyncModal';
+import DownloadAppModal from '../components/DownloadAppModal';
+import ExpiryAlertModal from '../components/ExpiryAlertModal';
 import { formatCurrency, formatDate } from '../utils/formatters';
 
 function MainApp() {
@@ -39,7 +42,8 @@ function MainApp() {
     hideAmounts,
     impersonatingTenant,
     exitImpersonation,
-    broadcastMessage
+    broadcastMessage,
+    staffPermissions
   } = useApp();
   const [dismissBroadcast, setDismissBroadcast] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -59,6 +63,9 @@ function MainApp() {
   const [transferTo, setTransferTo] = useState('store');
   const [showParkedModal, setShowParkedModal] = useState(false);
   const [resumedCartData, setResumedCartData] = useState(null);
+  const [showCloudSyncModal, setShowCloudSyncModal] = useState(false);
+  const [showDownloadAppModal, setShowDownloadAppModal] = useState(false);
+  const [showExpiryModal, setShowExpiryModal] = useState(false);
 
   // Global Keyboard Shortcuts (F1: New Sale, F2: Parked)
   useEffect(() => {
@@ -170,12 +177,68 @@ function MainApp() {
       case 'temp_ledger':
         return <TempLedgerView />;
       case 'reports':
+        if (auth.user?.role === 'staff' && !staffPermissions?.canViewReports) {
+          return (
+            <div className="page-body">
+              <div className="card" style={{ maxWidth: '580px', margin: '40px auto', textAlign: 'center', padding: '36px 24px', border: '1px solid #fecaca' }}>
+                <span style={{ fontSize: '42px' }}>🛡️</span>
+                <h3 style={{ color: '#991b1b', marginTop: '12px', fontSize: '18px', fontWeight: 800 }}>Access Denied: Financial Reports</h3>
+                <p style={{ fontSize: '13px', color: '#7f1d1d', margin: '8px 0 16px' }}>Staff accounts do not have permission to view store business reports and profit calculations.</p>
+                <button type="button" className="btn btn-primary" onClick={() => setActiveTab('dashboard')}>
+                  Return to Dashboard
+                </button>
+              </div>
+            </div>
+          );
+        }
         return <ReportsView />;
       case 'logs':
+        if (auth.user?.role === 'staff' && !staffPermissions?.canViewLogs) {
+          return (
+            <div className="page-body">
+              <div className="card" style={{ maxWidth: '580px', margin: '40px auto', textAlign: 'center', padding: '36px 24px', border: '1px solid #fecaca' }}>
+                <span style={{ fontSize: '42px' }}>🛡️</span>
+                <h3 style={{ color: '#991b1b', marginTop: '12px', fontSize: '18px', fontWeight: 800 }}>Access Denied: Audit Logs</h3>
+                <p style={{ fontSize: '13px', color: '#7f1d1d', margin: '8px 0 16px' }}>Staff accounts do not have permission to view system audit logs.</p>
+                <button type="button" className="btn btn-primary" onClick={() => setActiveTab('dashboard')}>
+                  Return to Dashboard
+                </button>
+              </div>
+            </div>
+          );
+        }
         return <LogsView />;
       case 'settings':
+        if (auth.user?.role === 'staff') {
+          return (
+            <div className="page-body">
+              <div className="card" style={{ maxWidth: '580px', margin: '40px auto', textAlign: 'center', padding: '36px 24px', border: '1px solid #fecaca' }}>
+                <span style={{ fontSize: '42px' }}>🛡️</span>
+                <h3 style={{ color: '#991b1b', marginTop: '12px', fontSize: '18px', fontWeight: 800 }}>Access Denied: System Settings</h3>
+                <p style={{ fontSize: '13px', color: '#7f1d1d', margin: '8px 0 16px' }}>Staff accounts cannot enter System Settings or modify store configuration.</p>
+                <button type="button" className="btn btn-primary" onClick={() => setActiveTab('dashboard')}>
+                  Return to Dashboard
+                </button>
+              </div>
+            </div>
+          );
+        }
         return <SettingsView />;
       case 'superadmin':
+        if (auth.user?.role !== 'superadmin' && !impersonatingTenant) {
+          return (
+            <div className="page-body">
+              <div className="card" style={{ maxWidth: '580px', margin: '40px auto', textAlign: 'center', padding: '36px 24px', border: '1px solid #fecaca' }}>
+                <span style={{ fontSize: '42px' }}>🛡️</span>
+                <h3 style={{ color: '#991b1b', marginTop: '12px', fontSize: '18px', fontWeight: 800 }}>Access Denied: Super Admin Portal</h3>
+                <p style={{ fontSize: '13px', color: '#7f1d1d', margin: '8px 0 16px' }}>Only Master SaaS Administrators can enter the Multi-Tenant Super Admin Console.</p>
+                <button type="button" className="btn btn-primary" onClick={() => setActiveTab('dashboard')}>
+                  Return to Dashboard
+                </button>
+              </div>
+            </div>
+          );
+        }
         return <SuperAdminView />;
       default:
         return <DashboardView onOpenNewSale={() => setShowPOSModal(true)} />;
@@ -185,7 +248,11 @@ function MainApp() {
   return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       {/* Top Header & Window Chrome */}
-      <Header onToggleMobileMenu={() => setIsMobileMenuOpen(prev => !prev)} />
+      <Header
+        onToggleMobileMenu={() => setIsMobileMenuOpen(prev => !prev)}
+        onOpenDownloadApp={() => setShowDownloadAppModal(true)}
+        onOpenExpiryAlert={() => setShowExpiryModal(true)}
+      />
 
       {/* Impersonation Warning Banner */}
       {impersonatingTenant && (
@@ -353,6 +420,22 @@ function MainApp() {
           setResumedCartData(cart);
           setShowPOSModal(true);
         }}
+      />
+
+      <CloudSyncModal
+        isOpen={showCloudSyncModal}
+        onClose={() => setShowCloudSyncModal(false)}
+      />
+
+      <DownloadAppModal
+        isOpen={showDownloadAppModal}
+        onClose={() => setShowDownloadAppModal(false)}
+      />
+
+      <ExpiryAlertModal
+        isOpen={showExpiryModal}
+        onClose={() => setShowExpiryModal(false)}
+        onOpenNewSale={() => setShowPOSModal(true)}
       />
 
       {/* Toast Notifications */}

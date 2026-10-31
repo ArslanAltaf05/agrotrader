@@ -25,8 +25,8 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
         batchNo: '',
         mfgDate: '',
         expiryDate: '',
-        category: 'Fertilizers',
-        manufacturer: 'Fauji Fertilizer Company (FFC)',
+        category: categories[0] || 'Fertilizers',
+        manufacturer: manufacturers[0] || '',
         unit: 'bag',
         unitWeight: '50',
         costPrice: '',
@@ -59,8 +59,8 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                 batchNo: editingProduct.batchNo || '',
                 mfgDate: editingProduct.mfgDate || '',
                 expiryDate: editingProduct.expiryDate || '',
-                category: editingProduct.category || 'Fertilizers',
-                manufacturer: editingProduct.manufacturer || 'Fauji Fertilizer Company (FFC)',
+                category: editingProduct.category || categories[0] || 'Fertilizers',
+                manufacturer: editingProduct.manufacturer || '',
                 unit: editingProduct.unit || 'bag',
                 unitWeight: editingProduct.unitWeight?.toString() || '50',
                 costPrice: editingProduct.costPrice?.toString() || '',
@@ -83,12 +83,12 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                 name: '',
                 sku: 'Auto',
                 generic: '',
-                barcode: (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$utils$2f$formatters$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["generateBarcode"])(),
-                batchNo: (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$utils$2f$formatters$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["generateBatchNumber"])(),
+                barcode: '',
+                batchNo: '',
                 mfgDate: new Date().toISOString().split('T')[0],
                 expiryDate: '',
-                category: 'Fertilizers',
-                manufacturer: 'Fauji Fertilizer Company (FFC)',
+                category: categories[0] || 'Fertilizers',
+                manufacturer: manufacturers[0] || '',
                 unit: 'bag',
                 unitWeight: '50',
                 costPrice: '',
@@ -354,65 +354,16 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                                                                 lineNumber: 195,
                                                                 columnNumber: 21
                                                             }, this),
-                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                                                style: {
-                                                                    display: 'flex',
-                                                                    gap: '8px'
-                                                                },
-                                                                children: [
-                                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
-                                                                        type: "text",
-                                                                        className: "input",
-                                                                        placeholder: "Scan or enter barcode",
-                                                                        value: formData.barcode,
-                                                                        onChange: (e)=>setFormData({
-                                                                                ...formData,
-                                                                                barcode: e.target.value
-                                                                            })
-                                                                    }, void 0, false, {
-                                                                        fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                        lineNumber: 197,
-                                                                        columnNumber: 23
-                                                                    }, this),
-                                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-                                                                        type: "button",
-                                                                        className: "btn btn-outline",
-                                                                        style: {
-                                                                            whiteSpace: 'nowrap',
-                                                                            fontSize: '12px'
-                                                                        },
-                                                                        onClick: ()=>{
-                                                                            const code = '890' + Math.floor(100000000 + Math.random() * 900000000);
-                                                                            setFormData({
-                                                                                ...formData,
-                                                                                barcode: code
-                                                                            });
-                                                                        },
-                                                                        children: "||| Scan"
-                                                                    }, void 0, false, {
-                                                                        fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                        lineNumber: 204,
-                                                                        columnNumber: 23
-                                                                    }, this),
-                                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-                                                                        type: "button",
-                                                                        className: "btn btn-outline",
-                                                                        style: {
-                                                                            whiteSpace: 'nowrap',
-                                                                            fontSize: '12px'
-                                                                        },
-                                                                        onClick: ()=>setFormData({
-                                                                                ...formData,
-                                                                                barcode: (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$utils$2f$formatters$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["generateBarcode"])()
-                                                                            }),
-                                                                        children: "||| Generate"
-                                                                    }, void 0, false, {
-                                                                        fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                        lineNumber: 215,
-                                                                        columnNumber: 23
-                                                                    }, this)
-                                                                ]
-                                                            }, void 0, true, {
+                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
+                                                                type: "text",
+                                                                className: "input",
+                                                                placeholder: "Scan with barcode gun or enter article no.",
+                                                                value: formData.barcode,
+                                                                onChange: (e)=>setFormData({
+                                                                        ...formData,
+                                                                        barcode: e.target.value
+                                                                    })
+                                                            }, void 0, false, {
                                                                 fileName: "[project]/src/components/AddProductModal.jsx",
                                                                 lineNumber: 196,
                                                                 columnNumber: 21
@@ -438,13 +389,13 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                                                                         children: "Batch No."
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                        lineNumber: 228,
+                                                                        lineNumber: 207,
                                                                         columnNumber: 23
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                                         type: "text",
                                                                         className: "input",
-                                                                        placeholder: "30062026-0001",
+                                                                        placeholder: "Batch / Lot (optional)",
                                                                         value: formData.batchNo,
                                                                         onChange: (e)=>setFormData({
                                                                                 ...formData,
@@ -452,13 +403,13 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                                                                             })
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                        lineNumber: 229,
+                                                                        lineNumber: 208,
                                                                         columnNumber: 23
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                lineNumber: 227,
+                                                                lineNumber: 206,
                                                                 columnNumber: 21
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -469,7 +420,7 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                                                                         children: "Mfg Date"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                        lineNumber: 238,
+                                                                        lineNumber: 217,
                                                                         columnNumber: 23
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -482,13 +433,13 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                                                                             })
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                        lineNumber: 239,
+                                                                        lineNumber: 218,
                                                                         columnNumber: 23
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                lineNumber: 237,
+                                                                lineNumber: 216,
                                                                 columnNumber: 21
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -499,7 +450,7 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                                                                         children: "Expiry Date"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                        lineNumber: 247,
+                                                                        lineNumber: 226,
                                                                         columnNumber: 23
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -512,19 +463,19 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                                                                             })
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                        lineNumber: 248,
+                                                                        lineNumber: 227,
                                                                         columnNumber: 23
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                lineNumber: 246,
+                                                                lineNumber: 225,
                                                                 columnNumber: 21
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                        lineNumber: 226,
+                                                        lineNumber: 205,
                                                         columnNumber: 19
                                                     }, this)
                                                 ]
@@ -543,7 +494,7 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                                                         children: "CLASSIFICATION"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                        lineNumber: 260,
+                                                        lineNumber: 239,
                                                         columnNumber: 19
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -566,13 +517,13 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                                                                                 children: "*"
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                                lineNumber: 264,
+                                                                                lineNumber: 243,
                                                                                 columnNumber: 63
                                                                             }, this)
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                        lineNumber: 264,
+                                                                        lineNumber: 243,
                                                                         columnNumber: 23
                                                                     }, this),
                                                                     !newCatInput ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -593,12 +544,12 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                                                                                         children: c
                                                                                     }, c, false, {
                                                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                                        lineNumber: 272,
+                                                                                        lineNumber: 251,
                                                                                         columnNumber: 50
                                                                                     }, this))
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                                lineNumber: 267,
+                                                                                lineNumber: 246,
                                                                                 columnNumber: 27
                                                                             }, this),
                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -609,13 +560,13 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                                                                                 children: "+"
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                                lineNumber: 274,
+                                                                                lineNumber: 253,
                                                                                 columnNumber: 27
                                                                             }, this)
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                        lineNumber: 266,
+                                                                        lineNumber: 245,
                                                                         columnNumber: 25
                                                                     }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                                         style: {
@@ -631,7 +582,7 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                                                                                 onChange: (e)=>setCustomCat(e.target.value)
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                                lineNumber: 285,
+                                                                                lineNumber: 264,
                                                                                 columnNumber: 27
                                                                             }, this),
                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -641,19 +592,19 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                                                                                 children: "×"
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                                lineNumber: 292,
+                                                                                lineNumber: 271,
                                                                                 columnNumber: 27
                                                                             }, this)
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                        lineNumber: 284,
+                                                                        lineNumber: 263,
                                                                         columnNumber: 25
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                lineNumber: 263,
+                                                                lineNumber: 242,
                                                                 columnNumber: 21
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -664,7 +615,7 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                                                                         children: "Manufacturer"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                        lineNumber: 305,
+                                                                        lineNumber: 284,
                                                                         columnNumber: 23
                                                                     }, this),
                                                                     !newMfgInput ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -685,12 +636,12 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                                                                                         children: m
                                                                                     }, m, false, {
                                                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                                        lineNumber: 313,
+                                                                                        lineNumber: 292,
                                                                                         columnNumber: 53
                                                                                     }, this))
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                                lineNumber: 308,
+                                                                                lineNumber: 287,
                                                                                 columnNumber: 27
                                                                             }, this),
                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -701,13 +652,13 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                                                                                 children: "+"
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                                lineNumber: 315,
+                                                                                lineNumber: 294,
                                                                                 columnNumber: 27
                                                                             }, this)
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                        lineNumber: 307,
+                                                                        lineNumber: 286,
                                                                         columnNumber: 25
                                                                     }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                                         style: {
@@ -723,7 +674,7 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                                                                                 onChange: (e)=>setCustomMfg(e.target.value)
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                                lineNumber: 326,
+                                                                                lineNumber: 305,
                                                                                 columnNumber: 27
                                                                             }, this),
                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -733,25 +684,25 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                                                                                 children: "×"
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                                lineNumber: 333,
+                                                                                lineNumber: 312,
                                                                                 columnNumber: 27
                                                                             }, this)
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                        lineNumber: 325,
+                                                                        lineNumber: 304,
                                                                         columnNumber: 25
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                lineNumber: 304,
+                                                                lineNumber: 283,
                                                                 columnNumber: 21
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                        lineNumber: 261,
+                                                        lineNumber: 240,
                                                         columnNumber: 19
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -773,13 +724,13 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                                                                                 children: "*"
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                                lineNumber: 347,
+                                                                                lineNumber: 326,
                                                                                 columnNumber: 59
                                                                             }, this)
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                        lineNumber: 347,
+                                                                        lineNumber: 326,
                                                                         columnNumber: 23
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
@@ -794,18 +745,18 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                                                                                 children: u
                                                                             }, u, false, {
                                                                                 fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                                lineNumber: 353,
+                                                                                lineNumber: 332,
                                                                                 columnNumber: 41
                                                                             }, this))
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                        lineNumber: 348,
+                                                                        lineNumber: 327,
                                                                         columnNumber: 23
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                lineNumber: 346,
+                                                                lineNumber: 325,
                                                                 columnNumber: 21
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -816,7 +767,7 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                                                                         children: "Unit Weight (kg)"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                        lineNumber: 357,
+                                                                        lineNumber: 336,
                                                                         columnNumber: 23
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -830,25 +781,25 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                                                                             })
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                        lineNumber: 358,
+                                                                        lineNumber: 337,
                                                                         columnNumber: 23
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                lineNumber: 356,
+                                                                lineNumber: 335,
                                                                 columnNumber: 21
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                        lineNumber: 345,
+                                                        lineNumber: 324,
                                                         columnNumber: 19
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/AddProductModal.jsx",
-                                                lineNumber: 259,
+                                                lineNumber: 238,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -858,7 +809,7 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                                                         children: "PRICING"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                        lineNumber: 371,
+                                                        lineNumber: 350,
                                                         columnNumber: 19
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -877,7 +828,7 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                                                                         children: "Trade / Cost Price (Rs)"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                        lineNumber: 374,
+                                                                        lineNumber: 353,
                                                                         columnNumber: 23
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -891,13 +842,13 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                                                                             })
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                        lineNumber: 375,
+                                                                        lineNumber: 354,
                                                                         columnNumber: 23
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                lineNumber: 373,
+                                                                lineNumber: 352,
                                                                 columnNumber: 21
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -912,13 +863,13 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                                                                                 children: "*"
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                                lineNumber: 384,
+                                                                                lineNumber: 363,
                                                                                 columnNumber: 70
                                                                             }, this)
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                        lineNumber: 384,
+                                                                        lineNumber: 363,
                                                                         columnNumber: 23
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -933,19 +884,19 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                                                                             })
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                        lineNumber: 385,
+                                                                        lineNumber: 364,
                                                                         columnNumber: 23
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                lineNumber: 383,
+                                                                lineNumber: 362,
                                                                 columnNumber: 21
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                        lineNumber: 372,
+                                                        lineNumber: 351,
                                                         columnNumber: 19
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -956,7 +907,7 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                                                                 children: "Offer Price (optional)"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                lineNumber: 397,
+                                                                lineNumber: 376,
                                                                 columnNumber: 21
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -970,19 +921,19 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                                                                     })
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                lineNumber: 398,
+                                                                lineNumber: 377,
                                                                 columnNumber: 21
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                        lineNumber: 396,
+                                                        lineNumber: 375,
                                                         columnNumber: 19
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/AddProductModal.jsx",
-                                                lineNumber: 370,
+                                                lineNumber: 349,
                                                 columnNumber: 17
                                             }, this)
                                         ]
@@ -1014,7 +965,7 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                                                                 children: "OPENING STOCK DETAIL"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                lineNumber: 414,
+                                                                lineNumber: 393,
                                                                 columnNumber: 21
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1027,13 +978,13 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                                                                 children: "+ Location"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                lineNumber: 415,
+                                                                lineNumber: 394,
                                                                 columnNumber: 21
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                        lineNumber: 413,
+                                                        lineNumber: 392,
                                                         columnNumber: 19
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1052,7 +1003,7 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                                                                         children: "Shop"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                        lineNumber: 422,
+                                                                        lineNumber: 401,
                                                                         columnNumber: 23
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1072,7 +1023,7 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                                                                                     })
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                                lineNumber: 424,
+                                                                                lineNumber: 403,
                                                                                 columnNumber: 25
                                                                             }, this),
                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1083,19 +1034,19 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                                                                                 children: formData.unit
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                                lineNumber: 430,
+                                                                                lineNumber: 409,
                                                                                 columnNumber: 25
                                                                             }, this)
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                        lineNumber: 423,
+                                                                        lineNumber: 402,
                                                                         columnNumber: 23
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                lineNumber: 421,
+                                                                lineNumber: 400,
                                                                 columnNumber: 21
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1106,7 +1057,7 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                                                                         children: "Alert Qty"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                        lineNumber: 434,
+                                                                        lineNumber: 413,
                                                                         columnNumber: 23
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -1119,19 +1070,19 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                                                                             })
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                        lineNumber: 435,
+                                                                        lineNumber: 414,
                                                                         columnNumber: 23
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                lineNumber: 433,
+                                                                lineNumber: 412,
                                                                 columnNumber: 21
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                        lineNumber: 420,
+                                                        lineNumber: 399,
                                                         columnNumber: 19
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1145,7 +1096,7 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                                                                 children: "Store / Godown Stock"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                lineNumber: 445,
+                                                                lineNumber: 424,
                                                                 columnNumber: 21
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1165,7 +1116,7 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                                                                             })
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                        lineNumber: 447,
+                                                                        lineNumber: 426,
                                                                         columnNumber: 23
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1176,19 +1127,19 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                                                                         children: formData.unit
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                        lineNumber: 453,
+                                                                        lineNumber: 432,
                                                                         columnNumber: 23
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                lineNumber: 446,
+                                                                lineNumber: 425,
                                                                 columnNumber: 21
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                        lineNumber: 444,
+                                                        lineNumber: 423,
                                                         columnNumber: 19
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1204,21 +1155,21 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                                                                 children: "Out of Stock"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                lineNumber: 460,
+                                                                lineNumber: 439,
                                                                 columnNumber: 23
                                                             }, this) : isLowStock ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                                 className: "badge badge-warning",
                                                                 children: "Low Stock"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                lineNumber: 462,
+                                                                lineNumber: 441,
                                                                 columnNumber: 23
                                                             }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                                 className: "badge badge-success",
                                                                 children: "In Stock"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                lineNumber: 464,
+                                                                lineNumber: 443,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1234,19 +1185,19 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                lineNumber: 466,
+                                                                lineNumber: 445,
                                                                 columnNumber: 21
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                        lineNumber: 458,
+                                                        lineNumber: 437,
                                                         columnNumber: 19
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/AddProductModal.jsx",
-                                                lineNumber: 412,
+                                                lineNumber: 391,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1259,7 +1210,7 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                                                         children: "FLAGS / SETTINGS"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                        lineNumber: 474,
+                                                        lineNumber: 453,
                                                         columnNumber: 19
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1290,20 +1241,20 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                                                                             })
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                        lineNumber: 477,
+                                                                        lineNumber: 456,
                                                                         columnNumber: 23
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                                         children: "Active"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                        lineNumber: 485,
+                                                                        lineNumber: 464,
                                                                         columnNumber: 23
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                lineNumber: 476,
+                                                                lineNumber: 455,
                                                                 columnNumber: 21
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
@@ -1327,20 +1278,20 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                                                                             })
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                        lineNumber: 489,
+                                                                        lineNumber: 468,
                                                                         columnNumber: 23
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                                         children: "Narcotic"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                        lineNumber: 497,
+                                                                        lineNumber: 476,
                                                                         columnNumber: 23
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                lineNumber: 488,
+                                                                lineNumber: 467,
                                                                 columnNumber: 21
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
@@ -1364,20 +1315,20 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                                                                             })
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                        lineNumber: 501,
+                                                                        lineNumber: 480,
                                                                         columnNumber: 23
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                                         children: "Serial Item"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                        lineNumber: 509,
+                                                                        lineNumber: 488,
                                                                         columnNumber: 23
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                lineNumber: 500,
+                                                                lineNumber: 479,
                                                                 columnNumber: 21
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
@@ -1401,32 +1352,32 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                                                                             })
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                        lineNumber: 513,
+                                                                        lineNumber: 492,
                                                                         columnNumber: 23
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                                         children: "Keep Record"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                        lineNumber: 521,
+                                                                        lineNumber: 500,
                                                                         columnNumber: 23
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/components/AddProductModal.jsx",
-                                                                lineNumber: 512,
+                                                                lineNumber: 491,
                                                                 columnNumber: 21
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                        lineNumber: 475,
+                                                        lineNumber: 454,
                                                         columnNumber: 19
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/AddProductModal.jsx",
-                                                lineNumber: 473,
+                                                lineNumber: 452,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1436,7 +1387,7 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                                                         children: "NOTES"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                        lineNumber: 528,
+                                                        lineNumber: 507,
                                                         columnNumber: 19
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("textarea", {
@@ -1450,19 +1401,19 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                                                             })
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                                        lineNumber: 529,
+                                                        lineNumber: 508,
                                                         columnNumber: 19
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/AddProductModal.jsx",
-                                                lineNumber: 527,
+                                                lineNumber: 506,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/AddProductModal.jsx",
-                                        lineNumber: 410,
+                                        lineNumber: 389,
                                         columnNumber: 15
                                     }, this)
                                 ]
@@ -1486,7 +1437,7 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                                     children: "Cancel"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/AddProductModal.jsx",
-                                    lineNumber: 543,
+                                    lineNumber: 522,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1498,13 +1449,13 @@ function AddProductModal({ isOpen, onClose, editingProduct = null }) {
                                     children: editingProduct ? 'Save Changes' : 'Add Product'
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/AddProductModal.jsx",
-                                    lineNumber: 546,
+                                    lineNumber: 525,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/AddProductModal.jsx",
-                            lineNumber: 542,
+                            lineNumber: 521,
                             columnNumber: 11
                         }, this)
                     ]

@@ -20,8 +20,9 @@ var _s = __turbopack_context__.k.signature();
 ;
 function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
     _s();
-    const { metrics, hideAmounts, sales, products, customers, suppliers, holdStock, tempLedger, payments, setActiveTab, activeBranchId } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$context$2f$AppContext$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useApp"])();
+    const { metrics, criticalExpiryProducts, hideAmounts, sales, products, customers, suppliers, holdStock, tempLedger, payments, setActiveTab, activeBranchId } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$context$2f$AppContext$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useApp"])();
     // Controls & Filters
+    const [isExpiryCardExpanded, setIsExpiryCardExpanded] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(true);
     const [chartMode, setChartMode] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])('sales'); // 'sales' | 'profit'
     const [timeframe, setTimeframe] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])('week'); // 'week' | 'month' | 'year'
     const [dateFilter, setDateFilter] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])('today'); // 'today' | 'yesterday' | 'week' | 'month' | 'all' | 'custom'
@@ -445,7 +446,7 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                 children: "📊 Filter Period:"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/DashboardView.jsx",
-                                lineNumber: 277,
+                                lineNumber: 279,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -478,18 +479,18 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                         children: item.label
                                     }, item.key, false, {
                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                        lineNumber: 288,
+                                        lineNumber: 290,
                                         columnNumber: 15
                                     }, this))
                             }, void 0, false, {
                                 fileName: "[project]/src/components/DashboardView.jsx",
-                                lineNumber: 280,
+                                lineNumber: 282,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/DashboardView.jsx",
-                        lineNumber: 276,
+                        lineNumber: 278,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -523,7 +524,7 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                         children: "‹"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                        lineNumber: 312,
+                                        lineNumber: 314,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -544,7 +545,7 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                         }
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                        lineNumber: 320,
+                                        lineNumber: 322,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -561,13 +562,13 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                         children: "›"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                        lineNumber: 337,
+                                        lineNumber: 339,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/DashboardView.jsx",
-                                lineNumber: 302,
+                                lineNumber: 304,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -581,20 +582,596 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                 children: "🛒 + New Sale (F1)"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/DashboardView.jsx",
-                                lineNumber: 347,
+                                lineNumber: 349,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/DashboardView.jsx",
-                        lineNumber: 300,
+                        lineNumber: 302,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/DashboardView.jsx",
-                lineNumber: 264,
+                lineNumber: 266,
                 columnNumber: 7
+            }, this),
+            criticalExpiryProducts && criticalExpiryProducts.length > 0 ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                className: "card",
+                style: {
+                    marginBottom: '20px',
+                    border: '1px solid #fecaca',
+                    background: 'linear-gradient(180deg, #fff5f5 0%, #ffffff 100%)',
+                    boxShadow: '0 4px 14px rgba(220, 38, 38, 0.08)',
+                    overflow: 'hidden'
+                },
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        style: {
+                            padding: '14px 18px',
+                            borderBottom: '1px solid #fee2e2',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            flexWrap: 'wrap',
+                            gap: '10px'
+                        },
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                style: {
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '10px'
+                                },
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                        style: {
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            width: '32px',
+                                            height: '32px',
+                                            background: '#fee2e2',
+                                            borderRadius: '8px',
+                                            fontSize: '18px'
+                                        },
+                                        children: "⚠️"
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/DashboardView.jsx",
+                                        lineNumber: 385,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                        children: [
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                style: {
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '8px',
+                                                    flexWrap: 'wrap'
+                                                },
+                                                children: [
+                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
+                                                        style: {
+                                                            fontSize: '15px',
+                                                            fontWeight: 800,
+                                                            color: '#991b1b',
+                                                            margin: 0
+                                                        },
+                                                        children: "INVENTORY EXPIRY ALERT (CRITICAL: WITHIN 7 DAYS)"
+                                                    }, void 0, false, {
+                                                        fileName: "[project]/src/components/DashboardView.jsx",
+                                                        lineNumber: 401,
+                                                        columnNumber: 19
+                                                    }, this),
+                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                        className: "badge badge-danger",
+                                                        style: {
+                                                            fontSize: '11px',
+                                                            fontWeight: 800,
+                                                            padding: '2px 8px',
+                                                            borderRadius: '12px'
+                                                        },
+                                                        children: [
+                                                            criticalExpiryProducts.length,
+                                                            " Item",
+                                                            criticalExpiryProducts.length > 1 ? 's' : '',
+                                                            " Need Action"
+                                                        ]
+                                                    }, void 0, true, {
+                                                        fileName: "[project]/src/components/DashboardView.jsx",
+                                                        lineNumber: 404,
+                                                        columnNumber: 19
+                                                    }, this)
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "[project]/src/components/DashboardView.jsx",
+                                                lineNumber: 400,
+                                                columnNumber: 17
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                style: {
+                                                    fontSize: '12px',
+                                                    color: '#7f1d1d',
+                                                    marginTop: '2px'
+                                                },
+                                                children: "The following pesticides, seeds, or fertilizers expire within 1 week or are past their expiration date. Plan clearance sales or returns to supplier."
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/DashboardView.jsx",
+                                                lineNumber: 411,
+                                                columnNumber: 17
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "[project]/src/components/DashboardView.jsx",
+                                        lineNumber: 399,
+                                        columnNumber: 15
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/components/DashboardView.jsx",
+                                lineNumber: 384,
+                                columnNumber: 13
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                style: {
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px'
+                                },
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                        type: "button",
+                                        className: "btn btn-outline btn-sm",
+                                        style: {
+                                            fontSize: '11.5px',
+                                            background: '#fff',
+                                            borderColor: '#fca5a5',
+                                            color: '#b91c1c'
+                                        },
+                                        onClick: ()=>setActiveTab('inventory'),
+                                        children: "📦 Open Full Inventory"
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/DashboardView.jsx",
+                                        lineNumber: 418,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                        type: "button",
+                                        className: "btn btn-outline btn-sm",
+                                        style: {
+                                            fontSize: '11.5px',
+                                            background: '#fff',
+                                            borderColor: '#fca5a5',
+                                            color: '#b91c1c'
+                                        },
+                                        onClick: ()=>setIsExpiryCardExpanded((prev)=>!prev),
+                                        children: isExpiryCardExpanded ? 'Collapse ▲' : 'Expand ▼'
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/DashboardView.jsx",
+                                        lineNumber: 426,
+                                        columnNumber: 15
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/components/DashboardView.jsx",
+                                lineNumber: 417,
+                                columnNumber: 13
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/src/components/DashboardView.jsx",
+                        lineNumber: 373,
+                        columnNumber: 11
+                    }, this),
+                    isExpiryCardExpanded && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "table-responsive",
+                        style: {
+                            maxHeight: '280px',
+                            overflowY: 'auto'
+                        },
+                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("table", {
+                            className: "data-table",
+                            style: {
+                                margin: 0
+                            },
+                            children: [
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("thead", {
+                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
+                                        style: {
+                                            background: 'rgba(254, 226, 226, 0.4)'
+                                        },
+                                        children: [
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
+                                                style: {
+                                                    fontSize: '11px',
+                                                    color: '#991b1b'
+                                                },
+                                                children: "PRODUCT & BATCH"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/DashboardView.jsx",
+                                                lineNumber: 443,
+                                                columnNumber: 21
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
+                                                style: {
+                                                    fontSize: '11px',
+                                                    color: '#991b1b'
+                                                },
+                                                children: "CATEGORY / COMPANY"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/DashboardView.jsx",
+                                                lineNumber: 444,
+                                                columnNumber: 21
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
+                                                style: {
+                                                    fontSize: '11px',
+                                                    color: '#991b1b'
+                                                },
+                                                children: "EXPIRY COUNTDOWN"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/DashboardView.jsx",
+                                                lineNumber: 445,
+                                                columnNumber: 21
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
+                                                style: {
+                                                    fontSize: '11px',
+                                                    color: '#991b1b',
+                                                    textAlign: 'center'
+                                                },
+                                                children: "STOCK ON HAND"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/DashboardView.jsx",
+                                                lineNumber: 446,
+                                                columnNumber: 21
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
+                                                style: {
+                                                    fontSize: '11px',
+                                                    color: '#991b1b',
+                                                    textAlign: 'right'
+                                                },
+                                                children: "VALUE AT RISK"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/DashboardView.jsx",
+                                                lineNumber: 447,
+                                                columnNumber: 21
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
+                                                style: {
+                                                    fontSize: '11px',
+                                                    color: '#991b1b',
+                                                    textAlign: 'right'
+                                                },
+                                                children: "QUICK ACTION"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/DashboardView.jsx",
+                                                lineNumber: 448,
+                                                columnNumber: 21
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "[project]/src/components/DashboardView.jsx",
+                                        lineNumber: 442,
+                                        columnNumber: 19
+                                    }, this)
+                                }, void 0, false, {
+                                    fileName: "[project]/src/components/DashboardView.jsx",
+                                    lineNumber: 441,
+                                    columnNumber: 17
+                                }, this),
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tbody", {
+                                    children: criticalExpiryProducts.map((p)=>{
+                                        const expiry = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$utils$2f$formatters$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["getExpiryDetails"])(p.expiryDate);
+                                        const totalUnits = (p.shopStock || 0) + (p.storeStock || 0);
+                                        const riskVal = totalUnits * (p.costPrice || 0);
+                                        return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
+                                            children: [
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
+                                                    children: [
+                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                            style: {
+                                                                fontWeight: 700,
+                                                                fontSize: '13px',
+                                                                color: '#111827'
+                                                            },
+                                                            children: p.name
+                                                        }, void 0, false, {
+                                                            fileName: "[project]/src/components/DashboardView.jsx",
+                                                            lineNumber: 460,
+                                                            columnNumber: 27
+                                                        }, this),
+                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                            style: {
+                                                                fontSize: '11px',
+                                                                color: 'var(--text-muted)'
+                                                            },
+                                                            children: [
+                                                                "SKU: ",
+                                                                p.sku,
+                                                                " ",
+                                                                p.batchNo && `• Batch: ${p.batchNo}`
+                                                            ]
+                                                        }, void 0, true, {
+                                                            fileName: "[project]/src/components/DashboardView.jsx",
+                                                            lineNumber: 461,
+                                                            columnNumber: 27
+                                                        }, this)
+                                                    ]
+                                                }, void 0, true, {
+                                                    fileName: "[project]/src/components/DashboardView.jsx",
+                                                    lineNumber: 459,
+                                                    columnNumber: 25
+                                                }, this),
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
+                                                    children: [
+                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                            className: "badge badge-neutral",
+                                                            style: {
+                                                                fontSize: '11px'
+                                                            },
+                                                            children: p.category
+                                                        }, void 0, false, {
+                                                            fileName: "[project]/src/components/DashboardView.jsx",
+                                                            lineNumber: 466,
+                                                            columnNumber: 27
+                                                        }, this),
+                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                            style: {
+                                                                fontSize: '10.5px',
+                                                                color: 'var(--text-muted)'
+                                                            },
+                                                            children: p.manufacturer || 'General'
+                                                        }, void 0, false, {
+                                                            fileName: "[project]/src/components/DashboardView.jsx",
+                                                            lineNumber: 469,
+                                                            columnNumber: 27
+                                                        }, this)
+                                                    ]
+                                                }, void 0, true, {
+                                                    fileName: "[project]/src/components/DashboardView.jsx",
+                                                    lineNumber: 465,
+                                                    columnNumber: 25
+                                                }, this),
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
+                                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                        style: {
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: '6px'
+                                                        },
+                                                        children: [
+                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                                className: `badge ${expiry?.badgeClass || 'badge-warning'}`,
+                                                                style: {
+                                                                    fontSize: '11px',
+                                                                    fontWeight: 700,
+                                                                    background: expiry?.bg,
+                                                                    color: expiry?.color,
+                                                                    border: `1px solid ${expiry?.color}40`
+                                                                },
+                                                                children: [
+                                                                    expiry?.isExpired ? '🔴 ' : '⏳ ',
+                                                                    expiry?.label || p.expiryDate
+                                                                ]
+                                                            }, void 0, true, {
+                                                                fileName: "[project]/src/components/DashboardView.jsx",
+                                                                lineNumber: 473,
+                                                                columnNumber: 29
+                                                            }, this),
+                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                                style: {
+                                                                    fontSize: '11px',
+                                                                    color: 'var(--text-muted)'
+                                                                },
+                                                                children: [
+                                                                    "(",
+                                                                    p.expiryDate,
+                                                                    ")"
+                                                                ]
+                                                            }, void 0, true, {
+                                                                fileName: "[project]/src/components/DashboardView.jsx",
+                                                                lineNumber: 486,
+                                                                columnNumber: 29
+                                                            }, this)
+                                                        ]
+                                                    }, void 0, true, {
+                                                        fileName: "[project]/src/components/DashboardView.jsx",
+                                                        lineNumber: 472,
+                                                        columnNumber: 27
+                                                    }, this)
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/DashboardView.jsx",
+                                                    lineNumber: 471,
+                                                    columnNumber: 25
+                                                }, this),
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
+                                                    style: {
+                                                        textAlign: 'center'
+                                                    },
+                                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                        className: "badge",
+                                                        style: {
+                                                            fontWeight: 700,
+                                                            background: totalUnits > 0 ? '#fee2e2' : '#f3f4f6',
+                                                            color: totalUnits > 0 ? '#b91c1c' : '#6b7280'
+                                                        },
+                                                        children: [
+                                                            totalUnits,
+                                                            " ",
+                                                            p.unit,
+                                                            " (",
+                                                            p.shopStock || 0,
+                                                            " Shop / ",
+                                                            p.storeStock || 0,
+                                                            " Godown)"
+                                                        ]
+                                                    }, void 0, true, {
+                                                        fileName: "[project]/src/components/DashboardView.jsx",
+                                                        lineNumber: 492,
+                                                        columnNumber: 27
+                                                    }, this)
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/DashboardView.jsx",
+                                                    lineNumber: 491,
+                                                    columnNumber: 25
+                                                }, this),
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
+                                                    style: {
+                                                        textAlign: 'right',
+                                                        fontWeight: 700,
+                                                        color: '#dc2626'
+                                                    },
+                                                    children: (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$utils$2f$formatters$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["formatCurrency"])(riskVal, hideAmounts)
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/DashboardView.jsx",
+                                                    lineNumber: 503,
+                                                    columnNumber: 25
+                                                }, this),
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
+                                                    style: {
+                                                        textAlign: 'right'
+                                                    },
+                                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                                        type: "button",
+                                                        className: "btn btn-sm btn-primary",
+                                                        style: {
+                                                            fontSize: '11px',
+                                                            padding: '3px 10px'
+                                                        },
+                                                        onClick: ()=>onOpenNewSale && onOpenNewSale(),
+                                                        title: "Ring up sale in POS with discount",
+                                                        children: "🛒 Sell in POS"
+                                                    }, void 0, false, {
+                                                        fileName: "[project]/src/components/DashboardView.jsx",
+                                                        lineNumber: 507,
+                                                        columnNumber: 27
+                                                    }, this)
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/DashboardView.jsx",
+                                                    lineNumber: 506,
+                                                    columnNumber: 25
+                                                }, this)
+                                            ]
+                                        }, p.id, true, {
+                                            fileName: "[project]/src/components/DashboardView.jsx",
+                                            lineNumber: 458,
+                                            columnNumber: 23
+                                        }, this);
+                                    })
+                                }, void 0, false, {
+                                    fileName: "[project]/src/components/DashboardView.jsx",
+                                    lineNumber: 451,
+                                    columnNumber: 17
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "[project]/src/components/DashboardView.jsx",
+                            lineNumber: 440,
+                            columnNumber: 15
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/DashboardView.jsx",
+                        lineNumber: 439,
+                        columnNumber: 13
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "[project]/src/components/DashboardView.jsx",
+                lineNumber: 362,
+                columnNumber: 9
+            }, this) : /* Status Card when all inventory is healthy */ /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                className: "card",
+                style: {
+                    marginBottom: '20px',
+                    padding: '12px 18px',
+                    background: 'linear-gradient(90deg, #f0fdf4 0%, #ffffff 100%)',
+                    border: '1px solid #bbf7d0',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    gap: '10px'
+                },
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        style: {
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '10px'
+                        },
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                style: {
+                                    fontSize: '18px'
+                                },
+                                children: "🛡️"
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/DashboardView.jsx",
+                                lineNumber: 542,
+                                columnNumber: 13
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                        style: {
+                                            fontSize: '13px',
+                                            fontWeight: 700,
+                                            color: '#166534'
+                                        },
+                                        children: "Inventory Expiry Health: All Current Batches Valid"
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/DashboardView.jsx",
+                                        lineNumber: 544,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                        style: {
+                                            fontSize: '11.5px',
+                                            color: '#15803d'
+                                        },
+                                        children: "No inventory batches expire within the next 7 days. Automated countdown alerts will display here as stock approaches expiry."
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/DashboardView.jsx",
+                                        lineNumber: 547,
+                                        columnNumber: 15
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/components/DashboardView.jsx",
+                                lineNumber: 543,
+                                columnNumber: 13
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/src/components/DashboardView.jsx",
+                        lineNumber: 541,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                        type: "button",
+                        className: "btn btn-outline btn-sm",
+                        style: {
+                            fontSize: '11px',
+                            background: '#fff',
+                            borderColor: '#86efac',
+                            color: '#166534'
+                        },
+                        onClick: ()=>setActiveTab('inventory'),
+                        children: "Inspect Stock Expiries →"
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/DashboardView.jsx",
+                        lineNumber: 552,
+                        columnNumber: 11
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "[project]/src/components/DashboardView.jsx",
+                lineNumber: 527,
+                columnNumber: 9
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                 className: "kpi-grid",
@@ -613,7 +1190,7 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                        lineNumber: 363,
+                                        lineNumber: 568,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -625,13 +1202,13 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                         children: "💵"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                        lineNumber: 364,
+                                        lineNumber: 569,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/DashboardView.jsx",
-                                lineNumber: 362,
+                                lineNumber: 567,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -642,7 +1219,7 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                 children: (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$utils$2f$formatters$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["formatCurrency"])(periodCashSales, hideAmounts)
                             }, void 0, false, {
                                 fileName: "[project]/src/components/DashboardView.jsx",
-                                lineNumber: 368,
+                                lineNumber: 573,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -652,7 +1229,7 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                         children: "↑"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                        lineNumber: 372,
+                                        lineNumber: 577,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -664,19 +1241,19 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                        lineNumber: 373,
+                                        lineNumber: 578,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/DashboardView.jsx",
-                                lineNumber: 371,
+                                lineNumber: 576,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/DashboardView.jsx",
-                        lineNumber: 361,
+                        lineNumber: 566,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -693,7 +1270,7 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                        lineNumber: 380,
+                                        lineNumber: 585,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -705,13 +1282,13 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                         children: "👥"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                        lineNumber: 381,
+                                        lineNumber: 586,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/DashboardView.jsx",
-                                lineNumber: 379,
+                                lineNumber: 584,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -722,7 +1299,7 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                 children: (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$utils$2f$formatters$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["formatCurrency"])(periodLedgerSales, hideAmounts)
                             }, void 0, false, {
                                 fileName: "[project]/src/components/DashboardView.jsx",
-                                lineNumber: 385,
+                                lineNumber: 590,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -732,7 +1309,7 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                         children: "↑"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                        lineNumber: 389,
+                                        lineNumber: 594,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -744,19 +1321,19 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                        lineNumber: 390,
+                                        lineNumber: 595,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/DashboardView.jsx",
-                                lineNumber: 388,
+                                lineNumber: 593,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/DashboardView.jsx",
-                        lineNumber: 378,
+                        lineNumber: 583,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -770,7 +1347,7 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                         children: "LIVE CASH IN HAND"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                        lineNumber: 397,
+                                        lineNumber: 602,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -782,13 +1359,13 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                         children: "👛"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                        lineNumber: 398,
+                                        lineNumber: 603,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/DashboardView.jsx",
-                                lineNumber: 396,
+                                lineNumber: 601,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -799,7 +1376,7 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                 children: (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$utils$2f$formatters$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["formatCurrency"])(metrics.cashInHand, hideAmounts)
                             }, void 0, false, {
                                 fileName: "[project]/src/components/DashboardView.jsx",
-                                lineNumber: 402,
+                                lineNumber: 607,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -809,7 +1386,7 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                         children: "↑"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                        lineNumber: 406,
+                                        lineNumber: 611,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -819,19 +1396,19 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                        lineNumber: 407,
+                                        lineNumber: 612,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/DashboardView.jsx",
-                                lineNumber: 405,
+                                lineNumber: 610,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/DashboardView.jsx",
-                        lineNumber: 395,
+                        lineNumber: 600,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -850,7 +1427,7 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                         children: "PRODUCTS IN STOCK"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                        lineNumber: 419,
+                                        lineNumber: 624,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -862,13 +1439,13 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                         children: "📦"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                        lineNumber: 420,
+                                        lineNumber: 625,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/DashboardView.jsx",
-                                lineNumber: 418,
+                                lineNumber: 623,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -880,7 +1457,7 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/DashboardView.jsx",
-                                lineNumber: 424,
+                                lineNumber: 629,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -895,24 +1472,24 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/DashboardView.jsx",
-                                    lineNumber: 428,
+                                    lineNumber: 633,
                                     columnNumber: 13
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/components/DashboardView.jsx",
-                                lineNumber: 427,
+                                lineNumber: 632,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/DashboardView.jsx",
-                        lineNumber: 412,
+                        lineNumber: 617,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/DashboardView.jsx",
-                lineNumber: 359,
+                lineNumber: 564,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -949,7 +1526,7 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                         children: "🌾 Farmer Khata Receivables"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                        lineNumber: 457,
+                                        lineNumber: 662,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -962,7 +1539,7 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                         children: (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$utils$2f$formatters$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["formatCurrency"])(totalFarmerBalance, hideAmounts)
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                        lineNumber: 460,
+                                        lineNumber: 665,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -973,13 +1550,13 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                         children: "Outstanding recovery"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                        lineNumber: 463,
+                                        lineNumber: 668,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/DashboardView.jsx",
-                                lineNumber: 456,
+                                lineNumber: 661,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -989,13 +1566,13 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                 children: "›"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/DashboardView.jsx",
-                                lineNumber: 465,
+                                lineNumber: 670,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/DashboardView.jsx",
-                        lineNumber: 442,
+                        lineNumber: 647,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1024,7 +1601,7 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                         children: "🏭 Company Payables"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                        lineNumber: 483,
+                                        lineNumber: 688,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1037,7 +1614,7 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                         children: (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$utils$2f$formatters$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["formatCurrency"])(totalSupplierBalance, hideAmounts)
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                        lineNumber: 486,
+                                        lineNumber: 691,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1048,13 +1625,13 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                         children: "Due to FFC, Engro, etc."
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                        lineNumber: 489,
+                                        lineNumber: 694,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/DashboardView.jsx",
-                                lineNumber: 482,
+                                lineNumber: 687,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1064,13 +1641,13 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                 children: "›"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/DashboardView.jsx",
-                                lineNumber: 491,
+                                lineNumber: 696,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/DashboardView.jsx",
-                        lineNumber: 468,
+                        lineNumber: 673,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1099,7 +1676,7 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                         children: "📦 Amanat Custody Held"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                        lineNumber: 509,
+                                        lineNumber: 714,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1115,7 +1692,7 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                        lineNumber: 512,
+                                        lineNumber: 717,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1126,13 +1703,13 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                         children: "Held for farmers in godown"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                        lineNumber: 515,
+                                        lineNumber: 720,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/DashboardView.jsx",
-                                lineNumber: 508,
+                                lineNumber: 713,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1142,13 +1719,13 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                 children: "›"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/DashboardView.jsx",
-                                lineNumber: 517,
+                                lineNumber: 722,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/DashboardView.jsx",
-                        lineNumber: 494,
+                        lineNumber: 699,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1177,7 +1754,7 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                         children: "📝 Scratchpad Temp Khata"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                        lineNumber: 535,
+                                        lineNumber: 740,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1195,7 +1772,7 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                        lineNumber: 538,
+                                        lineNumber: 743,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1206,13 +1783,13 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                         children: "Awaiting ledger posting"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                        lineNumber: 541,
+                                        lineNumber: 746,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/DashboardView.jsx",
-                                lineNumber: 534,
+                                lineNumber: 739,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1222,19 +1799,19 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                 children: "›"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/DashboardView.jsx",
-                                lineNumber: 543,
+                                lineNumber: 748,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/DashboardView.jsx",
-                        lineNumber: 520,
+                        lineNumber: 725,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/DashboardView.jsx",
-                lineNumber: 434,
+                lineNumber: 639,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1257,20 +1834,20 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                                         }
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                                        lineNumber: 554,
+                                                        lineNumber: 759,
                                                         columnNumber: 17
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                         children: "Sales & Profit Performance"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                                        lineNumber: 555,
+                                                        lineNumber: 760,
                                                         columnNumber: 17
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/DashboardView.jsx",
-                                                lineNumber: 553,
+                                                lineNumber: 758,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1289,13 +1866,13 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/DashboardView.jsx",
-                                                lineNumber: 557,
+                                                lineNumber: 762,
                                                 columnNumber: 15
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                        lineNumber: 552,
+                                        lineNumber: 757,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1311,7 +1888,7 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                                         children: "Sales (Rs)"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                                        lineNumber: 565,
+                                                        lineNumber: 770,
                                                         columnNumber: 17
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1321,13 +1898,13 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                                         children: "Profit (Rs)"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                                        lineNumber: 572,
+                                                        lineNumber: 777,
                                                         columnNumber: 17
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/DashboardView.jsx",
-                                                lineNumber: 564,
+                                                lineNumber: 769,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1340,7 +1917,7 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                                         children: "7 Days"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                                        lineNumber: 583,
+                                                        lineNumber: 788,
                                                         columnNumber: 17
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1350,7 +1927,7 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                                         children: "Month"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                                        lineNumber: 590,
+                                                        lineNumber: 795,
                                                         columnNumber: 17
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1360,25 +1937,25 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                                         children: "Year"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                                        lineNumber: 597,
+                                                        lineNumber: 802,
                                                         columnNumber: 17
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/DashboardView.jsx",
-                                                lineNumber: 582,
+                                                lineNumber: 787,
                                                 columnNumber: 15
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                        lineNumber: 562,
+                                        lineNumber: 767,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/DashboardView.jsx",
-                                lineNumber: 551,
+                                lineNumber: 756,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1431,7 +2008,7 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                                         children: val > 0 ? val >= 1000 ? `${(val / 1000).toFixed(0)}k` : val : '-'
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                                        lineNumber: 627,
+                                                        lineNumber: 832,
                                                         columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1449,7 +2026,7 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                                         title: `${d.label} (${d.dateLabel || d.dateStr}):\nSales: ${(0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$utils$2f$formatters$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["formatCurrency"])(d.sales)}\nProfit: ${(0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$utils$2f$formatters$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["formatCurrency"])(d.profit)}\nInvoices: ${d.invoicesCount}\nClick to inspect sales on this date`
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                                        lineNumber: 630,
+                                                        lineNumber: 835,
                                                         columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1463,19 +2040,19 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                                         children: d.label
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                                        lineNumber: 646,
+                                                        lineNumber: 851,
                                                         columnNumber: 21
                                                     }, this)
                                                 ]
                                             }, idx, true, {
                                                 fileName: "[project]/src/components/DashboardView.jsx",
-                                                lineNumber: 617,
+                                                lineNumber: 822,
                                                 columnNumber: 19
                                             }, this);
                                         })
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                        lineNumber: 610,
+                                        lineNumber: 815,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1497,13 +2074,13 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                                                 children: (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$utils$2f$formatters$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["formatCurrency"])(totalChartSales, hideAmounts)
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/DashboardView.jsx",
-                                                                lineNumber: 665,
+                                                                lineNumber: 870,
                                                                 columnNumber: 43
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                                        lineNumber: 665,
+                                                        lineNumber: 870,
                                                         columnNumber: 17
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1513,7 +2090,7 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                                         children: "•"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                                        lineNumber: 666,
+                                                        lineNumber: 871,
                                                         columnNumber: 17
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1526,19 +2103,19 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                                                 children: (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$utils$2f$formatters$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["formatCurrency"])(totalChartProfit, hideAmounts)
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/DashboardView.jsx",
-                                                                lineNumber: 667,
+                                                                lineNumber: 872,
                                                                 columnNumber: 37
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                                        lineNumber: 667,
+                                                        lineNumber: 872,
                                                         columnNumber: 17
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/DashboardView.jsx",
-                                                lineNumber: 664,
+                                                lineNumber: 869,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1564,14 +2141,14 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                                                 }
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/DashboardView.jsx",
-                                                                lineNumber: 671,
+                                                                lineNumber: 876,
                                                                 columnNumber: 19
                                                             }, this),
                                                             "Current / Selected"
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                                        lineNumber: 670,
+                                                        lineNumber: 875,
                                                         columnNumber: 17
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1591,38 +2168,38 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                                                 }
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/DashboardView.jsx",
-                                                                lineNumber: 675,
+                                                                lineNumber: 880,
                                                                 columnNumber: 19
                                                             }, this),
                                                             "Past Days"
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                                        lineNumber: 674,
+                                                        lineNumber: 879,
                                                         columnNumber: 17
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/DashboardView.jsx",
-                                                lineNumber: 669,
+                                                lineNumber: 874,
                                                 columnNumber: 15
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                        lineNumber: 663,
+                                        lineNumber: 868,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/DashboardView.jsx",
-                                lineNumber: 609,
+                                lineNumber: 814,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/DashboardView.jsx",
-                        lineNumber: 550,
+                        lineNumber: 755,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1640,7 +2217,7 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                                         children: "🕒"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                                        lineNumber: 688,
+                                                        lineNumber: 893,
                                                         columnNumber: 17
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1652,13 +2229,13 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                                        lineNumber: 689,
+                                                        lineNumber: 894,
                                                         columnNumber: 17
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/DashboardView.jsx",
-                                                lineNumber: 687,
+                                                lineNumber: 892,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1673,13 +2250,13 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/DashboardView.jsx",
-                                                lineNumber: 691,
+                                                lineNumber: 896,
                                                 columnNumber: 15
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                        lineNumber: 686,
+                                        lineNumber: 891,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1703,7 +2280,7 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                                         children: "All"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                                        lineNumber: 699,
+                                                        lineNumber: 904,
                                                         columnNumber: 17
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1717,7 +2294,7 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                                         children: "Cash"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                                        lineNumber: 707,
+                                                        lineNumber: 912,
                                                         columnNumber: 17
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1731,13 +2308,13 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                                         children: "Ledger"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                                        lineNumber: 715,
+                                                        lineNumber: 920,
                                                         columnNumber: 17
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/DashboardView.jsx",
-                                                lineNumber: 698,
+                                                lineNumber: 903,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1752,24 +2329,24 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                                     children: "View all"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/DashboardView.jsx",
-                                                    lineNumber: 731,
+                                                    lineNumber: 936,
                                                     columnNumber: 17
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/DashboardView.jsx",
-                                                lineNumber: 725,
+                                                lineNumber: 930,
                                                 columnNumber: 15
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                        lineNumber: 696,
+                                        lineNumber: 901,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/DashboardView.jsx",
-                                lineNumber: 685,
+                                lineNumber: 890,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1789,12 +2366,12 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                     }
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/DashboardView.jsx",
-                                    lineNumber: 738,
+                                    lineNumber: 943,
                                     columnNumber: 13
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/components/DashboardView.jsx",
-                                lineNumber: 737,
+                                lineNumber: 942,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1812,53 +2389,53 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                                         children: "CUSTOMER ↑"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                                        lineNumber: 753,
+                                                        lineNumber: 958,
                                                         columnNumber: 19
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
                                                         children: "TIME ↑"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                                        lineNumber: 754,
+                                                        lineNumber: 959,
                                                         columnNumber: 19
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
                                                         children: "PRODUCT ↑"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                                        lineNumber: 755,
+                                                        lineNumber: 960,
                                                         columnNumber: 19
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
                                                         children: "QTY ↑"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                                        lineNumber: 756,
+                                                        lineNumber: 961,
                                                         columnNumber: 19
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
                                                         children: "AMOUNT ↑"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                                        lineNumber: 757,
+                                                        lineNumber: 962,
                                                         columnNumber: 19
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
                                                         children: "ACTIONS"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/DashboardView.jsx",
-                                                        lineNumber: 758,
+                                                        lineNumber: 963,
                                                         columnNumber: 19
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/DashboardView.jsx",
-                                                lineNumber: 752,
+                                                lineNumber: 957,
                                                 columnNumber: 17
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/DashboardView.jsx",
-                                            lineNumber: 751,
+                                            lineNumber: 956,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tbody", {
@@ -1879,7 +2456,7 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/components/DashboardView.jsx",
-                                                            lineNumber: 765,
+                                                            lineNumber: 970,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1894,18 +2471,18 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                                             children: "🛒 + Start New Sale Now (F1)"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/DashboardView.jsx",
-                                                            lineNumber: 766,
+                                                            lineNumber: 971,
                                                             columnNumber: 23
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/DashboardView.jsx",
-                                                    lineNumber: 764,
+                                                    lineNumber: 969,
                                                     columnNumber: 21
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/DashboardView.jsx",
-                                                lineNumber: 763,
+                                                lineNumber: 968,
                                                 columnNumber: 19
                                             }, this) : filteredSalesList.map((sale)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
                                                     children: [
@@ -1918,7 +2495,7 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                                                     children: sale.customerName
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/DashboardView.jsx",
-                                                                    lineNumber: 780,
+                                                                    lineNumber: 985,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1932,13 +2509,13 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                                                     children: sale.paymentType
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/DashboardView.jsx",
-                                                                    lineNumber: 781,
+                                                                    lineNumber: 986,
                                                                     columnNumber: 25
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/components/DashboardView.jsx",
-                                                            lineNumber: 779,
+                                                            lineNumber: 984,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -1954,7 +2531,7 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                                                     })
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/DashboardView.jsx",
-                                                                    lineNumber: 789,
+                                                                    lineNumber: 994,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1965,13 +2542,13 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                                                     children: (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$utils$2f$formatters$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["formatDateShort"])(sale.date)
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/DashboardView.jsx",
-                                                                    lineNumber: 790,
+                                                                    lineNumber: 995,
                                                                     columnNumber: 25
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/components/DashboardView.jsx",
-                                                            lineNumber: 788,
+                                                            lineNumber: 993,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -1985,12 +2562,12 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/components/DashboardView.jsx",
-                                                                lineNumber: 793,
+                                                                lineNumber: 998,
                                                                 columnNumber: 25
                                                             }, this)
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/DashboardView.jsx",
-                                                            lineNumber: 792,
+                                                            lineNumber: 997,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -2003,12 +2580,12 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/components/DashboardView.jsx",
-                                                                lineNumber: 799,
+                                                                lineNumber: 1004,
                                                                 columnNumber: 25
                                                             }, this)
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/DashboardView.jsx",
-                                                            lineNumber: 798,
+                                                            lineNumber: 1003,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -2018,7 +2595,7 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                                             children: (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$utils$2f$formatters$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["formatCurrency"])(sale.grandTotal, hideAmounts)
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/DashboardView.jsx",
-                                                            lineNumber: 803,
+                                                            lineNumber: 1008,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -2030,56 +2607,56 @@ function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
                                                                 children: "👁️"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/DashboardView.jsx",
-                                                                lineNumber: 807,
+                                                                lineNumber: 1012,
                                                                 columnNumber: 25
                                                             }, this)
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/DashboardView.jsx",
-                                                            lineNumber: 806,
+                                                            lineNumber: 1011,
                                                             columnNumber: 23
                                                         }, this)
                                                     ]
                                                 }, sale.id, true, {
                                                     fileName: "[project]/src/components/DashboardView.jsx",
-                                                    lineNumber: 778,
+                                                    lineNumber: 983,
                                                     columnNumber: 21
                                                 }, this))
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/DashboardView.jsx",
-                                            lineNumber: 761,
+                                            lineNumber: 966,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/DashboardView.jsx",
-                                    lineNumber: 750,
+                                    lineNumber: 955,
                                     columnNumber: 13
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/components/DashboardView.jsx",
-                                lineNumber: 749,
+                                lineNumber: 954,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/DashboardView.jsx",
-                        lineNumber: 684,
+                        lineNumber: 889,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/DashboardView.jsx",
-                lineNumber: 548,
+                lineNumber: 753,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/DashboardView.jsx",
-        lineNumber: 262,
+        lineNumber: 264,
         columnNumber: 5
     }, this);
 }
-_s(DashboardView, "q69velaB+FhJqI/yqYEqw+kquQs=", false, function() {
+_s(DashboardView, "4LyVusaDxDPG+q3qxzIB1a1/iJ0=", false, function() {
     return [
         __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$context$2f$AppContext$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useApp"]
     ];

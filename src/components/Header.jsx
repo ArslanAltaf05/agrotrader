@@ -5,18 +5,16 @@ import { useApp } from '../context/AppContext';
 import { icons } from '../utils/icons';
 import { formatDate, formatTime } from '../utils/formatters';
 
-export default function Header({ onToggleMobileMenu }) {
+export default function Header({ onToggleMobileMenu, onOpenDownloadApp, onOpenExpiryAlert }) {
   const {
     activeTab,
     setActiveTab,
+    criticalExpiryProducts,
     hideAmounts,
     toggleHideAmounts,
     theme,
     setTheme,
     storeProfile,
-    activeBranchId,
-    switchBranch,
-    branches,
     saasPlan,
     auth,
     logout,
@@ -51,30 +49,40 @@ export default function Header({ onToggleMobileMenu }) {
 
   return (
     <>
-      {/* SaaS Multi-Branch & Realtime Cloud Bar */}
+      {/* SaaS Status & Realtime Cloud Bar */}
       <div className="saas-top-strip">
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
           <div className="saas-badge-plan">
             <span>🌾</span>
-            <span>{saasPlan.name} ({saasPlan.expiresInDays}d)</span>
-          </div>
-          <div className="saas-branch-selector">
-            <label style={{ fontSize: '11px', color: '#94a3b8' }}>Branch:</label>
-            <select
-              className="branch-select-input"
-              value={activeBranchId}
-              onChange={(e) => switchBranch(e.target.value)}
-            >
-              {branches.map(b => (
-                <option key={b.id} value={b.id}>
-                  {b.name} {b.isMain ? '★' : ''}
-                </option>
-              ))}
-            </select>
+            <span>{storeProfile.name || 'AgroTrader Pro'} ({saasPlan.name})</span>
           </div>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+          {/* Download App / Software Hub */}
+          <button
+            type="button"
+            className="btn btn-sm"
+            style={{
+              fontSize: '11px',
+              padding: '3px 8px',
+              background: 'rgba(59, 130, 246, 0.2)',
+              color: '#93c5fd',
+              border: '1px solid rgba(59, 130, 246, 0.4)',
+              fontWeight: 700,
+              borderRadius: '4px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px'
+            }}
+            onClick={onOpenDownloadApp}
+            title="Download AgroTrader Desktop ERP (.EXE) or Mobile POS (.APK)"
+          >
+            <span>💻</span>
+            <span>Download Software</span>
+          </button>
+
           {(auth.user?.role === 'superadmin' || impersonatingTenant) && (
             <button
               type="button"
@@ -96,13 +104,44 @@ export default function Header({ onToggleMobileMenu }) {
             </button>
           )}
 
-          <div className="cloud-sync-status">
-            <span className="cloud-sync-pulse" />
-            <span className="cloud-sync-text">Cloud Sync</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <span className={`badge ${auth.user?.role === 'superadmin' ? 'badge-warning' : 'badge-info'}`} style={{ textTransform: 'capitalize', fontSize: '10.5px', padding: '2px 6px' }}>
-              {auth.user?.role || 'admin'}
+          {criticalExpiryProducts && criticalExpiryProducts.length > 0 && (
+            <button
+              type="button"
+              className="btn btn-sm"
+              style={{
+                fontSize: '11px',
+                padding: '3px 8px',
+                background: 'rgba(239, 68, 68, 0.22)',
+                color: '#fca5a5',
+                border: '1px solid rgba(239, 68, 68, 0.5)',
+                fontWeight: 700,
+                borderRadius: '4px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px'
+              }}
+              onClick={onOpenExpiryAlert}
+              title={`${criticalExpiryProducts.length} product(s) expiring within 7 days or expired! Click to inspect.`}
+            >
+              <span>⚠️</span>
+              <span>{criticalExpiryProducts.length} Expiring (≤ 7d)</span>
+            </button>
+          )}
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span
+              className={`badge ${auth.user?.role === 'superadmin' ? 'badge-warning' : auth.user?.role === 'staff' ? 'badge-accent' : 'badge-info'}`}
+              style={{ fontSize: '11px', padding: '3px 8px', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 700 }}
+            >
+              <span>{auth.user?.role === 'superadmin' ? '🛡️' : auth.user?.role === 'staff' ? '👤' : '👑'}</span>
+              <span>
+                {auth.user?.role === 'superadmin'
+                  ? 'Master SuperAdmin'
+                  : auth.user?.role === 'staff'
+                  ? `Staff (${auth.user?.branchName || 'Counter'})`
+                  : 'Admin Manager'}
+              </span>
             </span>
           </div>
         </div>
@@ -171,11 +210,13 @@ export default function Header({ onToggleMobileMenu }) {
           {/* User profile / Logout */}
           <button
             type="button"
-            className="btn btn-outline btn-icon-only"
+            className="btn btn-outline"
+            style={{ fontSize: '12px', padding: '5px 10px', display: 'flex', alignItems: 'center', gap: '6px' }}
             onClick={logout}
-            title="Logout"
+            title="Logout &amp; Switch Account"
           >
             <span dangerouslySetInnerHTML={{ __html: icons.logout }} />
+            <span>Logout</span>
           </button>
         </div>
       </header>

@@ -4,15 +4,33 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { icons } from '../utils/icons';
 
+// Auto-detect role from username — no manual tab switching
+function detectRoleFromUsername(username) {
+  const u = (username || '').trim().toLowerCase();
+  if (u === 'superadmin' || u.startsWith('superadmin_')) return 'superadmin';
+  if (u === 'staff' || u.startsWith('staff_') || u.startsWith('counter_')) return 'staff';
+  return 'admin';
+}
+
+const ROLE_META = {
+  admin: { label: 'Admin', icon: '👑', badge: 'badge-info', desc: 'Enter your admin credentials to access the store portal.' },
+  staff: { label: 'Staff', icon: '👤', badge: 'badge-accent', desc: 'Enter your staff credentials to access the counter terminal.' },
+  superadmin: { label: 'Super Admin', icon: '🛡️', badge: 'badge-warning', desc: 'Master administrator access to manage all SaaS dealer stores.' },
+};
+
 export default function LoginView() {
   const { login, storeProfile, resetPin } = useApp();
 
-  const [role, setRole] = useState('admin'); // 'admin' | 'staff' | 'superadmin'
-  const [username, setUsername] = useState('admin');
-  const [pin, setPin] = useState('1234');
+  const [username, setUsername] = useState('');
+  const [pin, setPin] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [showForgotModal, setShowForgotModal] = useState(false);
   const [newResetPin, setNewResetPin] = useState('');
+  const [masterRecoveryKey, setMasterRecoveryKey] = useState('');
+
+  // Role is derived purely from username — no state needed
+  const role = detectRoleFromUsername(username);
+  const meta = ROLE_META[role];
 
   const handleLoginSubmit = (e) => {
     e.preventDefault();
@@ -25,27 +43,41 @@ export default function LoginView() {
 
   const handleResetSubmit = (e) => {
     e.preventDefault();
+    if (role === 'staff') {
+      alert('Staff PIN cannot be reset from the login terminal. Please ask your Store Administrator to update Staff PIN in Settings.');
+      setShowForgotModal(false);
+      return;
+    }
+
     if (!newResetPin.trim() || newResetPin.length < 4) {
       alert('Please enter at least 4 digits for PIN.');
       return;
     }
-    resetPin(newResetPin, role);
+
+    const res = resetPin(newResetPin, role, masterRecoveryKey);
+    if (res && !res.success) {
+      alert(res.message);
+      return;
+    }
+
     setPin(newResetPin);
     setShowForgotModal(false);
+    setMasterRecoveryKey('');
+    setNewResetPin('');
     alert(`PIN successfully reset to ${newResetPin}!`);
   };
 
   return (
     <div className="login-wrapper">
-      {/* Left Hero Banner matching Screenshot 1 & 3 */}
+      {/* Left Hero Banner */}
       <div className="login-left-hero">
         <div className="login-hero-header">
           <div className="login-hero-logo">
             <span dangerouslySetInnerHTML={{ __html: icons.leaf }} />
           </div>
           <div>
-            <h2 style={{ fontSize: '18px', fontWeight: 800 }}>{storeProfile.name}</h2>
-            <p style={{ fontSize: '12px', opacity: 0.9 }}>{storeProfile.subtitle}</p>
+            <h2 style={{ fontSize: '18px', fontWeight: 800 }}>Agro Trader SaaS</h2>
+            <p style={{ fontSize: '12px', opacity: 0.9 }}>The complete solution for agro business management</p>
           </div>
         </div>
 
@@ -61,76 +93,36 @@ export default function LoginView() {
             🌾
           </div>
           <div style={{ fontSize: '12px' }}>
-            <div style={{ fontWeight: 700 }}>AgriSol SaaS Pro</div>
-            <div style={{ opacity: 0.85 }}>Website: {storeProfile.website} &bull; Phone: {storeProfile.phone}</div>
+            <div style={{ fontWeight: 700 }}>Agro Trader</div>
+            <div style={{ opacity: 0.85 }}>Phone: 0312-5236040</div>
           </div>
         </div>
       </div>
 
-      {/* Right Login Panel matching Screenshot 1 & 3 */}
+      {/* Right Login Panel */}
       <div className="login-right-panel">
         <div className="login-card">
-          {/* Header store badge */}
+
+          {/* Store Header */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
-            <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: role === 'superadmin' ? 'linear-gradient(135deg, #1e3a8a 0%, #d97706 100%)' : 'var(--primary-light)', color: role === 'superadmin' ? '#fff' : 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px' }}>
-              {role === 'superadmin' ? '🛡️' : <span dangerouslySetInnerHTML={{ __html: icons.lock }} />}
-            </div>
+            <span dangerouslySetInnerHTML={{ __html: icons.lock }} />
             <div>
-              <div style={{ fontWeight: 700, fontSize: '14px' }}>
-                {role === 'superadmin' ? 'AgriSol SaaS Master Portal' : storeProfile.name}
-              </div>
-              <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                {role === 'superadmin' ? 'Cloud Multi-Tenant Management' : storeProfile.subtitle}
-              </div>
+              <div style={{ fontWeight: 700, fontSize: '14px' }}>Agr  Trader SaaS</div>
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>The complete solution for agro business management</div>
             </div>
           </div>
 
-          {/* Role Switch Tabs */}
-          <div className="login-role-tabs">
-            <div
-              className={`login-role-tab ${role === 'admin' ? 'active' : ''}`}
-              onClick={() => {
-                setRole('admin');
-                setUsername('admin');
-                setPin('1234');
-                setErrorMsg('');
-              }}
-            >
-              Admin PIN
-            </div>
-            <div
-              className={`login-role-tab ${role === 'staff' ? 'active' : ''}`}
-              onClick={() => {
-                setRole('staff');
-                setUsername('staff');
-                setPin('0000');
-                setErrorMsg('');
-              }}
-            >
-              Staff
-            </div>
-            <div
-              className={`login-role-tab ${role === 'superadmin' ? 'active' : ''}`}
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
-              onClick={() => {
-                setRole('superadmin');
-                setUsername('superadmin');
-                setPin('9999');
-                setErrorMsg('');
-              }}
-            >
-              <span>🛡️</span>
-              <span>Super Admin</span>
-            </div>
+          {/* Auto-detected Role Badge */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
+
+
           </div>
 
-          <h3 style={{ fontSize: '20px', fontWeight: 800, marginBottom: '6px' }}>
-            {role === 'superadmin' ? 'Super Admin Portal' : role === 'admin' ? 'Admin Login' : 'Staff Login'}
+          <h3 style={{ fontSize: '20px', fontWeight: 800, marginBottom: '4px' }}>
+            {meta.label === 'Super Admin' ? 'Super Admin Portal' : `${meta.label} Login`}
           </h3>
           <p style={{ fontSize: '12.5px', color: 'var(--text-muted)', marginBottom: '18px' }}>
-            {role === 'superadmin'
-              ? 'Master administrator access to manage all SaaS dealer stores.'
-              : `Enter your ${role} credentials to access this terminal.`}
+            {meta.desc}
           </p>
 
           {errorMsg && (
@@ -149,9 +141,13 @@ export default function LoginView() {
                   className="input"
                   style={{ paddingLeft: '36px' }}
                   value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="e.g. store_username, admin, or staff"
+                  onChange={(e) => { setUsername(e.target.value); setErrorMsg(''); }}
                   required
                 />
+              </div>
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>
+                Enter your registered store username, admin, or counter staff
               </div>
             </div>
 
@@ -176,37 +172,9 @@ export default function LoginView() {
               className="btn btn-primary"
               style={{ width: '100%', padding: '12px', fontSize: '14px', fontWeight: 700 }}
             >
-              <span>&rarr; Login as {role === 'superadmin' ? 'Super Admin' : role}</span>
+              <span>&rarr; Login as {meta.label}</span>
             </button>
           </form>
-
-          {/* Quick Fill Demo Helper */}
-          <div style={{ marginTop: '16px', display: 'flex', gap: '6px' }}>
-            <button
-              type="button"
-              className="btn btn-outline"
-              style={{ flex: 1, fontSize: '10.5px', padding: '6px 4px' }}
-              onClick={() => { setRole('admin'); setUsername('admin'); setPin('1234'); }}
-            >
-              Admin (1234)
-            </button>
-            <button
-              type="button"
-              className="btn btn-outline"
-              style={{ flex: 1, fontSize: '10.5px', padding: '6px 4px' }}
-              onClick={() => { setRole('staff'); setUsername('staff'); setPin('0000'); }}
-            >
-              Staff (0000)
-            </button>
-            <button
-              type="button"
-              className="btn btn-outline"
-              style={{ flex: 1.2, fontSize: '10.5px', padding: '6px 4px', borderColor: '#d97706', color: '#b45309', fontWeight: 700 }}
-              onClick={() => { setRole('superadmin'); setUsername('superadmin'); setPin('9999'); }}
-            >
-              🛡️ Super (9999)
-            </button>
-          </div>
 
           <div style={{ textAlign: 'center', marginTop: '20px' }}>
             <button
@@ -214,7 +182,7 @@ export default function LoginView() {
               style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '12px', textDecoration: 'underline', cursor: 'pointer' }}
               onClick={() => setShowForgotModal(true)}
             >
-              Forgot PIN? Reset on this device
+              Forgot PIN? Security recovery
             </button>
           </div>
         </div>
@@ -223,34 +191,61 @@ export default function LoginView() {
       {/* Forgot PIN Modal */}
       {showForgotModal && (
         <div className="modal-overlay active">
-          <div className="modal-dialog" style={{ maxWidth: '420px' }}>
+          <div className="modal-dialog" style={{ maxWidth: '440px' }}>
             <div className="modal-header">
-              <h3 className="modal-title">Device Security &bull; Reset PIN</h3>
+              <h3 className="modal-title">Device Security &bull; PIN Recovery</h3>
               <button type="button" className="modal-close-btn" onClick={() => setShowForgotModal(false)}>&times;</button>
             </div>
-            <form onSubmit={handleResetSubmit}>
-              <div className="modal-body">
-                <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '14px' }}>
-                  Since this software is running on your authorized store terminal, you can reset the master {role} PIN here.
+            {role === 'staff' ? (
+              <div className="modal-body" style={{ textAlign: 'center', padding: '24px 16px' }}>
+                <span style={{ fontSize: '40px' }}>🛡️</span>
+                <h4 style={{ fontSize: '16px', fontWeight: 700, margin: '12px 0 8px' }}>Staff PIN Managed by Admin</h4>
+                <p style={{ fontSize: '13px', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                  Under Role Isolation Middleware, counter staff PINs cannot be changed from the login terminal.
+                  Please ask your Store Administrator to reset or assign your PIN inside <b>Settings &bull; Security &amp; Permissions</b>.
                 </p>
-                <div className="input-group">
-                  <label className="input-label">New 4-digit PIN</label>
-                  <input
-                    type="password"
-                    maxLength={6}
-                    className="input"
-                    placeholder="e.g. 5566"
-                    value={newResetPin}
-                    onChange={(e) => setNewResetPin(e.target.value)}
-                    required
-                  />
+                <div style={{ marginTop: '20px' }}>
+                  <button type="button" className="btn btn-primary" onClick={() => setShowForgotModal(false)}>
+                    Understood
+                  </button>
                 </div>
               </div>
-              <div className="modal-footer">
-                <button type="button" className="btn btn-outline" onClick={() => setShowForgotModal(false)}>Cancel</button>
-                <button type="submit" className="btn btn-primary">Save New PIN</button>
-              </div>
-            </form>
+            ) : (
+              <form onSubmit={handleResetSubmit}>
+                <div className="modal-body">
+                  <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '14px', lineHeight: 1.4 }}>
+                    To reset the master {role} PIN, please provide the store Master Recovery Key or registered Store NTN.
+                  </p>
+                  <div className="input-group" style={{ marginBottom: '14px' }}>
+                    <label className="input-label">Master Recovery Key or Store NTN</label>
+                    <input
+                      type="text"
+                      className="input"
+                      placeholder="e.g. "
+                      value={masterRecoveryKey}
+                      onChange={(e) => setMasterRecoveryKey(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="input-group">
+                    <label className="input-label">New 4-digit PIN</label>
+                    <input
+                      type="password"
+                      maxLength={6}
+                      className="input"
+                      placeholder="e.g. 5566"
+                      value={newResetPin}
+                      onChange={(e) => setNewResetPin(e.target.value)}
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="modal-footer">
+                  <button type="button" className="btn btn-outline" onClick={() => setShowForgotModal(false)}>Cancel</button>
+                  <button type="submit" className="btn btn-primary">Verify &amp; Reset PIN</button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       )}
