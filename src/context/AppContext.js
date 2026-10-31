@@ -2,6 +2,14 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { saveToNeon, loadFromNeon, isNeonConfigured } from '../lib/db';
+import {
+  getLocalProducts,
+  saveLocalProduct,
+  deleteLocalProduct,
+  saveLocalProductsBatch,
+  generateProductId
+} from '../lib/offlineStorage';
+import { flushQueue, pullLatestFromServer, syncProductsFull } from '../lib/syncQueue';
 
 const STORAGE_KEY = 'agrotrader_live_production_v1';
 
@@ -383,16 +391,35 @@ export function AppProvider({ children }) {
   };
 
   const syncWithCloud = async (isAuto = false) => {
+    try {
+      const syncedProducts = await syncProductsFull();
+      if (Array.isArray(syncedProducts) && syncedProducts.length > 0) {
+        setProducts(syncedProducts);
+      }
+    } catch (e) {
+      console.warn('[SyncQueue] Product sync error:', e);
+    }
     return pushToCloud(isAuto);
   };
 
-  // Automated Internet Connection & Online/Offline Listener
+  // Automated Internet Connection & Online/Offline Listener + 30s Periodic Sync
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    const handleOnline = () => {
+    const handleOnline = async () => {
       setIsOnline(true);
       addLog('Network Status', 'Internet connection restored - synchronizing offline database with cloud');
+      showToast('🌐 Internet Connected: Syncing offline changes to Neon...', 'info');
+
+      try {
+        const syncedProducts = await syncProductsFull();
+        if (Array.isArray(syncedProducts) && syncedProducts.length > 0) {
+          setProducts(syncedProducts);
+          showToast('☁️ Products synchronized with Neon Database!', 'success');
+        }
+      } catch (err) {
+        console.warn('Sync on online error:', err);
+      }
       syncWithCloud(true);
     };
 
@@ -406,16 +433,23 @@ export function AppProvider({ children }) {
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
 
-    // Initial check on mount: if online, sync with cloud
+    // Initial check on mount: flush queue and sync
     if (navigator.onLine) {
+      flushQueue();
       syncWithCloud(true);
     } else {
       setCloudConfig(prev => ({ ...prev, syncStatus: 'offline' }));
     }
 
+    // Periodic 30-second retry to push any pending writes
+    const syncInterval = setInterval(() => {
+      flushQueue();
+    }, 30000);
+
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
+      clearInterval(syncInterval);
     };
   }, []);
 
@@ -501,12 +535,49 @@ export function AppProvider({ children }) {
       setIsLoaded(true);
     }
 
-    // Pull latest data from Neon DB when online
+    // 1. Load products from IndexedDB immediately on startup (Offline-First)
+    getLocalProducts().then(async (local) => {
+      if (local && local.length > 0) {
+        setProducts(local);
+        console.log(`[AppContext] Loaded ${local.length} products from IndexedDB.`);
+      } else {
+        // If IndexedDB is empty on first install, seed it from initial products
+        const savedStr = typeof localStorage !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null;
+        const parsed = savedStr ? JSON.parse(savedStr) : null;
+        const initialList = (parsed && Array.isArray(parsed.products) && parsed.products.length > 0)
+          ? parsed.products
+          : INITIAL_PRODUCTS;
+
+        await saveLocalProductsBatch(initialList.map(p => ({ ...p, synced: false })));
+        setProducts(initialList);
+        console.log(`[AppContext] Seeded IndexedDB with ${initialList.length} products.`);
+      }
+
+      // 2. If online, sync products with Neon (flush pending queue + pull server updates)
+      if (typeof navigator !== 'undefined' && navigator.onLine) {
+        syncProductsFull().then(synced => {
+          if (Array.isArray(synced) && synced.length > 0) {
+            setProducts(synced);
+            setCloudConfig(prev => ({
+              ...prev,
+              syncStatus: 'synced',
+              lastSyncTime: new Date().toISOString(),
+              isNeonConnected: true
+            }));
+          }
+        }).catch(err => {
+          console.warn('[AppContext] Neon products sync error:', err);
+        });
+      }
+    }).catch(err => {
+      console.warn('[AppContext] IndexedDB load error:', err);
+    });
+
+    // Pull legacy monolithic state from Neon DB when online
     if (typeof navigator !== 'undefined' && navigator.onLine) {
       loadFromNeon('tenant-1').then(remote => {
         if (remote && remote.success && remote.found && remote.data) {
           const d = remote.data;
-          if (Array.isArray(d.products) && d.products.length > 0) setProducts(d.products);
           if (Array.isArray(d.customers) && d.customers.length > 0) setCustomers(d.customers);
           if (Array.isArray(d.suppliers) && d.suppliers.length > 0) setSuppliers(d.suppliers);
           if (Array.isArray(d.sales) && d.sales.length > 0) setSales(d.sales);
@@ -1132,9 +1203,9 @@ export function AppProvider({ children }) {
     showToast(`Switched branch to ${b?.name || branchId}`, 'info');
   };
 
-  // Product Actions
+  // Product Actions (Offline-First via IndexedDB + Neon Sync Queue)
   const addProduct = (p) => {
-    const id = 'prod-' + Date.now();
+    const id = generateProductId();
     const newProd = {
       id,
       branchId: activeBranchId,
@@ -1157,9 +1228,18 @@ export function AppProvider({ children }) {
       alertQty: Number(p.alertQty) || 10,
       location: p.location || 'Godown Main',
       flags: p.flags || { active: true, narcotic: false, serialItem: false, keepRecord: true },
-      notes: p.notes || ''
+      notes: p.notes || '',
+      synced: false,
+      deleted: false,
+      updatedAt: new Date().toISOString()
     };
 
+    // 1. Write to IndexedDB FIRST
+    saveLocalProduct(newProd, false).catch(err => {
+      console.warn('[OfflineStorage] Error saving product to IndexedDB:', err);
+    });
+
+    // 2. Update UI state immediately
     setProducts(prev => [newProd, ...prev]);
     if (newProd.category && !categories.includes(newProd.category)) {
       setCategories(prev => [...prev, newProd.category]);
@@ -1168,12 +1248,45 @@ export function AppProvider({ children }) {
       setManufacturers(prev => [...prev, newProd.manufacturer]);
     }
     addLog('Add Product', `Added ${newProd.name} (SKU: ${newProd.sku})`);
-    showToast(`Product "${newProd.name}" added successfully!`, 'success');
+    showToast(`Product "${newProd.name}" saved!`, 'success');
+
+    // 3. Best-effort non-blocking sync to Neon
+    flushQueue().then(res => {
+      if (res && res.syncedCount > 0) {
+        setCloudConfig(prev => ({
+          ...prev,
+          syncStatus: 'synced',
+          lastSyncTime: new Date().toISOString(),
+          isNeonConnected: true
+        }));
+      }
+    });
+
     return newProd;
   };
 
   const updateProduct = (id, updated) => {
-    setProducts(prev => prev.map(p => p.id === id ? { ...p, ...updated } : p));
+    let updatedRecord = null;
+    setProducts(prev => prev.map(p => {
+      if (p.id === id) {
+        updatedRecord = {
+          ...p,
+          ...updated,
+          synced: false,
+          updatedAt: new Date().toISOString()
+        };
+        return updatedRecord;
+      }
+      return p;
+    }));
+
+    if (updatedRecord) {
+      saveLocalProduct(updatedRecord, false).catch(err => {
+        console.warn('[OfflineStorage] Error updating product in IndexedDB:', err);
+      });
+      flushQueue();
+    }
+
     addLog('Update Product', `Updated product ${id}`);
     showToast('Product updated successfully!', 'success');
   };
@@ -1185,23 +1298,53 @@ export function AppProvider({ children }) {
       return;
     }
     const prod = products.find(p => p.id === id);
+
+    // 1. Mark as tombstone in IndexedDB FIRST
+    deleteLocalProduct(id).catch(err => {
+      console.warn('[OfflineStorage] Error tombstoning product in IndexedDB:', err);
+    });
+
+    // 2. Remove from UI state immediately
     setProducts(prev => prev.filter(p => p.id !== id));
     addLog('Delete Product', `Deleted ${prod?.name || id}`);
     showToast('Product deleted', 'warning');
+
+    // 3. Push delete to Neon
+    flushQueue();
   };
 
   const transferStock = (id, fromLoc, toLoc, qty) => {
     const q = Number(qty) || 0;
     if (q <= 0) return false;
+    let updatedRecord = null;
     setProducts(prev => prev.map(p => {
       if (p.id !== id) return p;
+      let shopStock = p.shopStock;
+      let storeStock = p.storeStock;
       if (fromLoc === 'shop' && toLoc === 'store') {
-        return { ...p, shopStock: Math.max(0, p.shopStock - q), storeStock: p.storeStock + q };
+        shopStock = Math.max(0, p.shopStock - q);
+        storeStock = p.storeStock + q;
       } else if (fromLoc === 'store' && toLoc === 'shop') {
-        return { ...p, storeStock: Math.max(0, p.storeStock - q), shopStock: p.shopStock + q };
+        storeStock = Math.max(0, p.storeStock - q);
+        shopStock = p.shopStock + q;
       }
-      return p;
+      updatedRecord = {
+        ...p,
+        shopStock,
+        storeStock,
+        synced: false,
+        updatedAt: new Date().toISOString()
+      };
+      return updatedRecord;
     }));
+
+    if (updatedRecord) {
+      saveLocalProduct(updatedRecord, false).catch(err => {
+        console.warn('[OfflineStorage] Error saving transferred product to IndexedDB:', err);
+      });
+      flushQueue();
+    }
+
     addLog('Stock Transfer', `Moved ${q} units between ${fromLoc} and ${toLoc}`);
     showToast(`Transferred ${q} units successfully!`, 'success');
     return true;
@@ -1804,6 +1947,8 @@ export function AppProvider({ children }) {
         syncWithCloud,
         pushToCloud,
         pullFromCloud,
+        flushQueue,
+        syncProductsFull,
         purchases: purchases.filter(po => !po.branchId || po.branchId === activeBranchId),
         allPurchases: purchases,
         payments: branchPayments,
