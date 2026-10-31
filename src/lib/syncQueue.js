@@ -79,7 +79,7 @@ export async function flushAllQueues() {
       tempLedger: pendingTempLedger
     };
 
-    const res = await fetch('/api/sync', {
+    const res = await fetch('/api/sync/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
@@ -154,8 +154,8 @@ export async function pullAllFromServer() {
   if (typeof window === 'undefined') return null;
 
   try {
-    console.log('[SyncQueue] Pulling complete store dataset from Neon /api/sync...');
-    const res = await fetch('/api/sync');
+    console.log('[SyncQueue] Pulling complete store dataset from Neon /api/sync/...');
+    const res = await fetch('/api/sync/');
     if (!res.ok) {
       throw new Error(`HTTP ${res.status} from /api/sync`);
     }
