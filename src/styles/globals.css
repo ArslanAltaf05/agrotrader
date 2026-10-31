@@ -1170,10 +1170,12 @@ html, body {
 /* Mobile Bottom Navigation Bar */
 .mobile-bottom-nav {
   display: none;
-  position: fixed;
+  position: sticky;
   bottom: 0;
   left: 0;
   right: 0;
+  width: 100%;
+  flex-shrink: 0;
   height: 58px;
   background: var(--sidebar-bg);
   border-top: 1px solid rgba(255, 255, 255, 0.1);
@@ -1399,8 +1401,13 @@ html, body {
 
   /* App Shell & Viewport */
   .app-root-shell {
+    height: 100vh !important;
     height: 100dvh !important;
     min-height: 100dvh !important;
+    max-height: 100dvh !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
   }
 
   .app-container {
@@ -1408,6 +1415,9 @@ html, body {
     max-width: 100vw;
     flex: 1;
     min-height: 0;
+    overflow: hidden;
+    display: flex;
+    position: relative;
   }
 
   .app-main {
@@ -1415,14 +1425,20 @@ html, body {
     min-width: 0;
     flex: 1;
     min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
 
-  /* Page Body padding accounting for bottom navigation */
+  /* Page Body: scrollable content stopping cleanly above sticky bottom nav */
   .page-body {
-    padding: 12px 12px calc(140px + env(safe-area-inset-bottom, 24px)) 12px !important;
-    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto !important;
     -webkit-overflow-scrolling: touch;
-    scroll-padding-bottom: calc(140px + env(safe-area-inset-bottom, 24px));
+    overscroll-behavior-y: contain;
+    padding: 12px 12px 36px 12px !important;
+    scroll-padding-bottom: 24px;
   }
 
   /* Desktop Sidebar converted to an Off-Canvas Slide-In Drawer */
@@ -1480,21 +1496,23 @@ html, body {
     flex-shrink: 0;
   }
 
-  /* Mobile Bottom Navigation Bar */
+  /* Mobile Bottom Navigation Bar: Permanently Sticky at Bottom */
   .mobile-bottom-nav {
     display: flex;
-    position: fixed;
+    position: sticky;
     bottom: 0;
     left: 0;
     right: 0;
+    width: 100%;
+    flex-shrink: 0;
     height: calc(58px + env(safe-area-inset-bottom, 0px));
     padding-bottom: env(safe-area-inset-bottom, 0px);
-    background: rgba(9, 19, 37, 0.95);
+    background: rgba(9, 19, 37, 0.98);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border-top: 1px solid rgba(255, 255, 255, 0.12);
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.35);
-    z-index: 2500;
+    z-index: 1000;
     align-items: center;
     justify-content: space-around;
   }
