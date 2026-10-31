@@ -142,10 +142,10 @@ export function AppProvider({ children }) {
     cloudSyncStatus: 'synced'
   });
 
-  // Auth State
+  // Auth State (Login appears first on root page)
   const [auth, setAuth] = useState({
-    isAuthenticated: true,
-    user: { username: 'admin', name: 'Admin Manager', role: 'admin' },
+    isAuthenticated: false,
+    user: null,
     adminPin: '1234',
     staffPin: '0000',
     superadminPin: '9999'
@@ -458,7 +458,20 @@ export function AppProvider({ children }) {
           }
           setStoreProfile(profile);
         }
-        if (parsed.auth) setAuth(parsed.auth);
+        if (parsed.auth) {
+          // Restore saved custom PINs, but enforce login on fresh browser sessions
+          const isSessionActive = typeof sessionStorage !== 'undefined' && sessionStorage.getItem('agrotrader_session_authenticated') === 'true';
+          const sessionUser = typeof sessionStorage !== 'undefined' ? JSON.parse(sessionStorage.getItem('agrotrader_session_user') || 'null') : null;
+
+          setAuth(prev => ({
+            ...prev,
+            isAuthenticated: Boolean(isSessionActive && sessionUser),
+            user: isSessionActive && sessionUser ? sessionUser : null,
+            adminPin: parsed.auth.adminPin || prev.adminPin,
+            staffPin: parsed.auth.staffPin || prev.staffPin,
+            superadminPin: parsed.auth.superadminPin || prev.superadminPin
+          }));
+        }
         if (parsed.staffPermissions) setStaffPermissions(parsed.staffPermissions);
         if (Array.isArray(parsed.tenants)) {
           const migratedTenants = parsed.tenants.map(t => {
@@ -535,7 +548,11 @@ export function AppProvider({ children }) {
         branches,
         activeBranchId,
         storeProfile,
-        auth,
+        auth: {
+          adminPin: auth.adminPin,
+          staffPin: auth.staffPin,
+          superadminPin: auth.superadminPin
+        },
         staffPermissions,
         tenants,
         tenantUsers,
@@ -600,13 +617,18 @@ export function AppProvider({ children }) {
         };
       }
       if (cleanPin === auth.superadminPin || cleanPin === '9999') {
+        const superUser = { username: rawUser || 'superadmin', name: 'Master Super Admin', role: 'superadmin' };
         setAuth({
           isAuthenticated: true,
-          user: { username: rawUser || 'superadmin', name: 'Master Super Admin', role: 'superadmin' },
+          user: superUser,
           adminPin: auth.adminPin,
           staffPin: auth.staffPin,
           superadminPin: auth.superadminPin || '9999'
         });
+        if (typeof sessionStorage !== 'undefined') {
+          sessionStorage.setItem('agrotrader_session_authenticated', 'true');
+          sessionStorage.setItem('agrotrader_session_user', JSON.stringify(superUser));
+        }
         setActiveTab('superadmin');
         addLog('Super Admin Login', 'Master SaaS Administrator logged in');
         showToast('Welcome to Super Admin Portal!', 'success');
@@ -682,18 +704,23 @@ export function AppProvider({ children }) {
             status: targetTenant.status || prev.status,
             branchLimit: targetTenant.maxBranches || prev.branchLimit
           }));
+          const adminUser = {
+            username: rawUser,
+            name: matchedUser?.name || `${targetTenant.ownerName} (Admin)`,
+            role: 'admin',
+            tenantId: targetTenant.id,
+            storeName: targetTenant.name
+          };
           setAuth(prev => ({
             ...prev,
             isAuthenticated: true,
             adminPin: targetTenant.adminPin || '1234',
-            user: {
-              username: rawUser,
-              name: matchedUser?.name || `${targetTenant.ownerName} (Admin)`,
-              role: 'admin',
-              tenantId: targetTenant.id,
-              storeName: targetTenant.name
-            }
+            user: adminUser
           }));
+          if (typeof sessionStorage !== 'undefined') {
+            sessionStorage.setItem('agrotrader_session_authenticated', 'true');
+            sessionStorage.setItem('agrotrader_session_user', JSON.stringify(adminUser));
+          }
           if (typeof document !== 'undefined') {
             document.cookie = 'agrotrader_role=admin; path=/; SameSite=Lax';
             document.cookie = 'agrotrader_session=active; path=/; SameSite=Lax';
@@ -708,11 +735,16 @@ export function AppProvider({ children }) {
       // Fallback for default 'admin' username
       if (cleanUser === 'admin' || !cleanUser) {
         if (cleanPin === auth.adminPin || cleanPin === '1234') {
+          const fallbackAdminUser = { username: rawUser || 'admin', name: 'Admin Manager', role: 'admin' };
           setAuth(prev => ({
             ...prev,
             isAuthenticated: true,
-            user: { username: rawUser || 'admin', name: 'Admin Manager', role: 'admin' }
+            user: fallbackAdminUser
           }));
+          if (typeof sessionStorage !== 'undefined') {
+            sessionStorage.setItem('agrotrader_session_authenticated', 'true');
+            sessionStorage.setItem('agrotrader_session_user', JSON.stringify(fallbackAdminUser));
+          }
           if (typeof document !== 'undefined') {
             document.cookie = 'agrotrader_role=admin; path=/; SameSite=Lax';
             document.cookie = 'agrotrader_session=active; path=/; SameSite=Lax';
@@ -760,17 +792,22 @@ export function AppProvider({ children }) {
       if (cleanPin === auth.staffPin || cleanPin === '0000') {
         const assignedBranchId = branchId || activeBranchId || 'branch-1';
         const assignedBranch = branches.find(b => b.id === assignedBranchId) || branches[0];
+        const staffUser = {
+          username: rawUser || 'staff',
+          name: 'Counter Staff',
+          role: 'staff',
+          assignedBranchId,
+          branchName: assignedBranch?.name
+        };
         setAuth(prev => ({
           ...prev,
           isAuthenticated: true,
-          user: {
-            username: rawUser || 'staff',
-            name: 'Counter Staff',
-            role: 'staff',
-            assignedBranchId,
-            branchName: assignedBranch?.name
-          }
+          user: staffUser
         }));
+        if (typeof sessionStorage !== 'undefined') {
+          sessionStorage.setItem('agrotrader_session_authenticated', 'true');
+          sessionStorage.setItem('agrotrader_session_user', JSON.stringify(staffUser));
+        }
         if (typeof document !== 'undefined') {
           document.cookie = 'agrotrader_role=staff; path=/; SameSite=Lax';
           document.cookie = 'agrotrader_session=active; path=/; SameSite=Lax';
@@ -785,8 +822,12 @@ export function AppProvider({ children }) {
   };
 
   const logout = () => {
-    setAuth(prev => ({ ...prev, isAuthenticated: false }));
+    setAuth(prev => ({ ...prev, isAuthenticated: false, user: null }));
     setImpersonatingTenant(null);
+    if (typeof sessionStorage !== 'undefined') {
+      sessionStorage.removeItem('agrotrader_session_authenticated');
+      sessionStorage.removeItem('agrotrader_session_user');
+    }
     if (typeof document !== 'undefined') {
       document.cookie = 'agrotrader_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
       document.cookie = 'agrotrader_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';

@@ -107,7 +107,7 @@ export default function LoginView() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
             <span dangerouslySetInnerHTML={{ __html: icons.lock }} />
             <div>
-              <div style={{ fontWeight: 700, fontSize: '14px' }}>Agr  Trader SaaS</div>
+              <div style={{ fontWeight: 700, fontSize: '14px' }}>Agro Trader SaaS</div>
               <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>The complete solution for agro business management</div>
             </div>
           </div>
