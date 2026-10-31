@@ -15,7 +15,15 @@ export default function CloudSyncModal({ isOpen, onClose }) {
     activeBranchId,
     auth,
     showToast,
-    exportSaaSBackup
+    exportSaaSBackup,
+    products = [],
+    customers = [],
+    suppliers = [],
+    sales = [],
+    purchases = [],
+    payments = [],
+    holdStock = [],
+    tempLedger = []
   } = useApp();
 
   const [serverUrl, setServerUrl] = useState(cloudConfig?.serverUrl || 'https://cloud.agrisol.pk/api/v2');
@@ -246,6 +254,55 @@ export default function CloudSyncModal({ isOpen, onClose }) {
                   </span>
                 </div>
               ))}
+            </div>
+          </div>
+
+          {/* Synchronized Business Modules Grid */}
+          <div style={{ background: '#f8fafc', padding: '14px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+              <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                Offline-First Business Modules (Neon Relational Tables)
+              </div>
+              <span className="badge badge-accent" style={{ fontSize: '10px', padding: '1px 6px' }}>
+                Auto-Synced
+              </span>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '8px' }}>
+              <div style={{ background: '#ffffff', padding: '8px 10px', borderRadius: '6px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column' }}>
+                <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>📦 Inventory</span>
+                <span style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-primary)' }}>{products.length} items</span>
+              </div>
+              <div style={{ background: '#ffffff', padding: '8px 10px', borderRadius: '6px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column' }}>
+                <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>🌾 Accounts & Khata</span>
+                <span style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-primary)' }}>{customers.length} farmers</span>
+              </div>
+              <div style={{ background: '#ffffff', padding: '8px 10px', borderRadius: '6px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column' }}>
+                <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>🏢 Suppliers</span>
+                <span style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-primary)' }}>{suppliers.length} vendors</span>
+              </div>
+              <div style={{ background: '#ffffff', padding: '8px 10px', borderRadius: '6px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column' }}>
+                <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>🧾 Sales / Invoices</span>
+                <span style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-primary)' }}>{sales.length} bills</span>
+              </div>
+              <div style={{ background: '#ffffff', padding: '8px 10px', borderRadius: '6px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column' }}>
+                <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>📥 Purchases</span>
+                <span style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-primary)' }}>{purchases.length} orders</span>
+              </div>
+              <div style={{ background: '#ffffff', padding: '8px 10px', borderRadius: '6px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column' }}>
+                <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>💵 Payments & Cash</span>
+                <span style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-primary)' }}>{payments.length} vouchers</span>
+              </div>
+              <div style={{ background: '#ffffff', padding: '8px 10px', borderRadius: '6px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column' }}>
+                <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>🔒 Hold Customer Stock</span>
+                <span style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-primary)' }}>{holdStock.length} amanat</span>
+              </div>
+              <div style={{ background: '#ffffff', padding: '8px 10px', borderRadius: '6px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column' }}>
+                <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>📝 Temp Ledger</span>
+                <span style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-primary)' }}>{tempLedger.length} katcha</span>
+              </div>
+            </div>
+            <div style={{ marginTop: '8px', fontSize: '11px', color: 'var(--text-muted)' }}>
+              📊 Reports &amp; Analytics automatically calculate and sync from all the above transactions in real-time.
             </div>
           </div>
 

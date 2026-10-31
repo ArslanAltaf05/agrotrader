@@ -1,24 +1,35 @@
 import { openDB } from 'idb';
 
-const DB_NAME = 'agrotrader_offline_v1';
+const DB_NAME = 'agrotrader_offline_v2';
 const DB_VERSION = 1;
-const PRODUCTS_STORE = 'products';
+
+export const STORES = {
+  products: 'products',
+  customers: 'customers',
+  suppliers: 'suppliers',
+  sales: 'sales',
+  purchases: 'purchases',
+  payments: 'payments',
+  holdStock: 'holdStock',
+  tempLedger: 'tempLedger'
+};
 
 let dbPromise = null;
 
-// Initialize or get the IndexedDB database instance
 export function getDb() {
   if (typeof window === 'undefined') return null;
 
   if (!dbPromise) {
     dbPromise = openDB(DB_NAME, DB_VERSION, {
       upgrade(db) {
-        if (!db.objectStoreNames.contains(PRODUCTS_STORE)) {
-          const store = db.createObjectStore(PRODUCTS_STORE, { keyPath: 'id' });
-          store.createIndex('synced', 'synced');
-          store.createIndex('deleted', 'deleted');
-          store.createIndex('updatedAt', 'updatedAt');
-        }
+        Object.values(STORES).forEach(storeName => {
+          if (!db.objectStoreNames.contains(storeName)) {
+            const store = db.createObjectStore(storeName, { keyPath: 'id' });
+            store.createIndex('synced', 'synced');
+            store.createIndex('deleted', 'deleted');
+            store.createIndex('updatedAt', 'updatedAt');
+          }
+        });
       }
     });
   }
@@ -26,93 +37,103 @@ export function getDb() {
 }
 
 // Generate client-side UUID
-export function generateProductId() {
+export function generateEntityId(prefix = 'id') {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-    return 'prod-' + crypto.randomUUID();
+    return `${prefix}-${crypto.randomUUID()}`;
   }
-  return 'prod-' + Date.now() + '-' + Math.random().toString(36).slice(2, 9);
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
-// Get all non-deleted products from local IndexedDB
-export async function getLocalProducts() {
+export function generateProductId() {
+  return generateEntityId('prod');
+}
+
+// --- Generic IndexedDB CRUD Operations ---
+
+export async function getLocalItems(storeName) {
   const db = await getDb();
   if (!db) return [];
-  const all = await db.getAll(PRODUCTS_STORE);
-  return all.filter(p => !p.deleted);
+  try {
+    const all = await db.getAll(storeName);
+    return all.filter(item => !item.deleted);
+  } catch (err) {
+    console.warn(`[IndexedDB] Error fetching ${storeName}:`, err);
+    return [];
+  }
 }
 
-// Get all products including tombstones
-export async function getAllLocalRecords() {
+export async function getAllLocalItems(storeName) {
   const db = await getDb();
   if (!db) return [];
-  return await db.getAll(PRODUCTS_STORE);
+  try {
+    return await db.getAll(storeName);
+  } catch (err) {
+    return [];
+  }
 }
 
-// Save or update a product locally in IndexedDB
-export async function saveLocalProduct(product, synced = false) {
+export async function saveLocalItem(storeName, item, synced = false) {
   const db = await getDb();
-  if (!db) return product;
+  if (!db) return item;
 
   const record = {
-    ...product,
-    id: product.id || generateProductId(),
+    ...item,
+    id: item.id || generateEntityId(storeName.slice(0, 4)),
     synced: Boolean(synced),
-    deleted: Boolean(product.deleted),
-    updatedAt: product.updatedAt || new Date().toISOString()
+    deleted: Boolean(item.deleted),
+    updatedAt: item.updatedAt || new Date().toISOString()
   };
 
-  await db.put(PRODUCTS_STORE, record);
-  console.log(`[IndexedDB] Saved product "${record.name}" (id: ${record.id}, synced: ${record.synced})`);
+  await db.put(storeName, record);
   return record;
 }
 
-// Mark product as deleted (tombstone) locally in IndexedDB
-export async function deleteLocalProduct(id) {
+export async function deleteLocalItem(storeName, id) {
   const db = await getDb();
   if (!db) return;
 
-  const existing = await db.get(PRODUCTS_STORE, id);
+  const existing = await db.get(storeName, id);
   if (existing) {
     const tombstone = {
       ...existing,
       deleted: true,
-      synced: false, // Must be synced to Neon to delete remotely
+      synced: false,
       updatedAt: new Date().toISOString()
     };
-    await db.put(PRODUCTS_STORE, tombstone);
-    console.log(`[IndexedDB] Marked product ${id} as deleted (synced: false)`);
+    await db.put(storeName, tombstone);
     return tombstone;
   }
 }
 
-// Bulk save products to IndexedDB (e.g. from server pull)
-export async function saveLocalProductsBatch(productsList) {
+export async function saveLocalBatch(storeName, itemsList) {
   const db = await getDb();
-  if (!db || !Array.isArray(productsList) || !productsList.length) return;
+  if (!db || !Array.isArray(itemsList) || !itemsList.length) return;
 
-  const tx = db.transaction(PRODUCTS_STORE, 'readwrite');
-  for (const item of productsList) {
+  const tx = db.transaction(storeName, 'readwrite');
+  for (const item of itemsList) {
     if (!item || !item.id) continue;
     await tx.store.put(item);
   }
   await tx.done;
 }
 
-// Get all pending records that have not been synced to Neon yet
-export async function getPendingProducts() {
+export async function getPendingItems(storeName) {
   const db = await getDb();
   if (!db) return [];
-  const all = await db.getAll(PRODUCTS_STORE);
-  return all.filter(p => p.synced === false || p.synced === undefined);
+  try {
+    const all = await db.getAll(storeName);
+    return all.filter(item => item.synced === false || item.synced === undefined);
+  } catch (err) {
+    return [];
+  }
 }
 
-// Mark specific products as synced in IndexedDB
-export async function markProductsSynced(ids) {
+export async function markItemsSynced(storeName, ids) {
   const db = await getDb();
   if (!db || !ids || !ids.length) return;
 
   const idSet = new Set(ids);
-  const tx = db.transaction(PRODUCTS_STORE, 'readwrite');
+  const tx = db.transaction(storeName, 'readwrite');
   for (const id of idSet) {
     const item = await tx.store.get(id);
     if (item) {
@@ -121,5 +142,57 @@ export async function markProductsSynced(ids) {
     }
   }
   await tx.done;
-  console.log(`[IndexedDB] Marked ${ids.length} product(s) as synced:`, ids);
 }
+
+// --- Typed Entity Helpers ---
+
+// Products
+export const getLocalProducts = () => getLocalItems(STORES.products);
+export const getAllLocalRecords = () => getAllLocalItems(STORES.products);
+export const saveLocalProduct = (p, synced = false) => saveLocalItem(STORES.products, p, synced);
+export const deleteLocalProduct = (id) => deleteLocalItem(STORES.products, id);
+export const saveLocalProductsBatch = (list) => saveLocalBatch(STORES.products, list);
+export const getPendingProducts = () => getPendingItems(STORES.products);
+export const markProductsSynced = (ids) => markItemsSynced(STORES.products, ids);
+
+// Customers (Accounts / Khata)
+export const getLocalCustomers = () => getLocalItems(STORES.customers);
+export const saveLocalCustomer = (c, synced = false) => saveLocalItem(STORES.customers, c, synced);
+export const deleteLocalCustomer = (id) => deleteLocalItem(STORES.customers, id);
+export const saveLocalCustomersBatch = (list) => saveLocalBatch(STORES.customers, list);
+
+// Suppliers
+export const getLocalSuppliers = () => getLocalItems(STORES.suppliers);
+export const saveLocalSupplier = (s, synced = false) => saveLocalItem(STORES.suppliers, s, synced);
+export const deleteLocalSupplier = (id) => deleteLocalItem(STORES.suppliers, id);
+export const saveLocalSuppliersBatch = (list) => saveLocalBatch(STORES.suppliers, list);
+
+// Sales (Invoices)
+export const getLocalSales = () => getLocalItems(STORES.sales);
+export const saveLocalSale = (s, synced = false) => saveLocalItem(STORES.sales, s, synced);
+export const deleteLocalSale = (id) => deleteLocalItem(STORES.sales, id);
+export const saveLocalSalesBatch = (list) => saveLocalBatch(STORES.sales, list);
+
+// Purchases
+export const getLocalPurchases = () => getLocalItems(STORES.purchases);
+export const saveLocalPurchase = (po, synced = false) => saveLocalItem(STORES.purchases, po, synced);
+export const deleteLocalPurchase = (id) => deleteLocalItem(STORES.purchases, id);
+export const saveLocalPurchasesBatch = (list) => saveLocalBatch(STORES.purchases, list);
+
+// Payments (Vouchers)
+export const getLocalPayments = () => getLocalItems(STORES.payments);
+export const saveLocalPayment = (p, synced = false) => saveLocalItem(STORES.payments, p, synced);
+export const deleteLocalPayment = (id) => deleteLocalItem(STORES.payments, id);
+export const saveLocalPaymentsBatch = (list) => saveLocalBatch(STORES.payments, list);
+
+// Hold Stock (Customer Bookings)
+export const getLocalHoldStock = () => getLocalItems(STORES.holdStock);
+export const saveLocalHoldStock = (h, synced = false) => saveLocalItem(STORES.holdStock, h, synced);
+export const deleteLocalHoldStock = (id) => deleteLocalItem(STORES.holdStock, id);
+export const saveLocalHoldStockBatch = (list) => saveLocalBatch(STORES.holdStock, list);
+
+// Temp Ledger (Katcha Khata)
+export const getLocalTempLedger = () => getLocalItems(STORES.tempLedger);
+export const saveLocalTempLedger = (t, synced = false) => saveLocalItem(STORES.tempLedger, t, synced);
+export const deleteLocalTempLedger = (id) => deleteLocalItem(STORES.tempLedger, id);
+export const saveLocalTempLedgerBatch = (list) => saveLocalBatch(STORES.tempLedger, list);

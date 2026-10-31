@@ -7,9 +7,45 @@ import {
   saveLocalProduct,
   deleteLocalProduct,
   saveLocalProductsBatch,
-  generateProductId
+  generateProductId,
+  getLocalCustomers,
+  saveLocalCustomer,
+  deleteLocalCustomer,
+  saveLocalCustomersBatch,
+  getLocalSuppliers,
+  saveLocalSupplier,
+  deleteLocalSupplier,
+  saveLocalSuppliersBatch,
+  getLocalSales,
+  saveLocalSale,
+  deleteLocalSale,
+  saveLocalSalesBatch,
+  getLocalPurchases,
+  saveLocalPurchase,
+  deleteLocalPurchase,
+  saveLocalPurchasesBatch,
+  getLocalPayments,
+  saveLocalPayment,
+  deleteLocalPayment,
+  saveLocalPaymentsBatch,
+  getLocalHoldStock,
+  saveLocalHoldStock,
+  deleteLocalHoldStock,
+  saveLocalHoldStockBatch,
+  getLocalTempLedger,
+  saveLocalTempLedger,
+  deleteLocalTempLedger,
+  saveLocalTempLedgerBatch,
+  generateEntityId
 } from '../lib/offlineStorage';
-import { flushQueue, pullLatestFromServer, syncProductsFull } from '../lib/syncQueue';
+import {
+  flushAllQueues,
+  pullAllFromServer,
+  syncAllFull,
+  flushQueue,
+  pullLatestFromServer,
+  syncProductsFull
+} from '../lib/syncQueue';
 
 const STORAGE_KEY = 'agrotrader_live_production_v1';
 
@@ -280,6 +316,12 @@ export function AppProvider({ children }) {
 
     setCloudConfig(prev => ({ ...prev, syncStatus: 'syncing' }));
 
+    try {
+      await flushAllQueues();
+    } catch (e) {
+      console.warn('[Sync] Flush queues error in pushToCloud:', e);
+    }
+
     const payload = {
       tenantId: activeTenantId || 'tenant-1',
       storeName: storeProfile?.name || 'Asmat Agro Traders Retra',
@@ -349,6 +391,22 @@ export function AppProvider({ children }) {
     setCloudConfig(prev => ({ ...prev, syncStatus: 'syncing' }));
 
     try {
+      const syncedAll = await pullAllFromServer();
+      if (syncedAll) {
+        if (syncedAll.products?.length) setProducts(syncedAll.products);
+        if (syncedAll.customers?.length) setCustomers(syncedAll.customers);
+        if (syncedAll.suppliers?.length) setSuppliers(syncedAll.suppliers);
+        if (syncedAll.sales?.length) setSales(syncedAll.sales);
+        if (syncedAll.purchases?.length) setPurchases(syncedAll.purchases);
+        if (syncedAll.payments?.length) setPayments(syncedAll.payments);
+        if (syncedAll.holdStock?.length) setHoldStock(syncedAll.holdStock);
+        if (syncedAll.tempLedger?.length) setTempLedger(syncedAll.tempLedger);
+      }
+    } catch (err) {
+      console.warn('pullAllFromServer error in pullFromCloud:', err);
+    }
+
+    try {
       const result = await loadFromNeon(activeTenantId || 'tenant-1');
       const now = new Date().toISOString();
 
@@ -392,12 +450,19 @@ export function AppProvider({ children }) {
 
   const syncWithCloud = async (isAuto = false) => {
     try {
-      const syncedProducts = await syncProductsFull();
-      if (Array.isArray(syncedProducts) && syncedProducts.length > 0) {
-        setProducts(syncedProducts);
+      const syncedAll = await syncAllFull();
+      if (syncedAll) {
+        if (syncedAll.products?.length) setProducts(syncedAll.products);
+        if (syncedAll.customers?.length) setCustomers(syncedAll.customers);
+        if (syncedAll.suppliers?.length) setSuppliers(syncedAll.suppliers);
+        if (syncedAll.sales?.length) setSales(syncedAll.sales);
+        if (syncedAll.purchases?.length) setPurchases(syncedAll.purchases);
+        if (syncedAll.payments?.length) setPayments(syncedAll.payments);
+        if (syncedAll.holdStock?.length) setHoldStock(syncedAll.holdStock);
+        if (syncedAll.tempLedger?.length) setTempLedger(syncedAll.tempLedger);
       }
     } catch (e) {
-      console.warn('[SyncQueue] Product sync error:', e);
+      console.warn('[SyncQueue] Multi-entity sync error:', e);
     }
     return pushToCloud(isAuto);
   };
@@ -409,13 +474,20 @@ export function AppProvider({ children }) {
     const handleOnline = async () => {
       setIsOnline(true);
       addLog('Network Status', 'Internet connection restored - synchronizing offline database with cloud');
-      showToast('🌐 Internet Connected: Syncing offline changes to Neon...', 'info');
+      showToast('🌐 Internet Connected: Syncing all offline records to Neon...', 'info');
 
       try {
-        const syncedProducts = await syncProductsFull();
-        if (Array.isArray(syncedProducts) && syncedProducts.length > 0) {
-          setProducts(syncedProducts);
-          showToast('☁️ Products synchronized with Neon Database!', 'success');
+        const syncedAll = await syncAllFull();
+        if (syncedAll) {
+          if (syncedAll.products?.length) setProducts(syncedAll.products);
+          if (syncedAll.customers?.length) setCustomers(syncedAll.customers);
+          if (syncedAll.suppliers?.length) setSuppliers(syncedAll.suppliers);
+          if (syncedAll.sales?.length) setSales(syncedAll.sales);
+          if (syncedAll.purchases?.length) setPurchases(syncedAll.purchases);
+          if (syncedAll.payments?.length) setPayments(syncedAll.payments);
+          if (syncedAll.holdStock?.length) setHoldStock(syncedAll.holdStock);
+          if (syncedAll.tempLedger?.length) setTempLedger(syncedAll.tempLedger);
+          showToast('☁️ All records synchronized with Neon Database!', 'success');
         }
       } catch (err) {
         console.warn('Sync on online error:', err);
@@ -435,15 +507,15 @@ export function AppProvider({ children }) {
 
     // Initial check on mount: flush queue and sync
     if (navigator.onLine) {
-      flushQueue();
+      flushAllQueues();
       syncWithCloud(true);
     } else {
       setCloudConfig(prev => ({ ...prev, syncStatus: 'offline' }));
     }
 
-    // Periodic 30-second retry to push any pending writes
+    // Periodic 30-second retry to push any pending writes across all collections
     const syncInterval = setInterval(() => {
-      flushQueue();
+      flushAllQueues();
     }, 30000);
 
     return () => {
@@ -535,29 +607,99 @@ export function AppProvider({ children }) {
       setIsLoaded(true);
     }
 
-    // 1. Load products from IndexedDB immediately on startup (Offline-First)
-    getLocalProducts().then(async (local) => {
-      if (local && local.length > 0) {
-        setProducts(local);
-        console.log(`[AppContext] Loaded ${local.length} products from IndexedDB.`);
+    // 1. Load all store data from IndexedDB immediately on startup (Offline-First)
+    Promise.all([
+      getLocalProducts(),
+      getLocalCustomers(),
+      getLocalSuppliers(),
+      getLocalSales(),
+      getLocalPurchases(),
+      getLocalPayments(),
+      getLocalHoldStock(),
+      getLocalTempLedger()
+    ]).then(async ([lProducts, lCustomers, lSuppliers, lSales, lPurchases, lPayments, lHoldStock, lTempLedger]) => {
+      // Products
+      if (lProducts && lProducts.length > 0) {
+        setProducts(lProducts);
       } else {
-        // If IndexedDB is empty on first install, seed it from initial products
         const savedStr = typeof localStorage !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null;
         const parsed = savedStr ? JSON.parse(savedStr) : null;
-        const initialList = (parsed && Array.isArray(parsed.products) && parsed.products.length > 0)
-          ? parsed.products
-          : INITIAL_PRODUCTS;
-
+        const initialList = (parsed && Array.isArray(parsed.products) && parsed.products.length > 0) ? parsed.products : INITIAL_PRODUCTS;
         await saveLocalProductsBatch(initialList.map(p => ({ ...p, synced: false })));
         setProducts(initialList);
-        console.log(`[AppContext] Seeded IndexedDB with ${initialList.length} products.`);
       }
 
-      // 2. If online, sync products with Neon (flush pending queue + pull server updates)
+      // Customers
+      if (lCustomers && lCustomers.length > 0) {
+        setCustomers(lCustomers);
+      } else {
+        await saveLocalCustomersBatch(INITIAL_CUSTOMERS.map(c => ({ ...c, synced: false })));
+        setCustomers(INITIAL_CUSTOMERS);
+      }
+
+      // Suppliers
+      if (lSuppliers && lSuppliers.length > 0) {
+        setSuppliers(lSuppliers);
+      } else {
+        await saveLocalSuppliersBatch(INITIAL_SUPPLIERS.map(s => ({ ...s, synced: false })));
+        setSuppliers(INITIAL_SUPPLIERS);
+      }
+
+      // Sales
+      if (lSales && lSales.length > 0) {
+        setSales(lSales);
+      } else {
+        await saveLocalSalesBatch(INITIAL_SALES.map(s => ({ ...s, synced: false })));
+        setSales(INITIAL_SALES);
+      }
+
+      // Purchases
+      if (lPurchases && lPurchases.length > 0) {
+        setPurchases(lPurchases);
+      } else {
+        await saveLocalPurchasesBatch(INITIAL_PURCHASES.map(po => ({ ...po, synced: false })));
+        setPurchases(INITIAL_PURCHASES);
+      }
+
+      // Payments
+      if (lPayments && lPayments.length > 0) {
+        setPayments(lPayments);
+      } else {
+        await saveLocalPaymentsBatch(INITIAL_PAYMENTS.map(p => ({ ...p, synced: false })));
+        setPayments(INITIAL_PAYMENTS);
+      }
+
+      // Hold Stock
+      if (lHoldStock && lHoldStock.length > 0) {
+        setHoldStock(lHoldStock);
+      } else {
+        await saveLocalHoldStockBatch(INITIAL_HOLD_STOCK.map(h => ({ ...h, synced: false })));
+        setHoldStock(INITIAL_HOLD_STOCK);
+      }
+
+      // Temp Ledger
+      if (lTempLedger && lTempLedger.length > 0) {
+        setTempLedger(lTempLedger);
+      } else {
+        await saveLocalTempLedgerBatch(INITIAL_TEMP_LEDGER.map(t => ({ ...t, synced: false })));
+        setTempLedger(INITIAL_TEMP_LEDGER);
+      }
+
+      console.log('[AppContext] All stores loaded from IndexedDB (Offline-First Ready).');
+
+      // 2. If online, sync all entities with Neon (flush pending queues + pull server updates)
       if (typeof navigator !== 'undefined' && navigator.onLine) {
-        syncProductsFull().then(synced => {
-          if (Array.isArray(synced) && synced.length > 0) {
-            setProducts(synced);
+        syncAllFull().then(syncedAll => {
+          if (syncedAll) {
+            if (syncedAll.products?.length) setProducts(syncedAll.products);
+            if (syncedAll.customers?.length) setCustomers(syncedAll.customers);
+            if (syncedAll.suppliers?.length) setSuppliers(syncedAll.suppliers);
+            if (syncedAll.sales?.length) setSales(syncedAll.sales);
+            if (syncedAll.purchases?.length) setPurchases(syncedAll.purchases);
+            if (syncedAll.payments?.length) setPayments(syncedAll.payments);
+            if (syncedAll.holdStock?.length) setHoldStock(syncedAll.holdStock);
+            if (syncedAll.tempLedger?.length) setTempLedger(syncedAll.tempLedger);
+
             setCloudConfig(prev => ({
               ...prev,
               syncStatus: 'synced',
@@ -566,11 +708,11 @@ export function AppProvider({ children }) {
             }));
           }
         }).catch(err => {
-          console.warn('[AppContext] Neon products sync error:', err);
+          console.warn('[AppContext] Neon multi-entity sync error:', err);
         });
       }
     }).catch(err => {
-      console.warn('[AppContext] IndexedDB load error:', err);
+      console.warn('[AppContext] IndexedDB multi-store load error:', err);
     });
 
     // Pull legacy monolithic state from Neon DB when online
@@ -578,15 +720,8 @@ export function AppProvider({ children }) {
       loadFromNeon('tenant-1').then(remote => {
         if (remote && remote.success && remote.found && remote.data) {
           const d = remote.data;
-          if (Array.isArray(d.customers) && d.customers.length > 0) setCustomers(d.customers);
-          if (Array.isArray(d.suppliers) && d.suppliers.length > 0) setSuppliers(d.suppliers);
-          if (Array.isArray(d.sales) && d.sales.length > 0) setSales(d.sales);
-          if (Array.isArray(d.purchases) && d.purchases.length > 0) setPurchases(d.purchases);
-          if (Array.isArray(d.payments) && d.payments.length > 0) setPayments(d.payments);
-          if (Array.isArray(d.holdStock) && d.holdStock.length > 0) setHoldStock(d.holdStock);
-          if (Array.isArray(d.tempLedger) && d.tempLedger.length > 0) setTempLedger(d.tempLedger);
-          if (Array.isArray(d.branches) && d.branches.length > 0) setBranches(d.branches);
           if (d.storeProfile) setStoreProfile(d.storeProfile);
+          if (Array.isArray(d.branches) && d.branches.length > 0) setBranches(d.branches);
           if (Array.isArray(d.tenants) && d.tenants.length > 0) setTenants(d.tenants);
           if (Array.isArray(d.tenantUsers) && d.tenantUsers.length > 0) setTenantUsers(d.tenantUsers);
           setCloudConfig(prev => ({
@@ -1350,12 +1485,13 @@ export function AppProvider({ children }) {
     return true;
   };
 
-  // Sales / POS
+  // Sales / POS (Offline-First)
   const createSale = (saleData) => {
     const invoiceId = 'INV-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 9000);
     const newSale = {
       id: invoiceId,
       branchId: activeBranchId,
+      invoiceNo: invoiceId,
       date: new Date().toISOString(),
       customerId: saleData.customerId,
       customerName: saleData.customerName,
@@ -1363,29 +1499,51 @@ export function AppProvider({ children }) {
       items: saleData.items,
       subtotal: Number(saleData.subtotal) || 0,
       discount: Number(saleData.discount) || 0,
+      tax: Number(saleData.tax) || 0,
       grandTotal: Number(saleData.grandTotal) || 0,
+      total: Number(saleData.grandTotal) || 0,
       paidAmount: Number(saleData.paidAmount) || 0,
+      paid: Number(saleData.paidAmount) || 0,
       balanceAmount: Number(saleData.balanceAmount) || 0,
+      balance: Number(saleData.balanceAmount) || 0,
       createdBy: auth.user?.username || 'admin',
-      notes: saleData.notes || ''
+      notes: saleData.notes || '',
+      status: 'Completed',
+      synced: false,
+      deleted: false,
+      updatedAt: new Date().toISOString()
     };
 
-    // Deduct stock
+    // 1. Save sale to IndexedDB FIRST
+    saveLocalSale(newSale, false).catch(e => console.warn(e));
+
+    // 2. Deduct stock in IndexedDB & state
     setProducts(prev => prev.map(prod => {
       const lineItem = newSale.items.find(i => i.productId === prod.id);
       if (!lineItem) return prod;
-      if (lineItem.source === 'store') {
-        return { ...prod, storeStock: Math.max(0, prod.storeStock - lineItem.qty) };
-      } else {
-        return { ...prod, shopStock: Math.max(0, prod.shopStock - lineItem.qty) };
-      }
+      const updatedProd = {
+        ...prod,
+        storeStock: lineItem.source === 'store' ? Math.max(0, prod.storeStock - lineItem.qty) : prod.storeStock,
+        shopStock: lineItem.source !== 'store' ? Math.max(0, prod.shopStock - lineItem.qty) : prod.shopStock,
+        synced: false,
+        updatedAt: new Date().toISOString()
+      };
+      saveLocalProduct(updatedProd, false).catch(e => console.warn(e));
+      return updatedProd;
     }));
 
-    // Update Customer Khata balance if credit
+    // 3. Update Customer Khata balance if credit
     if (newSale.balanceAmount > 0 && newSale.customerId && newSale.customerId !== 'walk-in') {
       setCustomers(prev => prev.map(c => {
         if (c.id === newSale.customerId) {
-          return { ...c, balance: c.balance + newSale.balanceAmount };
+          const updatedCust = {
+            ...c,
+            balance: (c.balance || 0) + newSale.balanceAmount,
+            synced: false,
+            updatedAt: new Date().toISOString()
+          };
+          saveLocalCustomer(updatedCust, false).catch(e => console.warn(e));
+          return updatedCust;
         }
         return c;
       }));
@@ -1394,6 +1552,8 @@ export function AppProvider({ children }) {
     setSales(prev => [newSale, ...prev]);
     addLog('New Sale', `Invoice ${newSale.id} - Rs ${newSale.grandTotal} (${newSale.customerName})`);
     showToast(`Sale completed! Invoice #${newSale.id}`, 'success');
+
+    flushAllQueues();
     return newSale;
   };
 
@@ -1421,12 +1581,13 @@ export function AppProvider({ children }) {
     return null;
   };
 
-  // Payments
+  // Payments (Offline-First)
   const addPayment = (payData) => {
     const payId = (payData.type === 'in' ? 'PAY-IN-' : 'PAY-OUT-') + Math.floor(100 + Math.random() * 900);
     const payment = {
       id: payId,
       branchId: activeBranchId,
+      voucherNo: payId,
       date: new Date().toISOString(),
       type: payData.type,
       accountId: payData.accountId,
@@ -1434,58 +1595,116 @@ export function AppProvider({ children }) {
       accountType: payData.accountType,
       amount: Number(payData.amount) || 0,
       mode: payData.mode || 'Cash',
+      paymentMode: payData.mode || 'Cash',
       refNo: payData.refNo || '',
-      remarks: payData.remarks || ''
+      reference: payData.refNo || '',
+      remarks: payData.remarks || '',
+      notes: payData.remarks || '',
+      synced: false,
+      deleted: false,
+      updatedAt: new Date().toISOString()
     };
 
+    saveLocalPayment(payment, false).catch(e => console.warn(e));
+
     if (payData.type === 'in') {
-      setCustomers(prev => prev.map(c => c.id === payData.accountId ? { ...c, balance: c.balance - payment.amount } : c));
+      setCustomers(prev => prev.map(c => {
+        if (c.id === payData.accountId) {
+          const updatedCust = { ...c, balance: (c.balance || 0) - payment.amount, synced: false, updatedAt: new Date().toISOString() };
+          saveLocalCustomer(updatedCust, false).catch(e => console.warn(e));
+          return updatedCust;
+        }
+        return c;
+      }));
     } else {
-      setSuppliers(prev => prev.map(s => s.id === payData.accountId ? { ...s, balance: s.balance - payment.amount } : s));
+      setSuppliers(prev => prev.map(s => {
+        if (s.id === payData.accountId) {
+          const updatedSup = { ...s, balance: (s.balance || 0) - payment.amount, synced: false, updatedAt: new Date().toISOString() };
+          saveLocalSupplier(updatedSup, false).catch(e => console.warn(e));
+          return updatedSup;
+        }
+        return s;
+      }));
     }
 
     setPayments(prev => [payment, ...prev]);
     addLog(payData.type === 'in' ? 'Payment In' : 'Payment Out', `Rs ${payment.amount} (${payment.accountName})`);
     showToast(`Payment recorded: Rs ${payment.amount}`, 'success');
+
+    flushAllQueues();
     return payment;
   };
 
-  // Customer & Supplier Accounts
+  // Customer & Supplier Accounts (Offline-First)
   const addCustomer = (c) => {
     const newCust = {
-      id: 'cust-' + Date.now(),
+      id: generateEntityId('cust'),
       branchId: activeBranchId,
       name: c.name,
+      fatherName: c.fatherName || '',
       phone: c.phone || '',
       village: c.village || '',
       cnic: c.cnic || '',
+      address: c.address || c.village || '',
       creditLimit: Number(c.creditLimit) || 200000,
+      openingBalance: Number(c.openingBalance) || 0,
       balance: Number(c.balance) || 0,
-      type: c.type || 'Farmer'
+      type: c.type || 'Farmer',
+      notes: c.notes || '',
+      synced: false,
+      deleted: false,
+      updatedAt: new Date().toISOString()
     };
+
+    saveLocalCustomer(newCust, false).catch(e => console.warn(e));
     setCustomers(prev => [...prev, newCust]);
     addLog('Add Customer', `Added ${newCust.name}`);
     showToast(`Customer ${newCust.name} added!`, 'success');
+
+    flushAllQueues();
     return newCust;
   };
 
   const addSupplier = (s) => {
     const newSup = {
-      id: 'sup-' + Date.now(),
+      id: generateEntityId('sup'),
+      branchId: activeBranchId,
       name: s.name,
+      company: s.company || '',
       contactPerson: s.contactPerson || '',
       phone: s.phone || '',
+      address: s.address || s.city || '',
       balance: Number(s.balance) || 0,
-      city: s.city || ''
+      city: s.city || '',
+      notes: s.notes || '',
+      synced: false,
+      deleted: false,
+      updatedAt: new Date().toISOString()
     };
+
+    saveLocalSupplier(newSup, false).catch(e => console.warn(e));
     setSuppliers(prev => [...prev, newSup]);
     addLog('Add Supplier', `Added ${newSup.name}`);
     showToast(`Supplier ${newSup.name} added!`, 'success');
+
+    flushAllQueues();
     return newSup;
   };
 
   const updateCustomer = (id, updatedFields) => {
-    setCustomers(prev => prev.map(c => c.id === id ? { ...c, ...updatedFields } : c));
+    let updatedCust = null;
+    setCustomers(prev => prev.map(c => {
+      if (c.id === id) {
+        updatedCust = { ...c, ...updatedFields, synced: false, updatedAt: new Date().toISOString() };
+        return updatedCust;
+      }
+      return c;
+    }));
+
+    if (updatedCust) {
+      saveLocalCustomer(updatedCust, false).catch(e => console.warn(e));
+      flushAllQueues();
+    }
     addLog('Update Customer', `Updated customer account ${id}`);
     showToast('Customer account updated!', 'success');
   };
@@ -1497,13 +1716,27 @@ export function AppProvider({ children }) {
       return;
     }
     const cust = customers.find(c => c.id === id);
+    deleteLocalCustomer(id).catch(e => console.warn(e));
     setCustomers(prev => prev.filter(c => c.id !== id));
     addLog('Delete Customer', `Removed customer ${cust?.name || id}`);
     showToast('Customer account removed', 'warning');
+    flushAllQueues();
   };
 
   const updateSupplier = (id, updatedFields) => {
-    setSuppliers(prev => prev.map(s => s.id === id ? { ...s, ...updatedFields } : s));
+    let updatedSup = null;
+    setSuppliers(prev => prev.map(s => {
+      if (s.id === id) {
+        updatedSup = { ...s, ...updatedFields, synced: false, updatedAt: new Date().toISOString() };
+        return updatedSup;
+      }
+      return s;
+    }));
+
+    if (updatedSup) {
+      saveLocalSupplier(updatedSup, false).catch(e => console.warn(e));
+      flushAllQueues();
+    }
     addLog('Update Supplier', `Updated supplier account ${id}`);
     showToast('Supplier account updated!', 'success');
   };
@@ -1515,9 +1748,11 @@ export function AppProvider({ children }) {
       return;
     }
     const sup = suppliers.find(s => s.id === id);
+    deleteLocalSupplier(id).catch(e => console.warn(e));
     setSuppliers(prev => prev.filter(s => s.id !== id));
     addLog('Delete Supplier', `Removed supplier ${sup?.name || id}`);
     showToast('Supplier account removed', 'warning');
+    flushAllQueues();
   };
 
   const deleteSale = (saleId) => {
@@ -1529,22 +1764,35 @@ export function AppProvider({ children }) {
     const sale = sales.find(s => s.id === saleId);
     if (!sale) return;
 
+    deleteLocalSale(saleId).catch(e => console.warn(e));
+
     // 1. Revert product inventory
     setProducts(prev => prev.map(prod => {
       const item = sale.items?.find(it => it.productId === prod.id);
       if (!item) return prod;
-      if (item.source === 'store') {
-        return { ...prod, storeStock: (prod.storeStock || 0) + (item.qty || 0) };
-      } else {
-        return { ...prod, shopStock: (prod.shopStock || 0) + (item.qty || 0) };
-      }
+      const updatedProd = {
+        ...prod,
+        storeStock: item.source === 'store' ? (prod.storeStock || 0) + (item.qty || 0) : prod.storeStock,
+        shopStock: item.source !== 'store' ? (prod.shopStock || 0) + (item.qty || 0) : prod.shopStock,
+        synced: false,
+        updatedAt: new Date().toISOString()
+      };
+      saveLocalProduct(updatedProd, false).catch(e => console.warn(e));
+      return updatedProd;
     }));
 
     // 2. Revert customer balance if credit sale
     if (sale.balanceAmount > 0 && sale.customerId && sale.customerId !== 'walk-in') {
       setCustomers(prev => prev.map(c => {
         if (c.id === sale.customerId) {
-          return { ...c, balance: Math.max(0, (c.balance || 0) - sale.balanceAmount) };
+          const updatedCust = {
+            ...c,
+            balance: Math.max(0, (c.balance || 0) - sale.balanceAmount),
+            synced: false,
+            updatedAt: new Date().toISOString()
+          };
+          saveLocalCustomer(updatedCust, false).catch(e => console.warn(e));
+          return updatedCust;
         }
         return c;
       }));
@@ -1553,6 +1801,7 @@ export function AppProvider({ children }) {
     setSales(prev => prev.filter(s => s.id !== saleId));
     addLog('Delete Sale', `Deleted invoice ${saleId} (${sale.customerName}) - Restored stock and adjusted customer ledger`);
     showToast(`Invoice ${saleId} deleted. Stock & khata restored!`, 'info');
+    flushAllQueues();
   };
 
   const deletePayment = (payId) => {
@@ -1564,37 +1813,67 @@ export function AppProvider({ children }) {
     const pay = payments.find(p => p.id === payId);
     if (!pay) return;
 
+    deleteLocalPayment(payId).catch(e => console.warn(e));
+
     // Revert balance change
     if (pay.type === 'in') {
-      setCustomers(prev => prev.map(c => c.id === pay.accountId ? { ...c, balance: (c.balance || 0) + pay.amount } : c));
+      setCustomers(prev => prev.map(c => {
+        if (c.id === pay.accountId) {
+          const updatedCust = { ...c, balance: (c.balance || 0) + pay.amount, synced: false, updatedAt: new Date().toISOString() };
+          saveLocalCustomer(updatedCust, false).catch(e => console.warn(e));
+          return updatedCust;
+        }
+        return c;
+      }));
     } else {
-      setSuppliers(prev => prev.map(s => s.id === pay.accountId ? { ...s, balance: (s.balance || 0) + pay.amount } : s));
+      setSuppliers(prev => prev.map(s => {
+        if (s.id === pay.accountId) {
+          const updatedSup = { ...s, balance: (s.balance || 0) + pay.amount, synced: false, updatedAt: new Date().toISOString() };
+          saveLocalSupplier(updatedSup, false).catch(e => console.warn(e));
+          return updatedSup;
+        }
+        return s;
+      }));
     }
 
     setPayments(prev => prev.filter(p => p.id !== payId));
     addLog('Delete Payment', `Deleted payment voucher ${payId} (Rs ${pay.amount}) - Reverted account ledger`);
     showToast(`Payment voucher ${payId} deleted and ledger restored!`, 'info');
+    flushAllQueues();
   };
 
   const deletePurchase = (poId) => {
     const po = purchases.find(p => p.id === poId);
     if (!po) return;
 
+    deleteLocalPurchase(poId).catch(e => console.warn(e));
+
     // Deduct received stock from product
     setProducts(prev => prev.map(prod => {
       if (prod.id !== po.productId) return prod;
-      if (po.targetLoc === 'shop') {
-        return { ...prod, shopStock: Math.max(0, (prod.shopStock || 0) - (po.qty || 0)) };
-      } else {
-        return { ...prod, storeStock: Math.max(0, (prod.storeStock || 0) - (po.qty || 0)) };
-      }
+      const updatedProd = {
+        ...prod,
+        shopStock: po.targetLoc === 'shop' ? Math.max(0, (prod.shopStock || 0) - (po.qty || 0)) : prod.shopStock,
+        storeStock: po.targetLoc !== 'shop' ? Math.max(0, (prod.storeStock || 0) - (po.qty || 0)) : prod.storeStock,
+        synced: false,
+        updatedAt: new Date().toISOString()
+      };
+      saveLocalProduct(updatedProd, false).catch(e => console.warn(e));
+      return updatedProd;
     }));
 
     // Revert supplier balance if credit
     if (po.paymentMode?.includes('Credit')) {
       setSuppliers(prev => prev.map(s => {
         if (s.id === po.supplierId) {
-          return { ...s, balance: Math.max(0, (s.balance || 0) - (po.totalCost || 0)) };
+          const updatedSup = {
+            ...s,
+            balance: Math.max(0, (s.balance || 0) - (po.totalCost || 0)),
+            synced: false,
+            updatedAt: new Date().toISOString()
+          };
+          saveLocalSupplier(updatedSup, false).catch(e => console.warn(e));
+          return updatedSup;
         }
         return s;
       }));
@@ -1603,16 +1882,19 @@ export function AppProvider({ children }) {
     setPurchases(prev => prev.filter(p => p.id !== poId));
     addLog('Delete Purchase', `Deleted PO ${poId} (${po.productName}) - Restored stock and supplier ledger`);
     showToast(`Purchase order ${poId} deleted`, 'info');
+    flushAllQueues();
   };
 
   const deleteHoldStock = (id) => {
     const item = holdStock.find(h => h.id === id);
+    deleteLocalHoldStock(id).catch(e => console.warn(e));
     setHoldStock(prev => prev.filter(h => h.id !== id));
     addLog('Delete Custody Record', `Removed customer custody ${id} (${item?.customerName || id})`);
     showToast('Customer custody record removed', 'info');
+    flushAllQueues();
   };
 
-  // Inward Purchase & Stock In
+  // Inward Purchase & Stock In (Offline-First)
   const recordPurchase = (pData) => {
     const poId = 'PO-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 9000);
     const numQty = Number(pData.qty) || 1;
@@ -1622,6 +1904,7 @@ export function AppProvider({ children }) {
     const newPO = {
       id: poId,
       branchId: activeBranchId,
+      poNumber: poId,
       date: new Date().toISOString(),
       supplierId: pData.supplierId,
       supplierName: pData.supplierName,
@@ -1631,35 +1914,58 @@ export function AppProvider({ children }) {
       unit: pData.unit || 'bag',
       unitCost,
       totalCost,
+      subtotal: totalCost,
+      total: totalCost,
+      paid: pData.paymentMode?.includes('Credit') ? 0 : totalCost,
+      balance: pData.paymentMode?.includes('Credit') ? totalCost : 0,
       paymentMode: pData.paymentMode || 'Credit (Payable Khata)',
       targetLoc: pData.targetLoc || 'store',
-      status: `Received in ${pData.targetLoc === 'store' ? 'Godown' : 'Shop'}`
+      status: `Received in ${pData.targetLoc === 'store' ? 'Godown' : 'Shop'}`,
+      notes: '',
+      synced: false,
+      deleted: false,
+      updatedAt: new Date().toISOString()
     };
+
+    saveLocalPurchase(newPO, false).catch(e => console.warn(e));
 
     // Update Product Stock & Cost
     setProducts(prev => prev.map(prod => {
       if (prod.id !== pData.productId) return prod;
-      return {
+      const updatedProd = {
         ...prod,
         costPrice: unitCost > 0 ? unitCost : prod.costPrice,
         shopStock: pData.targetLoc === 'shop' ? (prod.shopStock || 0) + numQty : (prod.shopStock || 0),
-        storeStock: pData.targetLoc === 'store' ? (prod.storeStock || 0) + numQty : (prod.storeStock || 0)
+        storeStock: pData.targetLoc === 'store' ? (prod.storeStock || 0) + numQty : (prod.storeStock || 0),
+        synced: false,
+        updatedAt: new Date().toISOString()
       };
+      saveLocalProduct(updatedProd, false).catch(e => console.warn(e));
+      return updatedProd;
     }));
 
     // Update Supplier Balance if Credit
     if (newPO.paymentMode.includes('Credit')) {
       setSuppliers(prev => prev.map(s => {
         if (s.id === pData.supplierId) {
-          return { ...s, balance: (s.balance || 0) + totalCost };
+          const updatedSup = {
+            ...s,
+            balance: (s.balance || 0) + totalCost,
+            synced: false,
+            updatedAt: new Date().toISOString()
+          };
+          saveLocalSupplier(updatedSup, false).catch(e => console.warn(e));
+          return updatedSup;
         }
         return s;
       }));
     } else {
       // Create Outward Payment Voucher for Instant Cash / Bank
+      const payId = 'PAY-OUT-' + Math.floor(100 + Math.random() * 900);
       const payment = {
-        id: 'PAY-OUT-' + Math.floor(100 + Math.random() * 900),
+        id: payId,
         branchId: activeBranchId,
+        voucherNo: payId,
         date: new Date().toISOString(),
         type: 'out',
         accountId: pData.supplierId,
@@ -1667,81 +1973,145 @@ export function AppProvider({ children }) {
         accountType: 'supplier',
         amount: totalCost,
         mode: pData.paymentMode.includes('Bank') ? 'Bank Transfer' : 'Cash',
+        paymentMode: pData.paymentMode.includes('Bank') ? 'Bank Transfer' : 'Cash',
         refNo: poId,
-        remarks: `Auto-voucher for Inward Stock PO ${poId}`
+        reference: poId,
+        remarks: `Auto-voucher for Inward Stock PO ${poId}`,
+        notes: `Auto-voucher for Inward Stock PO ${poId}`,
+        synced: false,
+        deleted: false,
+        updatedAt: new Date().toISOString()
       };
+      saveLocalPayment(payment, false).catch(e => console.warn(e));
       setPayments(prev => [payment, ...prev]);
     }
 
     setPurchases(prev => [newPO, ...prev]);
     addLog('Inward Stock Purchase', `PO #${poId} received ${numQty} ${newPO.unit} of ${newPO.productName} from ${newPO.supplierName} (Total Rs ${totalCost})`);
     showToast(`Inward stock PO #${poId} recorded!`, 'success');
+
+    flushAllQueues();
     return newPO;
   };
 
-  // Hold Stock / Custody (Amanat)
+  // Hold Stock / Custody (Amanat) (Offline-First)
   const addHoldStock = (h) => {
+    const holdId = generateEntityId('hold');
     const hold = {
-      id: 'HOLD-' + Math.floor(100 + Math.random() * 900),
+      id: holdId,
       branchId: activeBranchId,
+      bookingNo: holdId,
       date: new Date().toISOString().split('T')[0],
+      bookingDate: new Date().toISOString().split('T')[0],
       customerId: h.customerId,
       customerName: h.customerName,
       productId: h.productId,
       productName: h.productName,
       totalBags: Number(h.totalBags) || 0,
+      qty: Number(h.totalBags) || 0,
+      unit: 'bag',
       releasedBags: 0,
       remainingBags: Number(h.totalBags) || 0,
       location: h.location || 'Godown Main',
       status: 'Active Custody',
-      notes: h.notes || ''
+      notes: h.notes || '',
+      synced: false,
+      deleted: false,
+      updatedAt: new Date().toISOString()
     };
+
+    saveLocalHoldStock(hold, false).catch(e => console.warn(e));
     setHoldStock(prev => [hold, ...prev]);
     addLog('Hold Stock', `Booked ${hold.totalBags} bags for ${hold.customerName}`);
     showToast(`Amanat stock custody booked: ${hold.totalBags} bags!`, 'success');
+
+    flushAllQueues();
     return hold;
   };
 
   const releaseHoldStock = (holdId, qty) => {
     const q = Number(qty) || 0;
+    let updatedHold = null;
     setHoldStock(prev => prev.map(h => {
       if (h.id !== holdId) return h;
       const rem = Math.max(0, h.remainingBags - q);
-      return {
+      updatedHold = {
         ...h,
         releasedBags: h.releasedBags + q,
         remainingBags: rem,
-        status: rem === 0 ? 'Fully Dispatched' : 'Active Custody'
+        qty: rem,
+        status: rem === 0 ? 'Fully Dispatched' : 'Active Custody',
+        synced: false,
+        updatedAt: new Date().toISOString()
       };
+      return updatedHold;
     }));
+
+    if (updatedHold) {
+      saveLocalHoldStock(updatedHold, false).catch(e => console.warn(e));
+      flushAllQueues();
+    }
     addLog('Release Stock', `Dispatched ${q} bags`);
     showToast(`Dispatched ${q} bags from custody!`, 'success');
   };
 
-  // Temp Ledger (Katcha Khata)
+  // Temp Ledger (Katcha Khata) (Offline-First)
   const addTempLedger = (entry) => {
+    const tempId = generateEntityId('temp');
     const item = {
-      id: 'TEMP-' + Math.floor(10 + Math.random() * 90),
+      id: tempId,
       branchId: activeBranchId,
       date: new Date().toISOString().split('T')[0],
       partyName: entry.partyName,
+      personName: entry.partyName,
+      phone: entry.phone || '',
       details: entry.details,
+      description: entry.details,
       amount: Number(entry.amount) || 0,
       type: entry.type || 'Sale',
-      status: 'Pending'
+      status: 'Pending',
+      isCleared: false,
+      notes: entry.notes || '',
+      synced: false,
+      deleted: false,
+      updatedAt: new Date().toISOString()
     };
+
+    saveLocalTempLedger(item, false).catch(e => console.warn(e));
     setTempLedger(prev => [item, ...prev]);
     showToast('Temp entry noted in Katcha Khata', 'info');
+
+    flushAllQueues();
   };
 
   const approveTempLedger = (id) => {
-    setTempLedger(prev => prev.map(t => t.id === id ? { ...t, status: 'Reconciled / Settled' } : t));
+    let updatedTemp = null;
+    setTempLedger(prev => prev.map(t => {
+      if (t.id === id) {
+        updatedTemp = {
+          ...t,
+          status: 'Reconciled / Settled',
+          isCleared: true,
+          synced: false,
+          updatedAt: new Date().toISOString()
+        };
+        return updatedTemp;
+      }
+      return t;
+    }));
+
+    if (updatedTemp) {
+      saveLocalTempLedger(updatedTemp, false).catch(e => console.warn(e));
+      flushAllQueues();
+    }
     showToast('Temp entry reconciled', 'success');
   };
 
   const deleteTempLedger = (id) => {
+    deleteLocalTempLedger(id).catch(e => console.warn(e));
     setTempLedger(prev => prev.filter(t => t.id !== id));
     showToast('Temp entry removed', 'info');
+    flushAllQueues();
   };
 
   const resetAllData = () => {
@@ -1949,6 +2319,8 @@ export function AppProvider({ children }) {
         pullFromCloud,
         flushQueue,
         syncProductsFull,
+        flushAllQueues,
+        syncAllFull,
         purchases: purchases.filter(po => !po.branchId || po.branchId === activeBranchId),
         allPurchases: purchases,
         payments: branchPayments,
