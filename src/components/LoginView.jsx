@@ -103,8 +103,21 @@ export default function LoginView() {
       <div className="login-right-panel">
         <div className="login-card">
 
-          {/* Store Header */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+          {/* Mobile Branded Header */}
+          <div className="mobile-login-branding">
+            <div className="login-hero-logo" style={{ margin: '0 auto 10px auto', background: 'var(--primary-gradient)', color: '#fff', width: '48px', height: '48px', borderRadius: '12px' }}>
+              <span dangerouslySetInnerHTML={{ __html: icons.leaf }} />
+            </div>
+            <h2 style={{ fontSize: '18px', fontWeight: 800, textAlign: 'center', color: 'var(--text-main)', marginBottom: '2px' }}>
+              {storeProfile?.name || 'AgroTrader Pro SaaS'}
+            </h2>
+            <p style={{ fontSize: '12px', textAlign: 'center', color: 'var(--text-muted)', marginBottom: '16px' }}>
+              Agriculture Store POS, Inventory &amp; Khata Cloud
+            </p>
+          </div>
+
+          {/* Desktop Store Header */}
+          <div className="desktop-login-header" style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
             <span dangerouslySetInnerHTML={{ __html: icons.lock }} />
             <div>
               <div style={{ fontWeight: 700, fontSize: '14px' }}>Agro Trader SaaS</div>

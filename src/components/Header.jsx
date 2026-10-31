@@ -80,7 +80,7 @@ export default function Header({ onToggleMobileMenu, onOpenDownloadApp, onOpenEx
             title="Download AgroTrader Desktop ERP (.EXE) or Mobile POS (.APK)"
           >
             <span>💻</span>
-            <span>Download Software</span>
+            <span className="btn-text-desktop">Download Software</span>
           </button>
 
           {(auth.user?.role === 'superadmin' || impersonatingTenant) && (
@@ -100,7 +100,8 @@ export default function Header({ onToggleMobileMenu, onOpenDownloadApp, onOpenEx
               onClick={() => setActiveTab('superadmin')}
               title="Open SaaS Super Admin Master Portal"
             >
-              🛡️ SaaS Master
+              <span>🛡️</span>
+              <span className="btn-text-desktop">SaaS Master</span>
             </button>
           )}
 
@@ -125,7 +126,8 @@ export default function Header({ onToggleMobileMenu, onOpenDownloadApp, onOpenEx
               title={`${criticalExpiryProducts.length} product(s) expiring within 7 days or expired! Click to inspect.`}
             >
               <span>⚠️</span>
-              <span>{criticalExpiryProducts.length} Expiring (≤ 7d)</span>
+              <span>{criticalExpiryProducts.length}</span>
+              <span className="btn-text-desktop">Expiring (≤ 7d)</span>
             </button>
           )}
 
@@ -135,12 +137,12 @@ export default function Header({ onToggleMobileMenu, onOpenDownloadApp, onOpenEx
               style={{ fontSize: '11px', padding: '3px 8px', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 700 }}
             >
               <span>{auth.user?.role === 'superadmin' ? '🛡️' : auth.user?.role === 'staff' ? '👤' : '👑'}</span>
-              <span>
+              <span className="btn-text-desktop">
                 {auth.user?.role === 'superadmin'
                   ? 'Master SuperAdmin'
                   : auth.user?.role === 'staff'
                   ? `Staff (${auth.user?.branchName || 'Counter'})`
-                  : 'Admin Manager'}
+                  : 'Admin'}
               </span>
             </span>
           </div>
@@ -182,28 +184,29 @@ export default function Header({ onToggleMobileMenu, onOpenDownloadApp, onOpenEx
           <button
             type="button"
             className={`btn ${hideAmounts ? 'btn-accent' : 'btn-outline'}`}
-            style={{ fontSize: '12px', padding: '6px 12px' }}
+            style={{ fontSize: '12px', padding: '6px 10px', display: 'flex', alignItems: 'center', gap: '5px' }}
             onClick={toggleHideAmounts}
-            title="Toggle masking amounts for customer privacy"
+            title={hideAmounts ? 'Show Amounts' : 'Hide Amounts'}
+            aria-label={hideAmounts ? 'Show Amounts' : 'Hide Amounts'}
           >
             <span dangerouslySetInnerHTML={{ __html: hideAmounts ? icons.eyeOff : icons.eye }} />
-            <span>{hideAmounts ? 'Show Amounts' : 'Hide Amounts'}</span>
+            <span className="btn-text-desktop">{hideAmounts ? 'Show Amounts' : 'Hide Amounts'}</span>
           </button>
 
           {/* Theme Switcher Dropdown */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
             <span dangerouslySetInnerHTML={{ __html: icons.palette }} style={{ color: 'var(--text-muted)' }} />
             <select
-              className="select"
+              className="select header-theme-select"
               value={theme}
               onChange={(e) => setTheme(e.target.value)}
               style={{ width: 'auto', padding: '5px 8px', fontSize: '12px', fontWeight: 600 }}
               title="Select application theme"
             >
-              <option value="theme-sapphire">✨ Sapphire & Gold (New Theme)</option>
-              <option value="theme-emerald">🌲 Emerald Classic (Screenshot)</option>
-              <option value="theme-obsidian">🌑 Obsidian Dark Cockpit</option>
-              <option value="theme-arctic">❄️ Arctic Clean Slate</option>
+              <option value="theme-sapphire">✨ Sapphire</option>
+              <option value="theme-emerald">🌲 Emerald</option>
+              <option value="theme-obsidian">🌑 Obsidian</option>
+              <option value="theme-arctic">❄️ Arctic</option>
             </select>
           </div>
 
@@ -211,12 +214,13 @@ export default function Header({ onToggleMobileMenu, onOpenDownloadApp, onOpenEx
           <button
             type="button"
             className="btn btn-outline"
-            style={{ fontSize: '12px', padding: '5px 10px', display: 'flex', alignItems: 'center', gap: '6px' }}
+            style={{ fontSize: '12px', padding: '5px 10px', display: 'flex', alignItems: 'center', gap: '5px' }}
             onClick={logout}
             title="Logout &amp; Switch Account"
+            aria-label="Logout"
           >
             <span dangerouslySetInnerHTML={{ __html: icons.logout }} />
-            <span>Logout</span>
+            <span className="btn-text-desktop">Logout</span>
           </button>
         </div>
       </header>

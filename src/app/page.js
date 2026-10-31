@@ -246,7 +246,7 @@ function MainApp() {
   };
 
   return (
-    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <div className="app-root-shell" style={{ minHeight: '100vh', height: '100dvh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       {/* Top Header & Window Chrome */}
       <Header
         onToggleMobileMenu={() => setIsMobileMenuOpen(prev => !prev)}
