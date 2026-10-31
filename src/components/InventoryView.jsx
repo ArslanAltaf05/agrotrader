@@ -611,6 +611,13 @@ export default function InventoryView({ onOpenAddProduct, onEditProduct, onOpenT
             );
           })
         )}
+
+        {/* End of Products list footer with comfortable bottom clearance */}
+        {filteredProducts.length > 0 && (
+          <div className="mobile-catalogue-footer">
+            <span>🌾 Showing all {filteredProducts.length} product{filteredProducts.length > 1 ? 's' : ''}</span>
+          </div>
+        )}
       </div>
     </div>
   );

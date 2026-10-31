@@ -1419,9 +1419,10 @@ html, body {
 
   /* Page Body padding accounting for bottom navigation */
   .page-body {
-    padding: 12px 12px calc(80px + env(safe-area-inset-bottom, 12px)) 12px !important;
+    padding: 12px 12px calc(140px + env(safe-area-inset-bottom, 24px)) 12px !important;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    scroll-padding-bottom: calc(140px + env(safe-area-inset-bottom, 24px));
   }
 
   /* Desktop Sidebar converted to an Off-Canvas Slide-In Drawer */
@@ -1657,6 +1658,15 @@ html, body {
     flex-direction: column;
     gap: 12px;
     width: 100%;
+    padding-bottom: 24px;
+  }
+
+  .mobile-catalogue-footer {
+    text-align: center;
+    padding: 14px 8px 32px 8px;
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 600;
   }
 
   .mobile-product-card {
