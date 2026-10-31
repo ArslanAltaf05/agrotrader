@@ -51,14 +51,16 @@ export default function Header({ onToggleMobileMenu, onOpenDownloadApp, onOpenEx
     <>
       {/* SaaS Status & Realtime Cloud Bar */}
       <div className="saas-top-strip">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
-          <div className="saas-badge-plan">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, flex: 1, overflow: 'hidden' }}>
+          <div className="saas-badge-plan" style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             <span>🌾</span>
-            <span>{storeProfile.name || 'AgroTrader Pro'} ({saasPlan.name})</span>
+            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {storeProfile.name || 'AgroTrader Pro'} ({saasPlan.name})
+            </span>
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
           {/* Download App / Software Hub */}
           <button
             type="button"
@@ -74,13 +76,14 @@ export default function Header({ onToggleMobileMenu, onOpenDownloadApp, onOpenEx
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: '4px'
+              gap: '4px',
+              whiteSpace: 'nowrap'
             }}
             onClick={onOpenDownloadApp}
             title="Download AgroTrader Desktop ERP (.EXE) or Mobile POS (.APK)"
           >
             <span>💻</span>
-            <span className="btn-text-desktop">Download Software</span>
+            <span className="btn-text-desktop hide-on-mobile">Download Software</span>
           </button>
 
           {(auth.user?.role === 'superadmin' || impersonatingTenant) && (
@@ -95,13 +98,14 @@ export default function Header({ onToggleMobileMenu, onOpenDownloadApp, onOpenEx
                 border: '1px solid rgba(217, 119, 6, 0.5)',
                 fontWeight: 700,
                 borderRadius: '4px',
-                cursor: 'pointer'
+                cursor: 'pointer',
+                whiteSpace: 'nowrap'
               }}
               onClick={() => setActiveTab('superadmin')}
               title="Open SaaS Super Admin Master Portal"
             >
               <span>🛡️</span>
-              <span className="btn-text-desktop">SaaS Master</span>
+              <span className="btn-text-desktop hide-on-mobile">SaaS Master</span>
             </button>
           )}
 
@@ -120,24 +124,25 @@ export default function Header({ onToggleMobileMenu, onOpenDownloadApp, onOpenEx
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '5px'
+                gap: '5px',
+                whiteSpace: 'nowrap'
               }}
               onClick={onOpenExpiryAlert}
               title={`${criticalExpiryProducts.length} product(s) expiring within 7 days or expired! Click to inspect.`}
             >
               <span>⚠️</span>
               <span>{criticalExpiryProducts.length}</span>
-              <span className="btn-text-desktop">Expiring (≤ 7d)</span>
+              <span className="btn-text-desktop hide-on-mobile">Expiring (≤ 7d)</span>
             </button>
           )}
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <span
               className={`badge ${auth.user?.role === 'superadmin' ? 'badge-warning' : auth.user?.role === 'staff' ? 'badge-accent' : 'badge-info'}`}
-              style={{ fontSize: '11px', padding: '3px 8px', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 700 }}
+              style={{ fontSize: '11px', padding: '3px 8px', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 700, whiteSpace: 'nowrap' }}
             >
               <span>{auth.user?.role === 'superadmin' ? '🛡️' : auth.user?.role === 'staff' ? '👤' : '👑'}</span>
-              <span className="btn-text-desktop">
+              <span className="btn-text-desktop hide-on-mobile">
                 {auth.user?.role === 'superadmin'
                   ? 'Master SuperAdmin'
                   : auth.user?.role === 'staff'
@@ -184,43 +189,62 @@ export default function Header({ onToggleMobileMenu, onOpenDownloadApp, onOpenEx
           <button
             type="button"
             className={`btn ${hideAmounts ? 'btn-accent' : 'btn-outline'}`}
-            style={{ fontSize: '12px', padding: '6px 10px', display: 'flex', alignItems: 'center', gap: '5px' }}
+            style={{ fontSize: '12px', padding: '6px 9px', display: 'flex', alignItems: 'center', gap: '5px', whiteSpace: 'nowrap', flexShrink: 0 }}
             onClick={toggleHideAmounts}
             title={hideAmounts ? 'Show Amounts' : 'Hide Amounts'}
             aria-label={hideAmounts ? 'Show Amounts' : 'Hide Amounts'}
           >
             <span dangerouslySetInnerHTML={{ __html: hideAmounts ? icons.eyeOff : icons.eye }} />
-            <span className="btn-text-desktop">{hideAmounts ? 'Show Amounts' : 'Hide Amounts'}</span>
+            <span className="btn-text-desktop hide-on-mobile">{hideAmounts ? 'Show Amounts' : 'Hide Amounts'}</span>
           </button>
 
-          {/* Theme Switcher Dropdown */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <span dangerouslySetInnerHTML={{ __html: icons.palette }} style={{ color: 'var(--text-muted)' }} />
-            <select
-              className="select header-theme-select"
-              value={theme}
-              onChange={(e) => setTheme(e.target.value)}
-              style={{ width: 'auto', padding: '5px 8px', fontSize: '12px', fontWeight: 600 }}
-              title="Select application theme"
+          {/* Theme Switcher */}
+          <div className="header-theme-wrapper" style={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
+            {/* Desktop Theme Select */}
+            <div className="hide-on-mobile" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <span dangerouslySetInnerHTML={{ __html: icons.palette }} style={{ color: 'var(--text-muted)' }} />
+              <select
+                className="select header-theme-select"
+                value={theme}
+                onChange={(e) => setTheme(e.target.value)}
+                style={{ width: 'auto', padding: '5px 8px', fontSize: '12px', fontWeight: 600 }}
+                title="Select application theme"
+              >
+                <option value="theme-sapphire">✨ Sapphire</option>
+                <option value="theme-emerald">🌲 Emerald</option>
+                <option value="theme-obsidian">🌑 Obsidian</option>
+                <option value="theme-arctic">❄️ Arctic</option>
+              </select>
+            </div>
+
+            {/* Mobile Theme Cycle Button */}
+            <button
+              type="button"
+              className="btn btn-outline show-on-mobile header-theme-cycle-btn"
+              style={{ fontSize: '13px', padding: '6px 8px', minWidth: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              onClick={() => {
+                const themes = ['theme-sapphire', 'theme-emerald', 'theme-obsidian', 'theme-arctic'];
+                const nextIdx = (themes.indexOf(theme) + 1) % themes.length;
+                setTheme(themes[nextIdx]);
+              }}
+              title={`Current Theme: ${theme.replace('theme-', '')}. Tap to switch theme.`}
+              aria-label="Switch Theme"
             >
-              <option value="theme-sapphire">✨ Sapphire</option>
-              <option value="theme-emerald">🌲 Emerald</option>
-              <option value="theme-obsidian">🌑 Obsidian</option>
-              <option value="theme-arctic">❄️ Arctic</option>
-            </select>
+              {theme === 'theme-sapphire' ? '✨' : theme === 'theme-emerald' ? '🌲' : theme === 'theme-obsidian' ? '🌑' : '❄️'}
+            </button>
           </div>
 
           {/* User profile / Logout */}
           <button
             type="button"
             className="btn btn-outline"
-            style={{ fontSize: '12px', padding: '5px 10px', display: 'flex', alignItems: 'center', gap: '5px' }}
+            style={{ fontSize: '12px', padding: '6px 9px', display: 'flex', alignItems: 'center', gap: '5px', flexShrink: 0, whiteSpace: 'nowrap' }}
             onClick={logout}
-            title="Logout &amp; Switch Account"
+            title="Logout & Switch Account"
             aria-label="Logout"
           >
             <span dangerouslySetInnerHTML={{ __html: icons.logout }} />
-            <span className="btn-text-desktop">Logout</span>
+            <span className="btn-text-desktop hide-on-mobile">Logout</span>
           </button>
         </div>
       </header>

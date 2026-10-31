@@ -303,7 +303,7 @@ export default function InventoryView({ onOpenAddProduct, onEditProduct, onOpenT
         </select>
 
         {/* Right action buttons */}
-        <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px', alignItems: 'center' }}>
+        <div className="filter-bar-actions" style={{ marginLeft: 'auto', display: 'flex', gap: '8px', alignItems: 'center' }}>
           <button
             type="button"
             className="btn btn-outline"
@@ -328,8 +328,8 @@ export default function InventoryView({ onOpenAddProduct, onEditProduct, onOpenT
         </div>
       </div>
 
-      {/* Main Inventory Table matching Screenshot 5 */}
-      <div className="card" style={{ padding: '0', overflow: 'hidden' }}>
+      {/* Main Inventory Table matching Screenshot 5 (Desktop & Tablet > 768px) */}
+      <div className="card desktop-only hide-on-mobile" style={{ padding: '0', overflow: 'hidden' }}>
         <div className="table-responsive">
           <table className="data-table">
             <thead>
@@ -483,6 +483,134 @@ export default function InventoryView({ onOpenAddProduct, onEditProduct, onOpenT
             </tbody>
           </table>
         </div>
+      </div>
+
+      {/* Mobile Inventory Cards (Smartphones <= 768px) */}
+      <div className="mobile-inventory-cards mobile-only show-on-mobile">
+        {filteredProducts.length === 0 ? (
+          <div className="card" style={{ textAlign: 'center', padding: '36px 16px', color: 'var(--text-muted)' }}>
+            <div style={{ fontSize: '32px', marginBottom: '8px' }}>🌾</div>
+            <div style={{ fontWeight: 600 }}>No products found</div>
+            <div style={{ fontSize: '12px', marginTop: '4px' }}>Try adjusting your filters or tap + Product to add a new item.</div>
+          </div>
+        ) : (
+          filteredProducts.map(p => {
+            const total = (p.shopStock || 0) + (p.storeStock || 0);
+            const isOutOfStock = total === 0;
+            const isLowStock = !isOutOfStock && total <= (p.alertQty || 10);
+
+            let statusBadge = <span className="badge badge-success">In Stock</span>;
+            if (isOutOfStock) {
+              statusBadge = <span className="badge badge-danger">Out of Stock</span>;
+            } else if (isLowStock) {
+              statusBadge = <span className="badge badge-warning">Low ({p.alertQty} min)</span>;
+            }
+
+            const exp = p.expiryDate ? getExpiryDetails(p.expiryDate) : null;
+
+            return (
+              <div key={p.id} className="mobile-product-card card">
+                {/* Header: Name, SKU, Category, Price */}
+                <div className="mobile-product-card-header">
+                  <div className="mobile-product-info">
+                    <div className="mobile-product-name">{p.name}</div>
+                    <div className="mobile-product-meta">
+                      <span>SKU: {p.sku}</span>
+                      {p.manufacturer && <span>&bull; {p.manufacturer}</span>}
+                      {p.batchNo && <span>&bull; Batch: {p.batchNo}</span>}
+                    </div>
+                  </div>
+                  <div className="mobile-product-price-badge">
+                    <span className="price-val">{formatCurrency(p.salePrice, hideAmounts)}</span>
+                    <span className="badge badge-neutral" style={{ fontWeight: 600 }}>{p.category}</span>
+                  </div>
+                </div>
+
+                {/* Expiry & Status Badges */}
+                <div className="mobile-product-badges">
+                  {exp && (
+                    <span
+                      className={`badge ${exp.badgeClass}`}
+                      style={{
+                        fontSize: '11px',
+                        fontWeight: 700,
+                        background: exp.bg,
+                        color: exp.color,
+                        border: `1px solid ${exp.color}40`,
+                        padding: '2px 8px'
+                      }}
+                    >
+                      {exp.isExpired ? '🔴 ' : (exp.isCritical ? '⏳ ' : '📅 ')}
+                      {exp.label} ({p.expiryDate})
+                    </span>
+                  )}
+                  {statusBadge}
+                </div>
+
+                {/* 3-Column Stock Grid */}
+                <div className="mobile-product-stock-grid">
+                  <div
+                    className="mobile-stock-pill shop"
+                    onClick={() => onOpenTransfer && onOpenTransfer(p, 'shop', 'store')}
+                    title="Click to transfer to Store"
+                  >
+                    <span className="stock-lbl">🏪 SHOP</span>
+                    <span className="stock-val">{p.shopStock || 0} {p.unit}</span>
+                  </div>
+                  <div
+                    className="mobile-stock-pill store"
+                    onClick={() => onOpenTransfer && onOpenTransfer(p, 'store', 'shop')}
+                    title="Click to transfer to Shop"
+                  >
+                    <span className="stock-lbl">🏭 STORE</span>
+                    <span className="stock-val">{p.storeStock || 0} {p.unit}</span>
+                  </div>
+                  <div className="mobile-stock-pill total">
+                    <span className="stock-lbl">📦 TOTAL</span>
+                    <span className="stock-val">{total} {p.unit}</span>
+                  </div>
+                </div>
+
+                {/* Quick Touch Action Buttons */}
+                <div className="mobile-product-actions">
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-outline mobile-act-btn"
+                    onClick={() => onOpenTransfer && onOpenTransfer(p, 'shop', 'store')}
+                    title="Transfer Stock between Shop and Store"
+                  >
+                    <span dangerouslySetInnerHTML={{ __html: icons.transfer }} />
+                    <span>Transfer</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-outline mobile-act-btn"
+                    onClick={() => onEditProduct && onEditProduct(p)}
+                    title="Edit Product Details"
+                  >
+                    <span dangerouslySetInnerHTML={{ __html: icons.edit }} />
+                    <span>Edit</span>
+                  </button>
+                  {isAdmin && (
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-outline btn-danger-soft mobile-act-btn"
+                      onClick={() => {
+                        if (confirm(`Are you sure you want to delete ${p.name}?`)) {
+                          deleteProduct(p.id);
+                        }
+                      }}
+                      title="Delete Product"
+                    >
+                      <span dangerouslySetInnerHTML={{ __html: icons.trash }} />
+                      <span>Delete</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })
+        )}
       </div>
     </div>
   );
