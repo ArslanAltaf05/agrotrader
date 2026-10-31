@@ -6,11 +6,12 @@
   "scripts": {
     "dev": "next dev --port 3000",
     "build": "next build",
+    "build:export": "CAPACITOR_BUILD=1 next build",
     "start": "next start",
     "cap:add": "cap add android",
     "cap:sync": "cap sync android",
     "cap:open": "cap open android",
-    "build:apk": "next build && cap sync android && cd android && ./gradlew assembleDebug"
+    "build:apk": "CAPACITOR_BUILD=1 next build && cap sync android && cd android && ./gradlew assembleDebug"
   },
   "devDependencies": {
     "@capacitor/android": "^8.5.3",
