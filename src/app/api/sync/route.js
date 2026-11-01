@@ -289,11 +289,12 @@ export async function POST(request) {
             cost_price = EXCLUDED.cost_price, sale_price = EXCLUDED.sale_price, offer_price = EXCLUDED.offer_price,
             shop_stock = EXCLUDED.shop_stock, store_stock = EXCLUDED.store_stock, alert_qty = EXCLUDED.alert_qty,
             location = EXCLUDED.location, flags = EXCLUDED.flags, notes = EXCLUDED.notes,
-            deleted = EXCLUDED.deleted, updated_at = EXCLUDED.updated_at;
+            deleted = EXCLUDED.deleted, updated_at = NOW();
         `;
         syncedIds.products.push(p.id);
       }
       syncedCounts.products = syncedIds.products.length;
+      console.log(`[Sync] Upserted ${syncedCounts.products} products, 0 deleted`);
     }
 
     // 2. Customers

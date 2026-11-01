@@ -145,11 +145,13 @@ export async function POST(request) {
           flags = EXCLUDED.flags,
           notes = EXCLUDED.notes,
           deleted = EXCLUDED.deleted,
-          updated_at = EXCLUDED.updated_at;
+          updated_at = NOW();
       `;
 
       syncedIds.push(p.id);
     }
+
+    console.log(`[Sync] Upserted ${syncedIds.length} products, 0 deleted`);
 
     return Response.json({
       success: true,

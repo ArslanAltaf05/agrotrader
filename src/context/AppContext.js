@@ -411,14 +411,6 @@ export function AppProvider({ children }) {
       const now = new Date().toISOString();
 
       if (result.success && result.found && result.data) {
-        if (Array.isArray(result.data.products) && result.data.products.length) setProducts(result.data.products);
-        if (Array.isArray(result.data.customers) && result.data.customers.length) setCustomers(result.data.customers);
-        if (Array.isArray(result.data.suppliers) && result.data.suppliers.length) setSuppliers(result.data.suppliers);
-        if (Array.isArray(result.data.sales) && result.data.sales.length) setSales(result.data.sales);
-        if (Array.isArray(result.data.purchases) && result.data.purchases.length) setPurchases(result.data.purchases);
-        if (Array.isArray(result.data.payments) && result.data.payments.length) setPayments(result.data.payments);
-        if (Array.isArray(result.data.holdStock)) setHoldStock(result.data.holdStock);
-        if (Array.isArray(result.data.tempLedger)) setTempLedger(result.data.tempLedger);
         if (Array.isArray(result.data.branches) && result.data.branches.length) setBranches(result.data.branches);
         if (result.data.storeProfile) setStoreProfile(result.data.storeProfile);
 
@@ -625,7 +617,7 @@ export function AppProvider({ children }) {
         const savedStr = typeof localStorage !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null;
         const parsed = savedStr ? JSON.parse(savedStr) : null;
         const initialList = (parsed && Array.isArray(parsed.products) && parsed.products.length > 0) ? parsed.products : INITIAL_PRODUCTS;
-        await saveLocalProductsBatch(initialList.map(p => ({ ...p, synced: false })));
+        await saveLocalProductsBatch(initialList.map(p => ({ ...p, synced: true })));
         setProducts(initialList);
       }
 
@@ -633,7 +625,7 @@ export function AppProvider({ children }) {
       if (lCustomers && lCustomers.length > 0) {
         setCustomers(lCustomers);
       } else {
-        await saveLocalCustomersBatch(INITIAL_CUSTOMERS.map(c => ({ ...c, synced: false })));
+        await saveLocalCustomersBatch(INITIAL_CUSTOMERS.map(c => ({ ...c, synced: true })));
         setCustomers(INITIAL_CUSTOMERS);
       }
 
@@ -641,7 +633,7 @@ export function AppProvider({ children }) {
       if (lSuppliers && lSuppliers.length > 0) {
         setSuppliers(lSuppliers);
       } else {
-        await saveLocalSuppliersBatch(INITIAL_SUPPLIERS.map(s => ({ ...s, synced: false })));
+        await saveLocalSuppliersBatch(INITIAL_SUPPLIERS.map(s => ({ ...s, synced: true })));
         setSuppliers(INITIAL_SUPPLIERS);
       }
 
@@ -649,7 +641,7 @@ export function AppProvider({ children }) {
       if (lSales && lSales.length > 0) {
         setSales(lSales);
       } else {
-        await saveLocalSalesBatch(INITIAL_SALES.map(s => ({ ...s, synced: false })));
+        await saveLocalSalesBatch(INITIAL_SALES.map(s => ({ ...s, synced: true })));
         setSales(INITIAL_SALES);
       }
 
@@ -657,7 +649,7 @@ export function AppProvider({ children }) {
       if (lPurchases && lPurchases.length > 0) {
         setPurchases(lPurchases);
       } else {
-        await saveLocalPurchasesBatch(INITIAL_PURCHASES.map(po => ({ ...po, synced: false })));
+        await saveLocalPurchasesBatch(INITIAL_PURCHASES.map(po => ({ ...po, synced: true })));
         setPurchases(INITIAL_PURCHASES);
       }
 
@@ -665,7 +657,7 @@ export function AppProvider({ children }) {
       if (lPayments && lPayments.length > 0) {
         setPayments(lPayments);
       } else {
-        await saveLocalPaymentsBatch(INITIAL_PAYMENTS.map(p => ({ ...p, synced: false })));
+        await saveLocalPaymentsBatch(INITIAL_PAYMENTS.map(p => ({ ...p, synced: true })));
         setPayments(INITIAL_PAYMENTS);
       }
 
@@ -673,7 +665,7 @@ export function AppProvider({ children }) {
       if (lHoldStock && lHoldStock.length > 0) {
         setHoldStock(lHoldStock);
       } else {
-        await saveLocalHoldStockBatch(INITIAL_HOLD_STOCK.map(h => ({ ...h, synced: false })));
+        await saveLocalHoldStockBatch(INITIAL_HOLD_STOCK.map(h => ({ ...h, synced: true })));
         setHoldStock(INITIAL_HOLD_STOCK);
       }
 
@@ -681,7 +673,7 @@ export function AppProvider({ children }) {
       if (lTempLedger && lTempLedger.length > 0) {
         setTempLedger(lTempLedger);
       } else {
-        await saveLocalTempLedgerBatch(INITIAL_TEMP_LEDGER.map(t => ({ ...t, synced: false })));
+        await saveLocalTempLedgerBatch(INITIAL_TEMP_LEDGER.map(t => ({ ...t, synced: true })));
         setTempLedger(INITIAL_TEMP_LEDGER);
       }
 

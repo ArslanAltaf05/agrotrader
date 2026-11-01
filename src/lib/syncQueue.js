@@ -118,32 +118,61 @@ export async function flushAllQueues() {
 }
 
 /**
- * Merge helper: preserves local un-synced edits so offline writes are never wiped
+ * Merge helper: implements true two-way union merge
+ * - Pulls all records from Neon
+ * - If record exists in local IndexedDB with synced: false, preserves local pending change
+ * - If record exists in both and is synced, updates only if server updated_at is newer
+ * - If record is only in Neon, inserts into IndexedDB
+ * - If record is only in IndexedDB (synced or pending), preserves it
+ * Result: union of all Neon products + all local products, never deleting rows.
  */
 async function mergeStore(storeName, serverList = []) {
   const localList = await getAllLocalItems(storeName);
   const localMap = new Map(localList.map(item => [item.id, item]));
+  const serverIdSet = new Set(serverList.map(s => s.id));
 
-  const merged = [];
+  const mergedMap = new Map();
+
+  // 1. Process all items received from Neon server
   for (const serverItem of serverList) {
+    if (!serverItem || !serverItem.id) continue;
     const local = localMap.get(serverItem.id);
-    if (local && local.synced === false) {
-      // Local pending change wins over server data!
-      merged.push(local);
+
+    if (local) {
+      if (local.synced === false) {
+        // Local pending item (edited or created offline) takes precedence until flushed
+        mergedMap.set(local.id, local);
+      } else {
+        // Both synced: update if server updated_at is newer
+        const localTime = new Date(local.updatedAt || local.updated_at || 0).getTime();
+        const serverTime = new Date(serverItem.updatedAt || serverItem.updated_at || 0).getTime();
+        if (serverTime >= localTime) {
+          mergedMap.set(serverItem.id, { ...serverItem, synced: true });
+        } else {
+          mergedMap.set(local.id, local);
+        }
+      }
     } else {
-      merged.push({ ...serverItem, synced: true });
+      // Product exists in Neon but not in local IndexedDB: insert into IndexedDB
+      mergedMap.set(serverItem.id, { ...serverItem, synced: true });
     }
   }
 
-  // Include any new local items not yet on the server
+  // 2. Process all items in local IndexedDB that were not in serverList
   for (const local of localList) {
-    if (!serverList.some(s => s.id === local.id)) {
-      merged.push(local);
+    if (!local || !local.id) continue;
+    if (!serverIdSet.has(local.id)) {
+      // Product in IndexedDB that wasn't in server list (pending push or local): keep it!
+      mergedMap.set(local.id, local);
     }
   }
 
-  // Save merged dataset into IndexedDB
+  const merged = Array.from(mergedMap.values());
+
+  // Save the complete union dataset into IndexedDB
   await saveLocalBatch(storeName, merged);
+
+  // Return active (non-deleted) items for immediate React state update
   return merged.filter(item => !item.deleted);
 }
 
