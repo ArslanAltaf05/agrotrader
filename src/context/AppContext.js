@@ -317,7 +317,8 @@ export function AppProvider({ children }) {
     setCloudConfig(prev => ({ ...prev, syncStatus: 'syncing' }));
 
     try {
-      await flushAllQueues();
+      // If manual push, push all local records across all stores to Neon
+      await flushAllQueues(!isAuto);
     } catch (e) {
       console.warn('[Sync] Flush queues error in pushToCloud:', e);
     }
@@ -363,7 +364,7 @@ export function AppProvider({ children }) {
           showToast('🌐 Internet Connected: Synced with Neon PostgreSQL!', 'success');
         }
       } else {
-        showToast(isNeon ? '☁️ All store ledgers saved to Neon PostgreSQL!' : '💾 Saved to local database (configure Neon credentials in .env)!', 'success');
+        showToast(isNeon ? '☁️ All store ledgers saved to Neon PostgreSQL (Preserved across all devices)!' : '💾 Saved to local database (configure Neon credentials in .env)!', 'success');
       }
       return true;
     } catch (err) {
@@ -393,14 +394,14 @@ export function AppProvider({ children }) {
     try {
       const syncedAll = await pullAllFromServer();
       if (syncedAll) {
-        if (syncedAll.products?.length) setProducts(syncedAll.products);
-        if (syncedAll.customers?.length) setCustomers(syncedAll.customers);
-        if (syncedAll.suppliers?.length) setSuppliers(syncedAll.suppliers);
-        if (syncedAll.sales?.length) setSales(syncedAll.sales);
-        if (syncedAll.purchases?.length) setPurchases(syncedAll.purchases);
-        if (syncedAll.payments?.length) setPayments(syncedAll.payments);
-        if (syncedAll.holdStock?.length) setHoldStock(syncedAll.holdStock);
-        if (syncedAll.tempLedger?.length) setTempLedger(syncedAll.tempLedger);
+        if (Array.isArray(syncedAll.products)) setProducts(syncedAll.products);
+        if (Array.isArray(syncedAll.customers)) setCustomers(syncedAll.customers);
+        if (Array.isArray(syncedAll.suppliers)) setSuppliers(syncedAll.suppliers);
+        if (Array.isArray(syncedAll.sales)) setSales(syncedAll.sales);
+        if (Array.isArray(syncedAll.purchases)) setPurchases(syncedAll.purchases);
+        if (Array.isArray(syncedAll.payments)) setPayments(syncedAll.payments);
+        if (Array.isArray(syncedAll.holdStock)) setHoldStock(syncedAll.holdStock);
+        if (Array.isArray(syncedAll.tempLedger)) setTempLedger(syncedAll.tempLedger);
       }
     } catch (err) {
       console.warn('pullAllFromServer error in pullFromCloud:', err);
@@ -413,6 +414,8 @@ export function AppProvider({ children }) {
       if (result.success && result.found && result.data) {
         if (Array.isArray(result.data.branches) && result.data.branches.length) setBranches(result.data.branches);
         if (result.data.storeProfile) setStoreProfile(result.data.storeProfile);
+        if (Array.isArray(result.data.tenants) && result.data.tenants.length) setTenants(result.data.tenants);
+        if (Array.isArray(result.data.tenantUsers) && result.data.tenantUsers.length) setTenantUsers(result.data.tenantUsers);
 
         setCloudConfig(prev => ({
           ...prev,
@@ -442,21 +445,61 @@ export function AppProvider({ children }) {
 
   const syncWithCloud = async (isAuto = false) => {
     try {
-      const syncedAll = await syncAllFull();
+      // 1. Run full 2-way sync (push pending or all local if manual + pull Neon server records and union-merge)
+      const syncedAll = await syncAllFull(!isAuto);
       if (syncedAll) {
-        if (syncedAll.products?.length) setProducts(syncedAll.products);
-        if (syncedAll.customers?.length) setCustomers(syncedAll.customers);
-        if (syncedAll.suppliers?.length) setSuppliers(syncedAll.suppliers);
-        if (syncedAll.sales?.length) setSales(syncedAll.sales);
-        if (syncedAll.purchases?.length) setPurchases(syncedAll.purchases);
-        if (syncedAll.payments?.length) setPayments(syncedAll.payments);
-        if (syncedAll.holdStock?.length) setHoldStock(syncedAll.holdStock);
-        if (syncedAll.tempLedger?.length) setTempLedger(syncedAll.tempLedger);
+        if (Array.isArray(syncedAll.products)) setProducts(syncedAll.products);
+        if (Array.isArray(syncedAll.customers)) setCustomers(syncedAll.customers);
+        if (Array.isArray(syncedAll.suppliers)) setSuppliers(syncedAll.suppliers);
+        if (Array.isArray(syncedAll.sales)) setSales(syncedAll.sales);
+        if (Array.isArray(syncedAll.purchases)) setPurchases(syncedAll.purchases);
+        if (Array.isArray(syncedAll.payments)) setPayments(syncedAll.payments);
+        if (Array.isArray(syncedAll.holdStock)) setHoldStock(syncedAll.holdStock);
+        if (Array.isArray(syncedAll.tempLedger)) setTempLedger(syncedAll.tempLedger);
+
+        // 2. Persist the freshly merged dataset to Neon agro_store_sync
+        const payload = {
+          tenantId: activeTenantId || 'tenant-1',
+          storeName: storeProfile?.name || 'Asmat Agro Traders Retra',
+          storeProfile,
+          products: syncedAll.products || [],
+          customers: syncedAll.customers || [],
+          suppliers: syncedAll.suppliers || [],
+          sales: syncedAll.sales || [],
+          purchases: syncedAll.purchases || [],
+          payments: syncedAll.payments || [],
+          holdStock: syncedAll.holdStock || [],
+          tempLedger: syncedAll.tempLedger || [],
+          branches,
+          tenants,
+          tenantUsers,
+          syncedBy: auth?.user?.name || auth?.user?.username || 'Store Admin',
+          deviceInfo: {
+            userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'Web',
+            syncedAt: new Date().toISOString()
+          }
+        };
+        await saveToNeon(payload);
       }
+
+      setCloudConfig(prev => ({
+        ...prev,
+        syncStatus: 'synced',
+        lastSyncTime: new Date().toISOString(),
+        isNeonConnected: true
+      }));
+
+      if (!isAuto) {
+        showToast('⚡ Two-way sync complete! All devices synchronized.', 'success');
+      }
+      return true;
     } catch (e) {
       console.warn('[SyncQueue] Multi-entity sync error:', e);
+      if (!isAuto) {
+        showToast('Sync finished with local database.', 'info');
+      }
+      return false;
     }
-    return pushToCloud(isAuto);
   };
 
   // Automated Internet Connection & Online/Offline Listener + 30s Periodic Sync
@@ -466,25 +509,13 @@ export function AppProvider({ children }) {
     const handleOnline = async () => {
       setIsOnline(true);
       addLog('Network Status', 'Internet connection restored - synchronizing offline database with cloud');
-      showToast('🌐 Internet Connected: Syncing all offline records to Neon...', 'info');
+      showToast('🌐 Internet Connected: Syncing records with Neon...', 'info');
 
       try {
-        const syncedAll = await syncAllFull();
-        if (syncedAll) {
-          if (syncedAll.products?.length) setProducts(syncedAll.products);
-          if (syncedAll.customers?.length) setCustomers(syncedAll.customers);
-          if (syncedAll.suppliers?.length) setSuppliers(syncedAll.suppliers);
-          if (syncedAll.sales?.length) setSales(syncedAll.sales);
-          if (syncedAll.purchases?.length) setPurchases(syncedAll.purchases);
-          if (syncedAll.payments?.length) setPayments(syncedAll.payments);
-          if (syncedAll.holdStock?.length) setHoldStock(syncedAll.holdStock);
-          if (syncedAll.tempLedger?.length) setTempLedger(syncedAll.tempLedger);
-          showToast('☁️ All records synchronized with Neon Database!', 'success');
-        }
+        await syncWithCloud(true);
       } catch (err) {
         console.warn('Sync on online error:', err);
       }
-      syncWithCloud(true);
     };
 
     const handleOffline = () => {
@@ -497,11 +528,8 @@ export function AppProvider({ children }) {
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
 
-    // Initial check on mount: flush queue and sync
-    if (navigator.onLine) {
-      flushAllQueues();
-      syncWithCloud(true);
-    } else {
+    // Initial check on mount: update online status without prematurely pushing empty state
+    if (!navigator.onLine) {
       setCloudConfig(prev => ({ ...prev, syncStatus: 'offline' }));
     }
 
@@ -683,14 +711,14 @@ export function AppProvider({ children }) {
       if (typeof navigator !== 'undefined' && navigator.onLine) {
         syncAllFull().then(syncedAll => {
           if (syncedAll) {
-            if (syncedAll.products?.length) setProducts(syncedAll.products);
-            if (syncedAll.customers?.length) setCustomers(syncedAll.customers);
-            if (syncedAll.suppliers?.length) setSuppliers(syncedAll.suppliers);
-            if (syncedAll.sales?.length) setSales(syncedAll.sales);
-            if (syncedAll.purchases?.length) setPurchases(syncedAll.purchases);
-            if (syncedAll.payments?.length) setPayments(syncedAll.payments);
-            if (syncedAll.holdStock?.length) setHoldStock(syncedAll.holdStock);
-            if (syncedAll.tempLedger?.length) setTempLedger(syncedAll.tempLedger);
+            if (Array.isArray(syncedAll.products)) setProducts(syncedAll.products);
+            if (Array.isArray(syncedAll.customers)) setCustomers(syncedAll.customers);
+            if (Array.isArray(syncedAll.suppliers)) setSuppliers(syncedAll.suppliers);
+            if (Array.isArray(syncedAll.sales)) setSales(syncedAll.sales);
+            if (Array.isArray(syncedAll.purchases)) setPurchases(syncedAll.purchases);
+            if (Array.isArray(syncedAll.payments)) setPayments(syncedAll.payments);
+            if (Array.isArray(syncedAll.holdStock)) setHoldStock(syncedAll.holdStock);
+            if (Array.isArray(syncedAll.tempLedger)) setTempLedger(syncedAll.tempLedger);
 
             setCloudConfig(prev => ({
               ...prev,

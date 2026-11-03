@@ -10,9 +10,9 @@ import {
 let isSyncingAll = false;
 
 /**
- * Pushes all pending (synced === false) items across all entities to Neon
+ * Pushes pending (or all local when pushAll=true) items across all entities to Neon
  */
-export async function flushAllQueues() {
+export async function flushAllQueues(pushAll = false) {
   if (typeof window === 'undefined') return { totalSynced: 0 };
   if (isSyncingAll) {
     console.log('[SyncQueue] Multi-entity sync already in progress, skipping duplicate.');
@@ -20,7 +20,9 @@ export async function flushAllQueues() {
   }
 
   try {
-    // Gather pending records across all 8 stores
+    const fetchFn = pushAll ? getAllLocalItems : getPendingItems;
+
+    // Gather records across all 8 stores
     const [
       pendingProducts,
       pendingCustomers,
@@ -31,14 +33,14 @@ export async function flushAllQueues() {
       pendingHoldStock,
       pendingTempLedger
     ] = await Promise.all([
-      getPendingItems(STORES.products),
-      getPendingItems(STORES.customers),
-      getPendingItems(STORES.suppliers),
-      getPendingItems(STORES.sales),
-      getPendingItems(STORES.purchases),
-      getPendingItems(STORES.payments),
-      getPendingItems(STORES.holdStock),
-      getPendingItems(STORES.tempLedger)
+      fetchFn(STORES.products),
+      fetchFn(STORES.customers),
+      fetchFn(STORES.suppliers),
+      fetchFn(STORES.sales),
+      fetchFn(STORES.purchases),
+      fetchFn(STORES.payments),
+      fetchFn(STORES.holdStock),
+      fetchFn(STORES.tempLedger)
     ]);
 
     const totalPending =
@@ -261,11 +263,11 @@ export async function pullAllFromServer() {
 
 /**
  * Bidirectional multi-entity synchronization:
- * 1. Push all pending local changes to Neon.
+ * 1. Push pending local changes to Neon (or all local if pushAll=true).
  * 2. Pull all remote changes and merge locally.
  */
-export async function syncAllFull() {
-  await flushAllQueues();
+export async function syncAllFull(pushAll = false) {
+  await flushAllQueues(pushAll);
   const remote = await pullAllFromServer();
   return remote;
 }

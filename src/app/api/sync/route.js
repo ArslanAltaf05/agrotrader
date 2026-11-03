@@ -199,27 +199,56 @@ export async function GET() {
       holdStockRows,
       tempLedgerRows
     ] = await Promise.all([
-      sql`SELECT * FROM products WHERE deleted = FALSE ORDER BY updated_at DESC`,
-      sql`SELECT * FROM customers WHERE deleted = FALSE ORDER BY updated_at DESC`,
-      sql`SELECT * FROM suppliers WHERE deleted = FALSE ORDER BY updated_at DESC`,
-      sql`SELECT * FROM sales WHERE deleted = FALSE ORDER BY updated_at DESC`,
-      sql`SELECT * FROM purchases WHERE deleted = FALSE ORDER BY updated_at DESC`,
-      sql`SELECT * FROM payments WHERE deleted = FALSE ORDER BY updated_at DESC`,
-      sql`SELECT * FROM hold_stock WHERE deleted = FALSE ORDER BY updated_at DESC`,
-      sql`SELECT * FROM temp_ledger WHERE deleted = FALSE ORDER BY updated_at DESC`
+      sql`SELECT * FROM products WHERE COALESCE(deleted, FALSE) = FALSE ORDER BY updated_at DESC`,
+      sql`SELECT * FROM customers WHERE COALESCE(deleted, FALSE) = FALSE ORDER BY updated_at DESC`,
+      sql`SELECT * FROM suppliers WHERE COALESCE(deleted, FALSE) = FALSE ORDER BY updated_at DESC`,
+      sql`SELECT * FROM sales WHERE COALESCE(deleted, FALSE) = FALSE ORDER BY updated_at DESC`,
+      sql`SELECT * FROM purchases WHERE COALESCE(deleted, FALSE) = FALSE ORDER BY updated_at DESC`,
+      sql`SELECT * FROM payments WHERE COALESCE(deleted, FALSE) = FALSE ORDER BY updated_at DESC`,
+      sql`SELECT * FROM hold_stock WHERE COALESCE(deleted, FALSE) = FALSE ORDER BY updated_at DESC`,
+      sql`SELECT * FROM temp_ledger WHERE COALESCE(deleted, FALSE) = FALSE ORDER BY updated_at DESC`
     ]);
+
+    let products = productsRows.map(mapProduct);
+    let customers = customersRows.map(mapCustomer);
+    let suppliers = suppliersRows.map(mapSupplier);
+    let sales = salesRows.map(mapSale);
+    let purchases = purchasesRows.map(mapPurchase);
+    let payments = paymentsRows.map(mapPayment);
+    let holdStock = holdStockRows.map(mapHoldStock);
+    let tempLedger = tempLedgerRows.map(mapTempLedger);
+
+    // If relational tables are empty, fallback to agro_store_sync backup if available
+    if (products.length === 0 && customers.length === 0 && sales.length === 0) {
+      try {
+        const backupRows = await sql`SELECT * FROM agro_store_sync LIMIT 1`;
+        if (backupRows && backupRows.length > 0) {
+          const b = backupRows[0];
+          if (Array.isArray(b.products) && b.products.length > 0) products = b.products;
+          if (Array.isArray(b.customers) && b.customers.length > 0) customers = b.customers;
+          if (Array.isArray(b.suppliers) && b.suppliers.length > 0) suppliers = b.suppliers;
+          if (Array.isArray(b.sales) && b.sales.length > 0) sales = b.sales;
+          if (Array.isArray(b.purchases) && b.purchases.length > 0) purchases = b.purchases;
+          if (Array.isArray(b.payments) && b.payments.length > 0) payments = b.payments;
+          if (Array.isArray(b.hold_stock) && b.hold_stock.length > 0) holdStock = b.hold_stock;
+          if (Array.isArray(b.temp_ledger) && b.temp_ledger.length > 0) tempLedger = b.temp_ledger;
+        }
+      } catch (e) {
+        console.warn('Fallback to agro_store_sync error:', e);
+      }
+    }
 
     return Response.json({
       success: true,
       timestamp: new Date().toISOString(),
-      products: productsRows.map(mapProduct),
-      customers: customersRows.map(mapCustomer),
-      suppliers: suppliersRows.map(mapSupplier),
-      sales: salesRows.map(mapSale),
-      purchases: purchasesRows.map(mapPurchase),
-      payments: paymentsRows.map(mapPayment),
-      holdStock: holdStockRows.map(mapHoldStock),
-      tempLedger: tempLedgerRows.map(mapTempLedger)
+      products,
+      customers,
+      suppliers,
+      sales,
+      purchases,
+      payments,
+      holdStock,
+      tempLedger
     });
   } catch (err) {
     console.error('GET /api/sync error:', err);
