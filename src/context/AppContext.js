@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { saveToNeon, loadFromNeon, isNeonConfigured } from '../lib/db';
 import {
   getLocalProducts,
@@ -159,6 +159,7 @@ const AppContext = createContext(null);
 
 export function AppProvider({ children }) {
   const [isLoaded, setIsLoaded] = useState(false);
+  const isInitialSyncDone = useRef(false);
   const [theme, setThemeState] = useState('theme-sapphire'); // NEW DEFAULT THEME
   const [hideAmounts, setHideAmounts] = useState(false);
   const [activeTab, setActiveTabState] = useState('dashboard');
@@ -314,6 +315,11 @@ export function AppProvider({ children }) {
       return false;
     }
 
+    // Guard against auto-pushing empty state on a fresh device before initial sync finishes
+    if (isAuto && (!isInitialSyncDone.current || (products.length === 0 && customers.length === 0))) {
+      return false;
+    }
+
     setCloudConfig(prev => ({ ...prev, syncStatus: 'syncing' }));
 
     try {
@@ -412,10 +418,45 @@ export function AppProvider({ children }) {
       const now = new Date().toISOString();
 
       if (result.success && result.found && result.data) {
-        if (Array.isArray(result.data.branches) && result.data.branches.length) setBranches(result.data.branches);
-        if (result.data.storeProfile) setStoreProfile(result.data.storeProfile);
-        if (Array.isArray(result.data.tenants) && result.data.tenants.length) setTenants(result.data.tenants);
-        if (Array.isArray(result.data.tenantUsers) && result.data.tenantUsers.length) setTenantUsers(result.data.tenantUsers);
+        const d = result.data;
+        if (Array.isArray(d.branches) && d.branches.length) setBranches(d.branches);
+        if (d.storeProfile) setStoreProfile(d.storeProfile);
+        if (Array.isArray(d.tenants) && d.tenants.length) setTenants(d.tenants);
+        if (Array.isArray(d.tenantUsers) && d.tenantUsers.length) setTenantUsers(d.tenantUsers);
+
+        // Populate core entities from snapshot if local state is empty or missing data
+        if (Array.isArray(d.products) && d.products.length > 0) {
+          setProducts(prev => (prev.length === 0 ? d.products : prev));
+          saveLocalProductsBatch(d.products.map(p => ({ ...p, synced: true })));
+        }
+        if (Array.isArray(d.customers) && d.customers.length > 0) {
+          setCustomers(prev => (prev.length === 0 ? d.customers : prev));
+          saveLocalCustomersBatch(d.customers.map(c => ({ ...c, synced: true })));
+        }
+        if (Array.isArray(d.suppliers) && d.suppliers.length > 0) {
+          setSuppliers(prev => (prev.length === 0 ? d.suppliers : prev));
+          saveLocalSuppliersBatch(d.suppliers.map(s => ({ ...s, synced: true })));
+        }
+        if (Array.isArray(d.sales) && d.sales.length > 0) {
+          setSales(prev => (prev.length === 0 ? d.sales : prev));
+          saveLocalSalesBatch(d.sales.map(s => ({ ...s, synced: true })));
+        }
+        if (Array.isArray(d.purchases) && d.purchases.length > 0) {
+          setPurchases(prev => (prev.length === 0 ? d.purchases : prev));
+          saveLocalPurchasesBatch(d.purchases.map(p => ({ ...p, synced: true })));
+        }
+        if (Array.isArray(d.payments) && d.payments.length > 0) {
+          setPayments(prev => (prev.length === 0 ? d.payments : prev));
+          saveLocalPaymentsBatch(d.payments.map(p => ({ ...p, synced: true })));
+        }
+        if (Array.isArray(d.holdStock) && d.holdStock.length > 0) {
+          setHoldStock(prev => (prev.length === 0 ? d.holdStock : prev));
+          saveLocalHoldStockBatch(d.holdStock.map(h => ({ ...h, synced: true })));
+        }
+        if (Array.isArray(d.tempLedger) && d.tempLedger.length > 0) {
+          setTempLedger(prev => (prev.length === 0 ? d.tempLedger : prev));
+          saveLocalTempLedgerBatch(d.tempLedger.map(t => ({ ...t, synced: true })));
+        }
 
         setCloudConfig(prev => ({
           ...prev,
@@ -711,14 +752,14 @@ export function AppProvider({ children }) {
       if (typeof navigator !== 'undefined' && navigator.onLine) {
         syncAllFull().then(syncedAll => {
           if (syncedAll) {
-            if (Array.isArray(syncedAll.products)) setProducts(syncedAll.products);
-            if (Array.isArray(syncedAll.customers)) setCustomers(syncedAll.customers);
-            if (Array.isArray(syncedAll.suppliers)) setSuppliers(syncedAll.suppliers);
-            if (Array.isArray(syncedAll.sales)) setSales(syncedAll.sales);
-            if (Array.isArray(syncedAll.purchases)) setPurchases(syncedAll.purchases);
-            if (Array.isArray(syncedAll.payments)) setPayments(syncedAll.payments);
-            if (Array.isArray(syncedAll.holdStock)) setHoldStock(syncedAll.holdStock);
-            if (Array.isArray(syncedAll.tempLedger)) setTempLedger(syncedAll.tempLedger);
+            if (Array.isArray(syncedAll.products) && syncedAll.products.length > 0) setProducts(syncedAll.products);
+            if (Array.isArray(syncedAll.customers) && syncedAll.customers.length > 0) setCustomers(syncedAll.customers);
+            if (Array.isArray(syncedAll.suppliers) && syncedAll.suppliers.length > 0) setSuppliers(syncedAll.suppliers);
+            if (Array.isArray(syncedAll.sales) && syncedAll.sales.length > 0) setSales(syncedAll.sales);
+            if (Array.isArray(syncedAll.purchases) && syncedAll.purchases.length > 0) setPurchases(syncedAll.purchases);
+            if (Array.isArray(syncedAll.payments) && syncedAll.payments.length > 0) setPayments(syncedAll.payments);
+            if (Array.isArray(syncedAll.holdStock) && syncedAll.holdStock.length > 0) setHoldStock(syncedAll.holdStock);
+            if (Array.isArray(syncedAll.tempLedger) && syncedAll.tempLedger.length > 0) setTempLedger(syncedAll.tempLedger);
 
             setCloudConfig(prev => ({
               ...prev,
@@ -727,23 +768,103 @@ export function AppProvider({ children }) {
               isNeonConnected: true
             }));
           }
+          isInitialSyncDone.current = true;
         }).catch(err => {
           console.warn('[AppContext] Neon multi-entity sync error:', err);
+          isInitialSyncDone.current = true;
         });
+      } else {
+        isInitialSyncDone.current = true;
       }
     }).catch(err => {
       console.warn('[AppContext] IndexedDB multi-store load error:', err);
+      isInitialSyncDone.current = true;
     });
 
-    // Pull legacy monolithic state from Neon DB when online
+    // Pull full state snapshot from Neon DB when online
     if (typeof navigator !== 'undefined' && navigator.onLine) {
-      loadFromNeon('tenant-1').then(remote => {
+      loadFromNeon('tenant-1').then(async remote => {
         if (remote && remote.success && remote.found && remote.data) {
           const d = remote.data;
           if (d.storeProfile) setStoreProfile(d.storeProfile);
           if (Array.isArray(d.branches) && d.branches.length > 0) setBranches(d.branches);
           if (Array.isArray(d.tenants) && d.tenants.length > 0) setTenants(d.tenants);
           if (Array.isArray(d.tenantUsers) && d.tenantUsers.length > 0) setTenantUsers(d.tenantUsers);
+
+          // Populate store collections if local state is currently empty (e.g. fresh device)
+          if (Array.isArray(d.products) && d.products.length > 0) {
+            setProducts(prev => {
+              if (!prev || prev.length === 0) {
+                saveLocalProductsBatch(d.products.map(p => ({ ...p, synced: true })));
+                return d.products;
+              }
+              return prev;
+            });
+          }
+          if (Array.isArray(d.customers) && d.customers.length > 0) {
+            setCustomers(prev => {
+              if (!prev || prev.length === 0) {
+                saveLocalCustomersBatch(d.customers.map(c => ({ ...c, synced: true })));
+                return d.customers;
+              }
+              return prev;
+            });
+          }
+          if (Array.isArray(d.suppliers) && d.suppliers.length > 0) {
+            setSuppliers(prev => {
+              if (!prev || prev.length === 0) {
+                saveLocalSuppliersBatch(d.suppliers.map(s => ({ ...s, synced: true })));
+                return d.suppliers;
+              }
+              return prev;
+            });
+          }
+          if (Array.isArray(d.sales) && d.sales.length > 0) {
+            setSales(prev => {
+              if (!prev || prev.length === 0) {
+                saveLocalSalesBatch(d.sales.map(s => ({ ...s, synced: true })));
+                return d.sales;
+              }
+              return prev;
+            });
+          }
+          if (Array.isArray(d.purchases) && d.purchases.length > 0) {
+            setPurchases(prev => {
+              if (!prev || prev.length === 0) {
+                saveLocalPurchasesBatch(d.purchases.map(p => ({ ...p, synced: true })));
+                return d.purchases;
+              }
+              return prev;
+            });
+          }
+          if (Array.isArray(d.payments) && d.payments.length > 0) {
+            setPayments(prev => {
+              if (!prev || prev.length === 0) {
+                saveLocalPaymentsBatch(d.payments.map(p => ({ ...p, synced: true })));
+                return d.payments;
+              }
+              return prev;
+            });
+          }
+          if (Array.isArray(d.holdStock) && d.holdStock.length > 0) {
+            setHoldStock(prev => {
+              if (!prev || prev.length === 0) {
+                saveLocalHoldStockBatch(d.holdStock.map(h => ({ ...h, synced: true })));
+                return d.holdStock;
+              }
+              return prev;
+            });
+          }
+          if (Array.isArray(d.tempLedger) && d.tempLedger.length > 0) {
+            setTempLedger(prev => {
+              if (!prev || prev.length === 0) {
+                saveLocalTempLedgerBatch(d.tempLedger.map(t => ({ ...t, synced: true })));
+                return d.tempLedger;
+              }
+              return prev;
+            });
+          }
+
           setCloudConfig(prev => ({
             ...prev,
             syncStatus: 'synced',
@@ -792,11 +913,11 @@ export function AppProvider({ children }) {
 
   // Automated background cloud synchronization to Neon DB when online
   useEffect(() => {
-    if (!isLoaded) return;
+    if (!isLoaded || !isInitialSyncDone.current) return;
     if (typeof navigator !== 'undefined' && navigator.onLine && cloudConfig.autoSync) {
       const timer = setTimeout(() => {
         pushToCloud(true);
-      }, 1000);
+      }, 2000);
       return () => clearTimeout(timer);
     }
   }, [isLoaded, products, customers, suppliers, sales, purchases, payments, holdStock, tempLedger, branches, storeProfile, tenants, tenantUsers]);
@@ -858,6 +979,7 @@ export function AppProvider({ children }) {
         setActiveTab('superadmin');
         addLog('Super Admin Login', 'Master SaaS Administrator logged in');
         showToast('Welcome to Super Admin Portal!', 'success');
+        setTimeout(() => { pullFromCloud(true); }, 150);
         return { success: true };
       }
       return { success: false, message: 'Invalid Super Admin Master PIN.' };
@@ -953,6 +1075,7 @@ export function AppProvider({ children }) {
           }
           addLog('User Login', `Admin ${rawUser} logged into store: ${targetTenant.name}`);
           showToast(`Welcome to ${targetTenant.name}!`, 'success');
+          setTimeout(() => { pullFromCloud(true); }, 150);
           return { success: true };
         }
         return { success: false, message: 'Invalid Admin PIN.' };
@@ -977,6 +1100,7 @@ export function AppProvider({ children }) {
           }
           addLog('User Login', `Admin ${rawUser || 'admin'} authenticated.`);
           showToast('Welcome back, Admin!', 'success');
+          setTimeout(() => { pullFromCloud(true); }, 150);
           return { success: true };
         }
         return { success: false, message: 'Invalid Admin PIN.' };
@@ -1041,6 +1165,7 @@ export function AppProvider({ children }) {
         setActiveBranchId(assignedBranchId);
         addLog('User Login', `Staff ${rawUser || 'staff'} authenticated at terminal: ${assignedBranch?.name}`);
         showToast(`Logged in as Counter Staff (${assignedBranch?.name})`, 'success');
+        setTimeout(() => { pullFromCloud(true); }, 150);
         return { success: true };
       }
       return { success: false, message: 'Invalid Staff PIN. ' };

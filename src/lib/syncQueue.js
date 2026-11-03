@@ -6,6 +6,7 @@ import {
   saveLocalBatch,
   getLocalItems
 } from './offlineStorage';
+import { loadFromNeon, saveToNeon } from './db';
 
 let isSyncingAll = false;
 
@@ -81,19 +82,50 @@ export async function flushAllQueues(pushAll = false) {
       tempLedger: pendingTempLedger
     };
 
-    const res = await fetch('/api/sync/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error || `HTTP ${res.status} from /api/sync`);
+    let result = null;
+    try {
+      const res = await fetch('/api/sync/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        result = await res.json();
+      }
+    } catch (fetchErr) {
+      console.warn('[SyncQueue] POST /api/sync/ failed, falling back to direct Neon save...', fetchErr);
     }
 
-    const result = await res.json();
-    if (result.success && result.syncedIds) {
+    // Direct Neon DB fallback (essential for Capacitor APK & offline exports)
+    if (!result || !result.success) {
+      try {
+        const directRes = await saveToNeon({
+          ...payload,
+          tenantId: 'tenant-1'
+        });
+        if (directRes && directRes.success) {
+          result = {
+            success: true,
+            syncedIds: {
+              products: pendingProducts.map(p => p.id),
+              customers: pendingCustomers.map(c => c.id),
+              suppliers: pendingSuppliers.map(s => s.id),
+              sales: pendingSales.map(s => s.id),
+              purchases: pendingPurchases.map(p => p.id),
+              payments: pendingPayments.map(p => p.id),
+              holdStock: pendingHoldStock.map(h => h.id),
+              tempLedger: pendingTempLedger.map(t => t.id)
+            },
+            syncedCounts: directRes.mergedCounts
+          };
+          console.log('[SyncQueue] Direct Neon save fallback successful.');
+        }
+      } catch (neonErr) {
+        console.warn('[SyncQueue] Direct Neon save fallback failed:', neonErr);
+      }
+    }
+
+    if (result && result.success && result.syncedIds) {
       // Mark all confirmed IDs as synced in IndexedDB
       await Promise.all([
         markItemsSynced(STORES.products, result.syncedIds.products || []),
@@ -110,7 +142,7 @@ export async function flushAllQueues(pushAll = false) {
       return { success: true, totalSynced: totalPending, syncedCounts: result.syncedCounts };
     }
 
-    return { success: false, error: 'Unexpected response from /api/sync' };
+    return { success: false, error: 'Could not reach server or Neon DB' };
   } catch (err) {
     console.warn('[SyncQueue] Push error (will auto-retry in 30s):', err.message);
     return { success: false, error: err.message };
@@ -185,15 +217,42 @@ export async function pullAllFromServer() {
   if (typeof window === 'undefined') return null;
 
   try {
-    console.log('[SyncQueue] Pulling complete store dataset from Neon /api/sync/...');
-    const res = await fetch('/api/sync/');
-    if (!res.ok) {
-      throw new Error(`HTTP ${res.status} from /api/sync`);
+    console.log('[SyncQueue] Pulling complete store dataset from Neon...');
+    let data = null;
+    try {
+      const res = await fetch('/api/sync/');
+      if (res.ok) {
+        data = await res.json();
+      }
+    } catch (fetchErr) {
+      console.warn('[SyncQueue] /api/sync/ fetch failed, attempting direct Neon fallback...', fetchErr);
     }
 
-    const data = await res.json();
-    if (!data.success) {
-      throw new Error(data.error || 'Server error pulling sync data');
+    // Direct Neon DB fallback if /api/sync is unreachable or failed (e.g., Capacitor APK / offline export)
+    if (!data || !data.success) {
+      try {
+        const directData = await loadFromNeon('tenant-1');
+        if (directData && directData.success && directData.found && directData.data) {
+          data = {
+            success: true,
+            products: directData.data.products || [],
+            customers: directData.data.customers || [],
+            suppliers: directData.data.suppliers || [],
+            sales: directData.data.sales || [],
+            purchases: directData.data.purchases || [],
+            payments: directData.data.payments || [],
+            holdStock: directData.data.holdStock || [],
+            tempLedger: directData.data.tempLedger || []
+          };
+          console.log('[SyncQueue] Successfully retrieved store data directly from Neon database.');
+        }
+      } catch (neonErr) {
+        console.warn('[SyncQueue] Direct loadFromNeon fallback failed:', neonErr);
+      }
+    }
+
+    if (!data || !data.success) {
+      throw new Error(data?.error || 'Could not retrieve data from server or Neon DB');
     }
 
     const [
