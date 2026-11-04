@@ -19,8 +19,27 @@ export default function MobileDashboardView({
     setActiveTab,
     setSelectedAccountId,
     showToast,
-    auth
+    auth,
+    syncWithCloud,
+    pullFromCloud,
+    cloudConfig
   } = useApp();
+
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  // Manual live Neon DB pull
+  const handleManualSync = async () => {
+    setIsSyncing(true);
+    showToast('🔄 Fetching live data dynamically from Neon DB...', 'info');
+    try {
+      await syncWithCloud(false);
+      showToast('✅ Dynamic store data updated from Neon DB!', 'success');
+    } catch (e) {
+      console.warn('Sync error:', e);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   // Admin Quick Gate State
   const [pinInput, setPinInput] = useState('');
@@ -43,23 +62,22 @@ export default function MobileDashboardView({
     }
   };
 
-  // Farmer total udhar calculation
+  // Farmer total udhar calculation (dynamic from live customers)
   const totalUdhar = useMemo(() => {
-    const sum = customers.reduce((acc, c) => acc + (c.balance > 0 ? c.balance : 0), 0);
-    return sum > 0 ? sum : 423800; // fallback to user's realistic demo figure if empty
+    const sum = customers.reduce((acc, c) => acc + (Number(c.balance) > 0 ? Number(c.balance) : 0), 0);
+    return sum;
   }, [customers]);
 
   const pendingFarmersCount = useMemo(() => {
-    const count = customers.filter(c => c.balance > 0).length;
-    return count > 0 ? count : 28;
+    return customers.filter(c => Number(c.balance) > 0).length;
   }, [customers]);
 
-  // Today's sales calculation
+  // Today's sales calculation (dynamic from live sales)
   const todaySalesTotal = useMemo(() => {
     const todayStr = new Date().toISOString().split('T')[0];
     const todaySales = sales.filter(s => s.date && s.date.startsWith(todayStr));
-    const sum = todaySales.reduce((acc, s) => acc + (s.grandTotal || s.total || 0), 0);
-    return sum > 0 ? sum : 184500; // realistic baseline matching screenshot
+    const sum = todaySales.reduce((acc, s) => acc + (Number(s.grandTotal) || Number(s.total) || 0), 0);
+    return sum;
   }, [sales]);
 
   // Low stock products
@@ -222,10 +240,17 @@ export default function MobileDashboardView({
             <span className="mobile-pulse-dot" />
             <span>CLOUD SYNC ACTIVE</span>
           </div>
-          <div className="mobile-realtime-badge">
-            <span>📶</span>
-            <span>Real-time</span>
-          </div>
+          <button
+            type="button"
+            onClick={handleManualSync}
+            disabled={isSyncing}
+            className="mobile-realtime-badge"
+            style={{ border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+            title="Tap to sync live with Neon DB"
+          >
+            <span style={{ display: 'inline-block', transform: isSyncing ? 'rotate(360deg)' : 'none', transition: 'transform 0.6s linear' }}>🔄</span>
+            <span>{isSyncing ? 'Syncing...' : 'Live Neon'}</span>
+          </button>
         </div>
 
         <div className="mobile-store-title-row">

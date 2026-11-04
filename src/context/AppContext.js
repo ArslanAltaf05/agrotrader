@@ -86,7 +86,7 @@ const INITIAL_TENANT_USERS = [
     id: 'user-1',
     tenantId: 'tenant-1',
     tenantName: 'Asmat Agro Traders Retra',
-    name: 'Ahmed Raza Malik (Administrator)',
+    name: 'Doctor Asmat Ullah (Administrator)',
     username: 'admin',
     role: 'Store Admin',
     branchId: 'branch-1',
@@ -606,37 +606,37 @@ export function AppProvider({ children }) {
         if (Array.isArray(d.tenants) && d.tenants.length) setTenants(d.tenants);
         if (Array.isArray(d.tenantUsers) && d.tenantUsers.length) setTenantUsers(d.tenantUsers);
 
-        // Populate core entities from snapshot if local state is empty or missing data
+        // Dynamically update core entities with live records from Neon DB
         if (Array.isArray(d.products) && d.products.length > 0) {
-          setProducts(prev => (prev.length === 0 ? d.products : prev));
+          setProducts(d.products);
           saveLocalProductsBatch(d.products.map(p => ({ ...p, synced: true })));
         }
         if (Array.isArray(d.customers) && d.customers.length > 0) {
-          setCustomers(prev => (prev.length === 0 ? d.customers : prev));
+          setCustomers(d.customers);
           saveLocalCustomersBatch(d.customers.map(c => ({ ...c, synced: true })));
         }
         if (Array.isArray(d.suppliers) && d.suppliers.length > 0) {
-          setSuppliers(prev => (prev.length === 0 ? d.suppliers : prev));
+          setSuppliers(d.suppliers);
           saveLocalSuppliersBatch(d.suppliers.map(s => ({ ...s, synced: true })));
         }
         if (Array.isArray(d.sales) && d.sales.length > 0) {
-          setSales(prev => (prev.length === 0 ? d.sales : prev));
+          setSales(d.sales);
           saveLocalSalesBatch(d.sales.map(s => ({ ...s, synced: true })));
         }
         if (Array.isArray(d.purchases) && d.purchases.length > 0) {
-          setPurchases(prev => (prev.length === 0 ? d.purchases : prev));
+          setPurchases(d.purchases);
           saveLocalPurchasesBatch(d.purchases.map(p => ({ ...p, synced: true })));
         }
         if (Array.isArray(d.payments) && d.payments.length > 0) {
-          setPayments(prev => (prev.length === 0 ? d.payments : prev));
+          setPayments(d.payments);
           saveLocalPaymentsBatch(d.payments.map(p => ({ ...p, synced: true })));
         }
         if (Array.isArray(d.holdStock) && d.holdStock.length > 0) {
-          setHoldStock(prev => (prev.length === 0 ? d.holdStock : prev));
+          setHoldStock(d.holdStock);
           saveLocalHoldStockBatch(d.holdStock.map(h => ({ ...h, synced: true })));
         }
         if (Array.isArray(d.tempLedger) && d.tempLedger.length > 0) {
-          setTempLedger(prev => (prev.length === 0 ? d.tempLedger : prev));
+          setTempLedger(d.tempLedger);
           saveLocalTempLedgerBatch(d.tempLedger.map(t => ({ ...t, synced: true })));
         }
 
@@ -756,10 +756,27 @@ export function AppProvider({ children }) {
       setCloudConfig(prev => ({ ...prev, syncStatus: 'offline' }));
     }
 
-    // Periodic 30-second retry to push any pending writes across all collections
+    // Periodic dynamic bidirectional sync with Neon DB every 20s
     const syncInterval = setInterval(() => {
-      flushAllQueues();
-    }, 30000);
+      if (typeof navigator !== 'undefined' && navigator.onLine) {
+        syncAllFull().then(syncedAll => {
+          if (syncedAll) {
+            if (Array.isArray(syncedAll.products) && syncedAll.products.length > 0) setProducts(syncedAll.products);
+            if (Array.isArray(syncedAll.customers) && syncedAll.customers.length > 0) setCustomers(syncedAll.customers);
+            if (Array.isArray(syncedAll.suppliers) && syncedAll.suppliers.length > 0) setSuppliers(syncedAll.suppliers);
+            if (Array.isArray(syncedAll.sales) && syncedAll.sales.length > 0) setSales(syncedAll.sales);
+            if (Array.isArray(syncedAll.purchases) && syncedAll.purchases.length > 0) setPurchases(syncedAll.purchases);
+            if (Array.isArray(syncedAll.payments) && syncedAll.payments.length > 0) setPayments(syncedAll.payments);
+            if (Array.isArray(syncedAll.holdStock) && syncedAll.holdStock.length > 0) setHoldStock(syncedAll.holdStock);
+            if (Array.isArray(syncedAll.tempLedger) && syncedAll.tempLedger.length > 0) setTempLedger(syncedAll.tempLedger);
+          }
+        }).catch(err => {
+          console.warn('[AppContext] Periodic sync error:', err);
+        });
+      } else {
+        flushAllQueues();
+      }
+    }, 20000);
 
     return () => {
       window.removeEventListener('online', handleOnline);
@@ -973,78 +990,38 @@ export function AppProvider({ children }) {
           if (Array.isArray(d.tenants) && d.tenants.length > 0) setTenants(d.tenants);
           if (Array.isArray(d.tenantUsers) && d.tenantUsers.length > 0) setTenantUsers(d.tenantUsers);
 
-          // Populate store collections if local state is currently empty (e.g. fresh device)
+          // Dynamically populate store collections with live records from Neon DB
           if (Array.isArray(d.products) && d.products.length > 0) {
-            setProducts(prev => {
-              if (!prev || prev.length === 0) {
-                saveLocalProductsBatch(d.products.map(p => ({ ...p, synced: true })));
-                return d.products;
-              }
-              return prev;
-            });
+            setProducts(d.products);
+            saveLocalProductsBatch(d.products.map(p => ({ ...p, synced: true })));
           }
           if (Array.isArray(d.customers) && d.customers.length > 0) {
-            setCustomers(prev => {
-              if (!prev || prev.length === 0) {
-                saveLocalCustomersBatch(d.customers.map(c => ({ ...c, synced: true })));
-                return d.customers;
-              }
-              return prev;
-            });
+            setCustomers(d.customers);
+            saveLocalCustomersBatch(d.customers.map(c => ({ ...c, synced: true })));
           }
           if (Array.isArray(d.suppliers) && d.suppliers.length > 0) {
-            setSuppliers(prev => {
-              if (!prev || prev.length === 0) {
-                saveLocalSuppliersBatch(d.suppliers.map(s => ({ ...s, synced: true })));
-                return d.suppliers;
-              }
-              return prev;
-            });
+            setSuppliers(d.suppliers);
+            saveLocalSuppliersBatch(d.suppliers.map(s => ({ ...s, synced: true })));
           }
           if (Array.isArray(d.sales) && d.sales.length > 0) {
-            setSales(prev => {
-              if (!prev || prev.length === 0) {
-                saveLocalSalesBatch(d.sales.map(s => ({ ...s, synced: true })));
-                return d.sales;
-              }
-              return prev;
-            });
+            setSales(d.sales);
+            saveLocalSalesBatch(d.sales.map(s => ({ ...s, synced: true })));
           }
           if (Array.isArray(d.purchases) && d.purchases.length > 0) {
-            setPurchases(prev => {
-              if (!prev || prev.length === 0) {
-                saveLocalPurchasesBatch(d.purchases.map(p => ({ ...p, synced: true })));
-                return d.purchases;
-              }
-              return prev;
-            });
+            setPurchases(d.purchases);
+            saveLocalPurchasesBatch(d.purchases.map(p => ({ ...p, synced: true })));
           }
           if (Array.isArray(d.payments) && d.payments.length > 0) {
-            setPayments(prev => {
-              if (!prev || prev.length === 0) {
-                saveLocalPaymentsBatch(d.payments.map(p => ({ ...p, synced: true })));
-                return d.payments;
-              }
-              return prev;
-            });
+            setPayments(d.payments);
+            saveLocalPaymentsBatch(d.payments.map(p => ({ ...p, synced: true })));
           }
           if (Array.isArray(d.holdStock) && d.holdStock.length > 0) {
-            setHoldStock(prev => {
-              if (!prev || prev.length === 0) {
-                saveLocalHoldStockBatch(d.holdStock.map(h => ({ ...h, synced: true })));
-                return d.holdStock;
-              }
-              return prev;
-            });
+            setHoldStock(d.holdStock);
+            saveLocalHoldStockBatch(d.holdStock.map(h => ({ ...h, synced: true })));
           }
           if (Array.isArray(d.tempLedger) && d.tempLedger.length > 0) {
-            setTempLedger(prev => {
-              if (!prev || prev.length === 0) {
-                saveLocalTempLedgerBatch(d.tempLedger.map(t => ({ ...t, synced: true })));
-                return d.tempLedger;
-              }
-              return prev;
-            });
+            setTempLedger(d.tempLedger);
+            saveLocalTempLedgerBatch(d.tempLedger.map(t => ({ ...t, synced: true })));
           }
 
           setCloudConfig(prev => ({

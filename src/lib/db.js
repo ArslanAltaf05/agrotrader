@@ -574,8 +574,194 @@ export async function saveToNeon(payload) {
 }
 
 /**
- * Loads store state from Neon Serverless PostgreSQL
+ * Helpers for parsing and mapping dynamic Neon DB records
  */
+function safeParseJson(val, fallback = []) {
+  if (!val) return fallback;
+  if (Array.isArray(val) || typeof val === 'object') return val;
+  try { return JSON.parse(val); } catch (e) { return fallback; }
+}
+
+function mapDbProduct(r) {
+  return {
+    id: r.id,
+    branchId: r.branch_id || 'branch-1',
+    name: r.name,
+    sku: r.sku || '',
+    generic: r.generic || '',
+    barcode: r.barcode || '',
+    batchNo: r.batch_no || '',
+    mfgDate: r.mfg_date || '',
+    expiryDate: r.expiry_date || '',
+    category: r.category || 'Fertilizers',
+    manufacturer: r.manufacturer || '',
+    unit: r.unit || 'bag',
+    unitWeight: Number(r.unit_weight) || 0,
+    costPrice: Number(r.cost_price) || 0,
+    salePrice: Number(r.sale_price) || 0,
+    offerPrice: Number(r.offer_price) || 0,
+    shopStock: Number(r.shop_stock) || 0,
+    storeStock: Number(r.store_stock) || 0,
+    alertQty: Number(r.alert_qty) || 10,
+    location: r.location || 'Godown Main',
+    flags: r.flags || { active: true, narcotic: false, serialItem: false, keepRecord: true },
+    notes: r.notes || '',
+    deleted: Boolean(r.deleted),
+    updatedAt: r.updated_at ? new Date(r.updated_at).toISOString() : new Date().toISOString(),
+    synced: true
+  };
+}
+
+function mapDbCustomer(r) {
+  return {
+    id: r.id,
+    branchId: r.branch_id || 'branch-1',
+    name: r.name,
+    fatherName: r.father_name || '',
+    phone: r.phone || '',
+    cnic: r.cnic || '',
+    address: r.address || '',
+    creditLimit: Number(r.credit_limit) || 0,
+    openingBalance: Number(r.opening_balance) || 0,
+    balance: Number(r.balance) || 0,
+    notes: r.notes || '',
+    deleted: Boolean(r.deleted),
+    updatedAt: r.updated_at ? new Date(r.updated_at).toISOString() : new Date().toISOString(),
+    synced: true
+  };
+}
+
+function mapDbSupplier(r) {
+  return {
+    id: r.id,
+    branchId: r.branch_id || 'branch-1',
+    name: r.name,
+    company: r.company || '',
+    phone: r.phone || '',
+    address: r.address || '',
+    balance: Number(r.balance) || 0,
+    notes: r.notes || '',
+    deleted: Boolean(r.deleted),
+    updatedAt: r.updated_at ? new Date(r.updated_at).toISOString() : new Date().toISOString(),
+    synced: true
+  };
+}
+
+function mapDbSale(r) {
+  let items = safeParseJson(r.items, []);
+  return {
+    id: r.id,
+    branchId: r.branch_id || 'branch-1',
+    invoiceNo: r.invoice_no || r.id,
+    date: r.date || '',
+    customerId: r.customer_id || '',
+    customerName: r.customer_name || 'Walk-in Farmer',
+    paymentType: r.payment_type || 'cash',
+    subtotal: Number(r.subtotal) || 0,
+    discount: Number(r.discount) || 0,
+    tax: Number(r.tax) || 0,
+    total: Number(r.total) || 0,
+    paid: Number(r.paid) || 0,
+    balance: Number(r.balance) || 0,
+    items: Array.isArray(items) ? items : [],
+    notes: r.notes || '',
+    status: r.status || 'Completed',
+    deleted: Boolean(r.deleted),
+    updatedAt: r.updated_at ? new Date(r.updated_at).toISOString() : new Date().toISOString(),
+    synced: true
+  };
+}
+
+function mapDbPurchase(r) {
+  let items = safeParseJson(r.items, []);
+  return {
+    id: r.id,
+    branchId: r.branch_id || 'branch-1',
+    poNumber: r.po_number || r.id,
+    date: r.date || '',
+    supplierId: r.supplier_id || '',
+    supplierName: r.supplier_name || '',
+    items: Array.isArray(items) ? items : [],
+    subtotal: Number(r.subtotal) || 0,
+    tax: Number(r.tax) || 0,
+    total: Number(r.total) || 0,
+    paid: Number(r.paid) || 0,
+    balance: Number(r.balance) || 0,
+    status: r.status || 'Received',
+    notes: r.notes || '',
+    deleted: Boolean(r.deleted),
+    updatedAt: r.updated_at ? new Date(r.updated_at).toISOString() : new Date().toISOString(),
+    synced: true
+  };
+}
+
+function mapDbPayment(r) {
+  return {
+    id: r.id,
+    branchId: r.branch_id || 'branch-1',
+    voucherNo: r.voucher_no || r.id,
+    date: r.date || '',
+    type: r.type || 'in',
+    accountType: r.account_type || 'customer',
+    accountId: r.account_id || '',
+    accountName: r.account_name || '',
+    amount: Number(r.amount) || 0,
+    mode: r.payment_mode || 'Cash',
+    paymentMode: r.payment_mode || 'Cash',
+    reference: r.reference || '',
+    notes: r.notes || '',
+    deleted: Boolean(r.deleted),
+    updatedAt: r.updated_at ? new Date(r.updated_at).toISOString() : new Date().toISOString(),
+    synced: true
+  };
+}
+
+function mapDbHoldStock(r) {
+  return {
+    id: r.id,
+    branchId: r.branch_id || 'branch-1',
+    bookingNo: r.booking_no || r.id,
+    customerId: r.customer_id || '',
+    customerName: r.customer_name || '',
+    productId: r.product_id || '',
+    productName: r.product_name || '',
+    qty: Number(r.qty) || 0,
+    unit: r.unit || 'bag',
+    unitPrice: Number(r.unit_price) || 0,
+    totalAmount: Number(r.total_amount) || 0,
+    advancePaid: Number(r.advance_paid) || 0,
+    remainingBalance: Number(r.remaining_balance) || 0,
+    bookingDate: r.booking_date || '',
+    expiryDate: r.expiry_date || '',
+    status: r.status || 'Booked',
+    notes: r.notes || '',
+    deleted: Boolean(r.deleted),
+    updatedAt: r.updated_at ? new Date(r.updated_at).toISOString() : new Date().toISOString(),
+    synced: true
+  };
+}
+
+function mapDbTempLedger(r) {
+  return {
+    id: r.id,
+    branchId: r.branch_id || 'branch-1',
+    date: r.date || '',
+    partyName: r.party_name || '',
+    personName: r.party_name || '',
+    phone: r.phone || '',
+    details: r.details || '',
+    description: r.details || '',
+    amount: Number(r.amount) || 0,
+    type: r.type || 'Sale',
+    status: r.status || 'Pending',
+    isCleared: Boolean(r.is_cleared),
+    notes: r.notes || '',
+    deleted: Boolean(r.deleted),
+    updatedAt: r.updated_at ? new Date(r.updated_at).toISOString() : new Date().toISOString(),
+    synced: true
+  };
+}
+
 export async function loadFromNeon(tenantId = 'tenant-1') {
   if (!isNeonConfigured()) {
     return {
@@ -592,43 +778,72 @@ export async function loadFromNeon(tenantId = 'tenant-1') {
 
   try {
     await initNeonDatabase();
-    const rows = await sql`
+
+    // 1. Fetch snapshot from agro_store_sync
+    const syncRows = await sql`
       SELECT * FROM agro_store_sync 
       WHERE tenant_id = ${tenantId} 
       LIMIT 1;
     `;
+    const row = (syncRows && syncRows.length > 0) ? syncRows[0] : null;
 
-    if (rows && rows.length > 0) {
-      const row = rows[0];
-      return {
-        success: true,
-        configured: true,
-        found: true,
-        tenantId: row.tenant_id,
-        storeName: row.store_name,
-        lastSyncedAt: row.last_synced_at,
-        data: {
-          storeProfile: row.store_profile,
-          products: row.products,
-          customers: row.customers,
-          suppliers: row.suppliers,
-          sales: row.sales,
-          purchases: row.purchases,
-          payments: row.payments,
-          holdStock: row.hold_stock,
-          tempLedger: row.temp_ledger,
-          branches: row.branches,
-          tenants: row.tenants,
-          tenantUsers: row.tenant_users
-        }
-      };
-    }
+    // 2. Fetch live relational rows in parallel
+    const [relProducts, relCustomers, relSuppliers, relSales, relPurchases, relPayments, relHoldStock, relTempLedger] = await Promise.all([
+      sql`SELECT * FROM products WHERE deleted = FALSE ORDER BY updated_at DESC;`.catch(() => []),
+      sql`SELECT * FROM customers WHERE deleted = FALSE ORDER BY updated_at DESC;`.catch(() => []),
+      sql`SELECT * FROM suppliers WHERE deleted = FALSE ORDER BY updated_at DESC;`.catch(() => []),
+      sql`SELECT * FROM sales WHERE deleted = FALSE ORDER BY updated_at DESC;`.catch(() => []),
+      sql`SELECT * FROM purchases WHERE deleted = FALSE ORDER BY updated_at DESC;`.catch(() => []),
+      sql`SELECT * FROM payments WHERE deleted = FALSE ORDER BY updated_at DESC;`.catch(() => []),
+      sql`SELECT * FROM hold_stock WHERE deleted = FALSE ORDER BY updated_at DESC;`.catch(() => []),
+      sql`SELECT * FROM temp_ledger WHERE deleted = FALSE ORDER BY updated_at DESC;`.catch(() => [])
+    ]);
+
+    // 3. Union merge snapshot JSON arrays with active relational SQL tables
+    const snapProducts = safeParseJson(row?.products, []);
+    const snapCustomers = safeParseJson(row?.customers, []);
+    const snapSuppliers = safeParseJson(row?.suppliers, []);
+    const snapSales = safeParseJson(row?.sales, []);
+    const snapPurchases = safeParseJson(row?.purchases, []);
+    const snapPayments = safeParseJson(row?.payments, []);
+    const snapHoldStock = safeParseJson(row?.hold_stock, []);
+    const snapTempLedger = safeParseJson(row?.temp_ledger, []);
+
+    const dynamicProducts = mergeEntityLists(snapProducts, (relProducts || []).map(mapDbProduct));
+    const dynamicCustomers = mergeEntityLists(snapCustomers, (relCustomers || []).map(mapDbCustomer));
+    const dynamicSuppliers = mergeEntityLists(snapSuppliers, (relSuppliers || []).map(mapDbSupplier));
+    const dynamicSales = mergeEntityLists(snapSales, (relSales || []).map(mapDbSale));
+    const dynamicPurchases = mergeEntityLists(snapPurchases, (relPurchases || []).map(mapDbPurchase));
+    const dynamicPayments = mergeEntityLists(snapPayments, (relPayments || []).map(mapDbPayment));
+    const dynamicHoldStock = mergeEntityLists(snapHoldStock, (relHoldStock || []).map(mapDbHoldStock));
+    const dynamicTempLedger = mergeEntityLists(snapTempLedger, (relTempLedger || []).map(mapDbTempLedger));
+
+    const branches = safeParseJson(row?.branches, []);
+    const tenants = safeParseJson(row?.tenants, []);
+    const tenantUsers = safeParseJson(row?.tenant_users, []);
+    const storeProfile = row?.store_profile ? (typeof row.store_profile === 'string' ? JSON.parse(row.store_profile) : row.store_profile) : null;
 
     return {
       success: true,
       configured: true,
-      found: false,
-      message: `No cloud snapshot found in Neon DB for ${tenantId}.`
+      found: Boolean(row || dynamicProducts.length > 0 || dynamicCustomers.length > 0),
+      tenantId: row?.tenant_id || tenantId,
+      storeName: row?.store_name || storeProfile?.name || 'Asmat Agro Traders Retra',
+      lastSyncedAt: row?.last_synced_at || new Date().toISOString(),
+      data: {
+        storeProfile,
+        products: dynamicProducts,
+        customers: dynamicCustomers,
+        suppliers: dynamicSuppliers,
+        sales: dynamicSales,
+        purchases: dynamicPurchases,
+        payments: dynamicPayments,
+        holdStock: dynamicHoldStock,
+        tempLedger: dynamicTempLedger,
+        branches,
+        tenants,
+        tenantUsers
+      }
     };
   } catch (error) {
     console.error('loadFromNeon error:', error);

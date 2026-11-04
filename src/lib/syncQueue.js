@@ -83,45 +83,48 @@ export async function flushAllQueues(pushAll = false) {
     };
 
     let result = null;
+
+    // 1. Direct Neon DB save first (instant write for mobile APK and web client)
     try {
-      const res = await fetch('/api/sync/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+      const directRes = await saveToNeon({
+        ...payload,
+        tenantId: 'tenant-1'
       });
-      if (res.ok) {
-        result = await res.json();
+      if (directRes && directRes.success) {
+        result = {
+          success: true,
+          syncedIds: {
+            products: pendingProducts.map(p => p.id),
+            customers: pendingCustomers.map(c => c.id),
+            suppliers: pendingSuppliers.map(s => s.id),
+            sales: pendingSales.map(s => s.id),
+            purchases: pendingPurchases.map(p => p.id),
+            payments: pendingPayments.map(p => p.id),
+            holdStock: pendingHoldStock.map(h => h.id),
+            tempLedger: pendingTempLedger.map(t => t.id)
+          },
+          syncedCounts: directRes.mergedCounts
+        };
+        console.log('[SyncQueue] Direct Neon save successful.');
       }
-    } catch (fetchErr) {
-      console.warn('[SyncQueue] POST /api/sync/ failed, falling back to direct Neon save...', fetchErr);
+    } catch (neonErr) {
+      console.warn('[SyncQueue] Direct Neon save error, trying /api/sync/ fallback:', neonErr);
     }
 
-    // Direct Neon DB fallback (essential for Capacitor APK & offline exports)
+    // 2. Fallback to API route if direct save didn't run
     if (!result || !result.success) {
       try {
-        const directRes = await saveToNeon({
-          ...payload,
-          tenantId: 'tenant-1'
+        const res = await fetch('/api/sync/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
         });
-        if (directRes && directRes.success) {
-          result = {
-            success: true,
-            syncedIds: {
-              products: pendingProducts.map(p => p.id),
-              customers: pendingCustomers.map(c => c.id),
-              suppliers: pendingSuppliers.map(s => s.id),
-              sales: pendingSales.map(s => s.id),
-              purchases: pendingPurchases.map(p => p.id),
-              payments: pendingPayments.map(p => p.id),
-              holdStock: pendingHoldStock.map(h => h.id),
-              tempLedger: pendingTempLedger.map(t => t.id)
-            },
-            syncedCounts: directRes.mergedCounts
-          };
-          console.log('[SyncQueue] Direct Neon save fallback successful.');
+        if (res.ok) {
+          const json = await res.json();
+          if (json && json.success) result = json;
         }
-      } catch (neonErr) {
-        console.warn('[SyncQueue] Direct Neon save fallback failed:', neonErr);
+      } catch (fetchErr) {
+        console.warn('[SyncQueue] POST /api/sync/ fallback failed:', fetchErr);
       }
     }
 
@@ -196,8 +199,10 @@ async function mergeStore(storeName, serverList = []) {
   for (const local of localList) {
     if (!local || !local.id) continue;
     if (!serverIdSet.has(local.id)) {
-      // Product in IndexedDB that wasn't in server list (pending push or local): keep it!
-      mergedMap.set(local.id, local);
+      // Keep only if pending offline write (synced === false); discard stale deleted items
+      if (local.synced === false) {
+        mergedMap.set(local.id, local);
+      }
     }
   }
 
@@ -217,37 +222,40 @@ export async function pullAllFromServer() {
   if (typeof window === 'undefined') return null;
 
   try {
-    console.log('[SyncQueue] Pulling complete store dataset from Neon...');
+    console.log('[SyncQueue] Pulling complete dynamic store dataset from Neon DB...');
     let data = null;
+
+    // 1. Direct Neon DB load (instant, dynamic, works directly in mobile APK and web client)
     try {
-      const res = await fetch('/api/sync/');
-      if (res.ok) {
-        data = await res.json();
+      const directData = await loadFromNeon('tenant-1');
+      if (directData && directData.success && directData.found && directData.data) {
+        data = {
+          success: true,
+          products: directData.data.products || [],
+          customers: directData.data.customers || [],
+          suppliers: directData.data.suppliers || [],
+          sales: directData.data.sales || [],
+          purchases: directData.data.purchases || [],
+          payments: directData.data.payments || [],
+          holdStock: directData.data.holdStock || [],
+          tempLedger: directData.data.tempLedger || []
+        };
+        console.log('[SyncQueue] Successfully retrieved store data directly from Neon database.');
       }
-    } catch (fetchErr) {
-      console.warn('[SyncQueue] /api/sync/ fetch failed, attempting direct Neon fallback...', fetchErr);
+    } catch (neonErr) {
+      console.warn('[SyncQueue] Direct loadFromNeon fallback failed, trying /api/sync/:', neonErr);
     }
 
-    // Direct Neon DB fallback if /api/sync is unreachable or failed (e.g., Capacitor APK / offline export)
+    // 2. Fallback to API route if direct load didn't run
     if (!data || !data.success) {
       try {
-        const directData = await loadFromNeon('tenant-1');
-        if (directData && directData.success && directData.found && directData.data) {
-          data = {
-            success: true,
-            products: directData.data.products || [],
-            customers: directData.data.customers || [],
-            suppliers: directData.data.suppliers || [],
-            sales: directData.data.sales || [],
-            purchases: directData.data.purchases || [],
-            payments: directData.data.payments || [],
-            holdStock: directData.data.holdStock || [],
-            tempLedger: directData.data.tempLedger || []
-          };
-          console.log('[SyncQueue] Successfully retrieved store data directly from Neon database.');
+        const res = await fetch('/api/sync/');
+        if (res.ok) {
+          const json = await res.json();
+          if (json && json.success) data = json;
         }
-      } catch (neonErr) {
-        console.warn('[SyncQueue] Direct loadFromNeon fallback failed:', neonErr);
+      } catch (fetchErr) {
+        console.warn('[SyncQueue] /api/sync/ fetch fallback failed:', fetchErr);
       }
     }
 

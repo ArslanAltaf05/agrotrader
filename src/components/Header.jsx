@@ -19,11 +19,24 @@ export default function Header({ onToggleMobileMenu, onOpenDownloadApp, onOpenEx
     auth,
     logout,
     impersonatingTenant,
-    exitImpersonation
+    exitImpersonation,
+    syncWithCloud,
+    cloudConfig
   } = useApp();
 
   const [currentTime, setCurrentTime] = useState(new Date());
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [isSyncingTop, setIsSyncingTop] = useState(false);
+
+  const handleTopSync = async (e) => {
+    e.stopPropagation();
+    setIsSyncingTop(true);
+    try {
+      await syncWithCloud(false);
+    } finally {
+      setIsSyncingTop(false);
+    }
+  };
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -58,9 +71,14 @@ export default function Header({ onToggleMobileMenu, onOpenDownloadApp, onOpenEx
           </div>
           <div className="mobile-brand-text">
             <div className="mobile-brand-title">{storeProfile?.name || 'Asmat Agro Traders'}</div>
-            <div className="mobile-brand-cloud-status">
+            <div
+              className="mobile-brand-cloud-status"
+              onClick={handleTopSync}
+              style={{ cursor: 'pointer' }}
+              title="Tap to sync live with Neon DB"
+            >
               <span className="mobile-live-dot" />
-              <span>Cloud Active</span>
+              <span>{isSyncingTop ? 'Syncing...' : 'Cloud Live'}</span>
             </div>
           </div>
         </div>
