@@ -80,142 +80,66 @@ export default function MobileDashboardView({
     return sum;
   }, [sales]);
 
-  // Low stock products
+  // Low stock products (Dynamic from live products)
   const lowStockItems = useMemo(() => {
-    const realLow = products.filter(p => ((p.shopStock || 0) + (p.storeStock || 0)) <= (p.alertQty || 10));
-    if (realLow.length > 0) return realLow.slice(0, 5);
-
-    // Fallback items matching user screenshot
-    return [
-      {
-        id: 'prod-dap-demo',
-        name: 'Di-Ammonium (DAP)',
-        category: 'Fertilizers',
-        unitWeight: 50,
-        unit: 'kg',
-        costPrice: 11200,
-        salePrice: 11800,
-        stock: 4,
-        badgeText: 'Low Stock: 4 Bags',
-        isCritical: false
-      },
-      {
-        id: 'prod-cartap-demo',
-        name: 'Cartap Insecticide 4G',
-        category: 'Pesticides',
-        unitWeight: 1,
-        unit: 'Litre',
-        costPrice: 1450,
-        salePrice: 1750,
-        stock: 3,
-        badgeText: 'Critical: 3 Btls',
-        isCritical: true
-      },
-      {
-        id: 'prod-urea-demo',
-        name: 'FFC Sona Urea Bag',
-        category: 'Fertilizers',
-        unitWeight: 50,
-        unit: 'kg',
-        costPrice: 4100,
-        salePrice: 4250,
-        stock: 8,
-        badgeText: 'Low Stock: 8 Bags',
-        isCritical: false
-      }
-    ];
+    return products
+      .filter(p => !p.deleted && ((Number(p.shopStock) || 0) + (Number(p.storeStock) || 0)) <= (Number(p.alertQty) || 10))
+      .slice(0, 6)
+      .map(p => {
+        const totalStock = (Number(p.shopStock) || 0) + (Number(p.storeStock) || 0);
+        const isCritical = totalStock <= 3;
+        return {
+          id: p.id,
+          name: p.name,
+          category: p.category || 'General',
+          unitWeight: p.unitWeight || 1,
+          unit: p.unit || 'bag',
+          costPrice: Number(p.costPrice) || 0,
+          salePrice: Number(p.salePrice) || 0,
+          stock: totalStock,
+          badgeText: isCritical ? `Critical: ${totalStock} ${p.unit || 'units'}` : `Low: ${totalStock} ${p.unit || 'units'}`,
+          isCritical
+        };
+      });
   }, [products]);
 
-  // Farmer ledgers list
+  // Farmer ledgers list (Dynamic from live customers)
   const displayFarmers = useMemo(() => {
-    if (customers.length >= 3) {
-      return customers.slice(0, 4).map(c => {
+    return customers
+      .filter(c => !c.deleted)
+      .slice(0, 6)
+      .map(c => {
         const initials = (c.name || 'CU').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-        const isOverdue = c.balance > 80000;
-        const isCleared = !c.balance || c.balance <= 0;
+        const bal = Number(c.balance) || 0;
+        const isOverdue = bal > 50000;
+        const isCleared = bal <= 0;
         return {
           id: c.id,
           name: c.name,
           initials,
-          phone: c.phone || '0300-8841290',
-          village: c.village || c.address || 'Chak 42-RB',
-          balance: c.balance || 0,
-          statusBadge: isCleared ? 'Cleared' : isOverdue ? 'Overdue' : 'Reliable',
-          dueSubtext: isCleared ? 'All Clear (Jama)' : isOverdue ? '12 days overdue' : 'Due 15 May'
+          phone: c.phone || 'No phone',
+          village: c.village || c.address || 'Local',
+          balance: bal,
+          statusBadge: isCleared ? 'Cleared' : isOverdue ? 'Overdue' : 'Active',
+          dueSubtext: isCleared ? 'All Clear (Jama)' : isOverdue ? 'Overdue balance' : 'Active Account'
         };
       });
-    }
-
-    // Default matching screenshot
-    return [
-      {
-        id: 'farmer-1',
-        name: 'Chaudhry Bashir',
-        initials: 'CH',
-        phone: '0300-8841290',
-        village: 'Chak 42-RB',
-        balance: 48500,
-        statusBadge: 'Reliable',
-        dueSubtext: 'Due 15 May'
-      },
-      {
-        id: 'farmer-2',
-        name: 'Malik Riaz Hussain',
-        initials: 'MR',
-        phone: '0301-4492103',
-        village: 'Retra Mor',
-        balance: 112000,
-        statusBadge: 'Overdue',
-        dueSubtext: '12 days overdue'
-      },
-      {
-        id: 'farmer-3',
-        name: 'Haji Akhtar Rasool',
-        initials: 'HA',
-        phone: '0313-7729910',
-        village: 'Basti Malana',
-        balance: 0,
-        statusBadge: 'Cleared',
-        dueSubtext: 'All Clear (Jama)'
-      }
-    ];
   }, [customers]);
 
-  // Recent invoices list
+  // Recent counter invoices list (Dynamic from live sales)
   const recentInvoices = useMemo(() => {
-    if (sales.length >= 2) {
-      return sales.slice(0, 3).map(s => ({
+    return sales
+      .filter(s => !s.deleted)
+      .slice(0, 5)
+      .map(s => ({
         id: s.id,
         invoiceNo: s.invoiceNo || s.id,
-        summary: s.items && s.items.length > 0 ? `${s.paymentType === 'cash' ? 'Cash Sale' : 'Khata Credit'} • ${s.items[0]?.name} (${s.items[0]?.quantity || 1}x)` : 'Counter Sale',
-        amount: s.grandTotal || s.total || 0,
+        summary: s.items && s.items.length > 0 ? `${s.paymentType === 'cash' ? 'Cash Sale' : 'Khata Credit'} • ${s.items[0]?.name || 'Item'} (${s.items[0]?.quantity || s.items[0]?.qty || 1}x)` : `${s.paymentType === 'cash' ? 'Cash' : 'Credit'} Sale`,
+        amount: Number(s.grandTotal) || Number(s.total) || 0,
         statusLabel: s.paymentType === 'cash' ? 'Paid (Cash)' : 'Added to Udhar',
         isCash: s.paymentType === 'cash',
         rawSale: s
       }));
-    }
-
-    // Default matching screenshot
-    return [
-      {
-        id: 'inv-1',
-        invoiceNo: 'INV-2024-0891',
-        summary: 'Cash Sale • 4x FFC Urea Bags',
-        amount: 16400,
-        statusLabel: 'Paid (Cash)',
-        isCash: true,
-        rawSale: { id: 'INV-2024-0891', total: 16400, grandTotal: 16400, items: [{ name: 'FFC Urea Bags', quantity: 4, price: 4100 }] }
-      },
-      {
-        id: 'inv-2',
-        invoiceNo: 'INV-2024-0890',
-        summary: 'Khata Credit • Tarzan Cartap (6 btls)',
-        amount: 10500,
-        statusLabel: 'Added to Udhar',
-        isCash: false,
-        rawSale: { id: 'INV-2024-0890', total: 10500, grandTotal: 10500, items: [{ name: 'Tarzan Cartap', quantity: 6, price: 1750 }] }
-      }
-    ];
   }, [sales]);
 
   const handleSelectFarmer = (farmerId) => {
@@ -351,10 +275,10 @@ export default function MobileDashboardView({
             </div>
           </div>
           <div className="mobile-metric-value amber-text">
-            {metrics.lowStockCount > 0 ? `${metrics.lowStockCount} SKUs` : '6 SKUs'}
+            {metrics.lowStockCount || lowStockItems.length} SKUs
           </div>
-          <div className="mobile-metric-subtext" style={{ color: '#d97706', fontWeight: 600 }}>
-            Urea &amp; DAP Low
+          <div className="mobile-metric-subtext" style={{ color: (metrics.lowStockCount || lowStockItems.length) > 0 ? '#d97706' : '#10b981', fontWeight: 600 }}>
+            {(metrics.lowStockCount || lowStockItems.length) > 0 ? 'Requires Reorder' : 'All Stock Healthy'}
           </div>
         </div>
       </div>
@@ -502,43 +426,49 @@ export default function MobileDashboardView({
         </div>
 
         <div className="mobile-stock-cards-scroll">
-          {lowStockItems.map((item) => {
-            const stockQty = (item.shopStock ?? item.stock ?? 0);
-            const isCritical = item.isCritical || stockQty <= 3;
-            const badgeLabel = item.badgeText || (isCritical ? `Critical: ${stockQty} ${item.unit || 'Btls'}` : `Low Stock: ${stockQty} ${item.unit || 'Bags'}`);
-            const packWeight = item.unitWeight ? `${item.unitWeight}${item.unit || 'kg'}` : (item.unit || '50kg');
+          {lowStockItems.length === 0 ? (
+            <div style={{ padding: '16px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px dashed rgba(255,255,255,0.1)', color: '#94a3b8', fontSize: '13px', textAlign: 'center', width: '100%' }}>
+              ✅ All inventory stocks are healthy. No low stock alerts.
+            </div>
+          ) : (
+            lowStockItems.map((item) => {
+              const stockQty = item.stock || 0;
+              const isCritical = item.isCritical;
+              const badgeLabel = item.badgeText;
+              const packWeight = item.unitWeight ? `${item.unitWeight} ${item.unit || 'kg'}` : (item.unit || 'unit');
 
-            return (
-              <div key={item.id} className="mobile-stock-item-card">
-                <div className="mobile-stock-card-top">
-                  <span className={`mobile-stock-badge ${isCritical ? 'critical' : 'warning'}`}>
-                    {badgeLabel}
-                  </span>
-                  <span className="mobile-stock-pack-label">
-                    {packWeight}
-                  </span>
-                </div>
-
-                <div className="mobile-stock-prod-name">{item.name}</div>
-                <div className="mobile-stock-cost-sell">
-                  Cost: {formatNumber(item.costPrice || 0, hideAmounts)} • Sell: {formatNumber(item.salePrice || 0, hideAmounts)}
-                </div>
-
-                <div className="mobile-stock-card-bottom">
-                  <div className="mobile-stock-price">
-                    {formatCurrency(item.salePrice || 0, hideAmounts)}
+              return (
+                <div key={item.id} className="mobile-stock-item-card">
+                  <div className="mobile-stock-card-top">
+                    <span className={`mobile-stock-badge ${isCritical ? 'critical' : 'warning'}`}>
+                      {badgeLabel}
+                    </span>
+                    <span className="mobile-stock-pack-label">
+                      {packWeight}
+                    </span>
                   </div>
-                  <button
-                    type="button"
-                    className="mobile-reorder-btn"
-                    onClick={() => setActiveTab('purchases')}
-                  >
-                    + Reorder
-                  </button>
+
+                  <div className="mobile-stock-prod-name">{item.name}</div>
+                  <div className="mobile-stock-cost-sell">
+                    Cost: {formatNumber(item.costPrice || 0, hideAmounts)} • Sell: {formatNumber(item.salePrice || 0, hideAmounts)}
+                  </div>
+
+                  <div className="mobile-stock-card-bottom">
+                    <div className="mobile-stock-price">
+                      {formatCurrency(item.salePrice || 0, hideAmounts)}
+                    </div>
+                    <button
+                      type="button"
+                      className="mobile-reorder-btn"
+                      onClick={() => setActiveTab('purchases')}
+                    >
+                      + Reorder
+                    </button>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })
+          )}
         </div>
       </div>
 
@@ -559,38 +489,44 @@ export default function MobileDashboardView({
         </div>
 
         <div className="mobile-farmer-list">
-          {displayFarmers.map((f) => (
-            <div
-              key={f.id}
-              className="mobile-farmer-item"
-              onClick={() => handleSelectFarmer(f.id)}
-            >
-              <div className="mobile-farmer-avatar">
-                {f.initials}
-              </div>
-
-              <div className="mobile-farmer-details">
-                <div className="mobile-farmer-name-row">
-                  <span className="mobile-farmer-name">{f.name}</span>
-                  <span className={`mobile-farmer-trust-pill ${f.statusBadge.toLowerCase()}`}>
-                    {f.statusBadge}
-                  </span>
-                </div>
-                <div className="mobile-farmer-location">
-                  {f.village} • {f.phone}
-                </div>
-              </div>
-
-              <div className="mobile-farmer-balance-col">
-                <div className={`mobile-farmer-balance-val ${f.balance > 0 ? 'negative' : 'cleared'}`}>
-                  {f.balance > 0 ? `- ${formatCurrency(f.balance, hideAmounts)}` : 'Rs. 0'}
-                </div>
-                <div className="mobile-farmer-due-date">
-                  {f.dueSubtext}
-                </div>
-              </div>
+          {displayFarmers.length === 0 ? (
+            <div style={{ padding: '20px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px dashed rgba(255,255,255,0.1)', color: '#94a3b8', fontSize: '13px', textAlign: 'center' }}>
+              👨‍🌾 No farmer accounts recorded yet. Tap <strong>+ Add Udhar</strong> or Ledger to register customers.
             </div>
-          ))}
+          ) : (
+            displayFarmers.map((f) => (
+              <div
+                key={f.id}
+                className="mobile-farmer-item"
+                onClick={() => handleSelectFarmer(f.id)}
+              >
+                <div className="mobile-farmer-avatar">
+                  {f.initials}
+                </div>
+
+                <div className="mobile-farmer-details">
+                  <div className="mobile-farmer-name-row">
+                    <span className="mobile-farmer-name">{f.name}</span>
+                    <span className={`mobile-farmer-trust-pill ${f.statusBadge.toLowerCase()}`}>
+                      {f.statusBadge}
+                    </span>
+                  </div>
+                  <div className="mobile-farmer-location">
+                    {f.village} • {f.phone}
+                  </div>
+                </div>
+
+                <div className="mobile-farmer-balance-col">
+                  <div className={`mobile-farmer-balance-val ${f.balance > 0 ? 'negative' : 'cleared'}`}>
+                    {f.balance > 0 ? `- ${formatCurrency(f.balance, hideAmounts)}` : 'Rs. 0'}
+                  </div>
+                  <div className="mobile-farmer-due-date">
+                    {f.dueSubtext}
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
@@ -605,27 +541,33 @@ export default function MobileDashboardView({
         </div>
 
         <div className="mobile-invoices-list">
-          {recentInvoices.map((inv) => (
-            <div
-              key={inv.id}
-              className="mobile-invoice-item"
-              onClick={() => handleInvoiceClick(inv)}
-            >
-              <div className="mobile-invoice-icon">🧾</div>
-              <div className="mobile-invoice-details">
-                <div className="mobile-invoice-id">{inv.invoiceNo}</div>
-                <div className="mobile-invoice-summary">{inv.summary}</div>
-              </div>
-              <div className="mobile-invoice-amount-col">
-                <div className="mobile-invoice-amount">
-                  {formatCurrency(inv.amount, hideAmounts)}
-                </div>
-                <div className={`mobile-invoice-status ${inv.isCash ? 'paid' : 'udhar'}`}>
-                  {inv.statusLabel}
-                </div>
-              </div>
+          {recentInvoices.length === 0 ? (
+            <div style={{ padding: '20px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px dashed rgba(255,255,255,0.1)', color: '#94a3b8', fontSize: '13px', textAlign: 'center' }}>
+              🧾 No counter sales recorded yet. Tap <strong>+ New Sale</strong> to start checkout.
             </div>
-          ))}
+          ) : (
+            recentInvoices.map((inv) => (
+              <div
+                key={inv.id}
+                className="mobile-invoice-item"
+                onClick={() => handleInvoiceClick(inv)}
+              >
+                <div className="mobile-invoice-icon">🧾</div>
+                <div className="mobile-invoice-details">
+                  <div className="mobile-invoice-id">{inv.invoiceNo}</div>
+                  <div className="mobile-invoice-summary">{inv.summary}</div>
+                </div>
+                <div className="mobile-invoice-amount-col">
+                  <div className="mobile-invoice-amount">
+                    {formatCurrency(inv.amount, hideAmounts)}
+                  </div>
+                  <div className={`mobile-invoice-status ${inv.isCash ? 'paid' : 'udhar'}`}>
+                    {inv.statusLabel}
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
