@@ -4,7 +4,9 @@ import {
   markItemsSynced,
   getAllLocalItems,
   saveLocalBatch,
-  getLocalItems
+  getLocalItems,
+  filterOutDemo,
+  DEMO_IDS
 } from './offlineStorage';
 import { loadFromNeon, saveToNeon } from './db';
 
@@ -164,15 +166,16 @@ export async function flushAllQueues(pushAll = false) {
  * Result: union of all Neon products + all local products, never deleting rows.
  */
 async function mergeStore(storeName, serverList = []) {
-  const localList = await getAllLocalItems(storeName);
+  const cleanServerList = filterOutDemo(serverList);
+  const localList = filterOutDemo(await getAllLocalItems(storeName));
   const localMap = new Map(localList.map(item => [item.id, item]));
-  const serverIdSet = new Set(serverList.map(s => s.id));
+  const serverIdSet = new Set(cleanServerList.map(s => s.id));
 
   const mergedMap = new Map();
 
   // 1. Process all items received from Neon server
-  for (const serverItem of serverList) {
-    if (!serverItem || !serverItem.id) continue;
+  for (const serverItem of cleanServerList) {
+    if (!serverItem || !serverItem.id || DEMO_IDS.has(serverItem.id)) continue;
     const local = localMap.get(serverItem.id);
 
     if (local) {
@@ -190,14 +193,14 @@ async function mergeStore(storeName, serverList = []) {
         }
       }
     } else {
-      // Product exists in Neon but not in local IndexedDB: insert into IndexedDB
+      // Record exists in Neon but not in local IndexedDB: insert into IndexedDB
       mergedMap.set(serverItem.id, { ...serverItem, synced: true });
     }
   }
 
   // 2. Process all items in local IndexedDB that were not in serverList
   for (const local of localList) {
-    if (!local || !local.id) continue;
+    if (!local || !local.id || DEMO_IDS.has(local.id)) continue;
     if (!serverIdSet.has(local.id)) {
       // Keep only if pending offline write (synced === false); discard stale deleted items
       if (local.synced === false) {
@@ -206,7 +209,7 @@ async function mergeStore(storeName, serverList = []) {
     }
   }
 
-  const merged = Array.from(mergedMap.values());
+  const merged = filterOutDemo(Array.from(mergedMap.values()));
 
   // Save the complete union dataset into IndexedDB
   await saveLocalBatch(storeName, merged);

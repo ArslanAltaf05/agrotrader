@@ -28,16 +28,29 @@ export function getSql() {
  * Never flushes or deletes items from other devices.
  * For items with matching IDs, uses the newer updatedAt timestamp.
  */
+export const DEMO_IDS = new Set([
+  'prod-dap-01', 'prod-cartap-02', 'prod-urea-03', 'prod-tarzan-04',
+  'cust-bashir-01', 'cust-riaz-02', 'cust-akhtar-03',
+  'supp-ffc-01', 'supp-engro-02', 'supp-syngenta-03',
+  'INV-2024-0891', 'INV-2024-0890',
+  'PAY-OUT-701', 'PAY-IN-553', 'PAY-IN-990', 'PAY-IN-613', 'PAY-IN-699', 'PAY-IN-932', 'PAY-OUT-878'
+]);
+
+export function filterOutDemo(list) {
+  if (!Array.isArray(list)) return [];
+  return list.filter(item => item && !DEMO_IDS.has(item.id) && !String(item.id).startsWith('demo-') && !String(item.id).includes('demo'));
+}
+
 export function mergeEntityLists(existingList = [], incomingList = []) {
   const mergedMap = new Map();
 
-  // 1. Load existing items from DB (skip any item previously marked deleted)
+  // 1. Load existing items from DB (skip any item previously marked deleted or demo)
   const existingArr = Array.isArray(existingList)
     ? existingList
     : (typeof existingList === 'string' ? JSON.parse(existingList || '[]') : []);
 
   for (const item of existingArr) {
-    if (item && item.id && !item.deleted) {
+    if (item && item.id && !item.deleted && !DEMO_IDS.has(item.id) && !String(item.id).startsWith('demo-')) {
       mergedMap.set(String(item.id), item);
     }
   }
@@ -48,7 +61,7 @@ export function mergeEntityLists(existingList = [], incomingList = []) {
     : (typeof incomingList === 'string' ? JSON.parse(incomingList || '[]') : []);
 
   for (const item of incomingArr) {
-    if (!item || !item.id) continue;
+    if (!item || !item.id || DEMO_IDS.has(item.id) || String(item.id).startsWith('demo-')) continue;
     const strId = String(item.id);
 
     // If incoming record is marked deleted, actively remove from map so it deletes from Neon DB!
@@ -73,8 +86,8 @@ export function mergeEntityLists(existingList = [], incomingList = []) {
     }
   }
 
-  // Filter out any deleted items before returning
-  return Array.from(mergedMap.values()).filter(item => !item.deleted);
+  // Filter out any deleted items and demo items before returning
+  return filterOutDemo(Array.from(mergedMap.values()).filter(item => !item.deleted));
 }
 
 /**

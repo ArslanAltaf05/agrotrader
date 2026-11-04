@@ -2,6 +2,19 @@ export const dynamic = 'force-static';
 
 import { neon } from '@neondatabase/serverless';
 
+const DEMO_IDS = new Set([
+  'prod-dap-01', 'prod-cartap-02', 'prod-urea-03', 'prod-tarzan-04',
+  'cust-bashir-01', 'cust-riaz-02', 'cust-akhtar-03',
+  'supp-ffc-01', 'supp-engro-02', 'supp-syngenta-03',
+  'INV-2024-0891', 'INV-2024-0890',
+  'PAY-OUT-701', 'PAY-IN-553', 'PAY-IN-990', 'PAY-IN-613', 'PAY-IN-699', 'PAY-IN-932', 'PAY-OUT-878'
+]);
+
+function filterOutDemo(list) {
+  if (!Array.isArray(list)) return [];
+  return list.filter(item => item && !DEMO_IDS.has(item.id) && !String(item.id).startsWith('demo-') && !String(item.id).includes('demo'));
+}
+
 function getDb() {
   const url = process.env.DATABASE_URL;
   if (!url) {
@@ -243,14 +256,14 @@ export async function GET() {
     return Response.json({
       success: true,
       timestamp: new Date().toISOString(),
-      products,
-      customers,
-      suppliers,
-      sales,
-      purchases,
-      payments,
-      holdStock,
-      tempLedger
+      products: filterOutDemo(products),
+      customers: filterOutDemo(customers),
+      suppliers: filterOutDemo(suppliers),
+      sales: filterOutDemo(sales),
+      purchases: filterOutDemo(purchases),
+      payments: filterOutDemo(payments),
+      holdStock: filterOutDemo(holdStock),
+      tempLedger: filterOutDemo(tempLedger)
     });
   } catch (err) {
     console.error('GET /api/sync error:', err);

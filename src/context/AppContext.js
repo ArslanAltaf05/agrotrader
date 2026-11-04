@@ -36,7 +36,9 @@ import {
   saveLocalTempLedger,
   deleteLocalTempLedger,
   saveLocalTempLedgerBatch,
-  generateEntityId
+  generateEntityId,
+  filterOutDemo,
+  DEMO_IDS
 } from '../lib/offlineStorage';
 import {
   flushAllQueues,
@@ -47,7 +49,7 @@ import {
   syncProductsFull
 } from '../lib/syncQueue';
 
-const STORAGE_KEY = 'agrotrader_live_production_v1';
+const STORAGE_KEY = 'agrotrader_live_production_v2';
 
 // Multi-tenant SaaS Branches
 const DEFAULT_BRANCHES = [
@@ -490,14 +492,14 @@ export function AppProvider({ children }) {
       // 1. Run full 2-way sync (push pending or all local if manual + pull Neon server records and union-merge)
       const syncedAll = await syncAllFull(!isAuto);
       if (syncedAll) {
-        if (Array.isArray(syncedAll.products)) setProducts(syncedAll.products);
-        if (Array.isArray(syncedAll.customers)) setCustomers(syncedAll.customers);
-        if (Array.isArray(syncedAll.suppliers)) setSuppliers(syncedAll.suppliers);
-        if (Array.isArray(syncedAll.sales)) setSales(syncedAll.sales);
-        if (Array.isArray(syncedAll.purchases)) setPurchases(syncedAll.purchases);
-        if (Array.isArray(syncedAll.payments)) setPayments(syncedAll.payments);
-        if (Array.isArray(syncedAll.holdStock)) setHoldStock(syncedAll.holdStock);
-        if (Array.isArray(syncedAll.tempLedger)) setTempLedger(syncedAll.tempLedger);
+        if (Array.isArray(syncedAll.products)) setProducts(filterOutDemo(syncedAll.products));
+        if (Array.isArray(syncedAll.customers)) setCustomers(filterOutDemo(syncedAll.customers));
+        if (Array.isArray(syncedAll.suppliers)) setSuppliers(filterOutDemo(syncedAll.suppliers));
+        if (Array.isArray(syncedAll.sales)) setSales(filterOutDemo(syncedAll.sales));
+        if (Array.isArray(syncedAll.purchases)) setPurchases(filterOutDemo(syncedAll.purchases));
+        if (Array.isArray(syncedAll.payments)) setPayments(filterOutDemo(syncedAll.payments));
+        if (Array.isArray(syncedAll.holdStock)) setHoldStock(filterOutDemo(syncedAll.holdStock));
+        if (Array.isArray(syncedAll.tempLedger)) setTempLedger(filterOutDemo(syncedAll.tempLedger));
 
         // 2. Persist the freshly merged dataset to Neon agro_store_sync
         const payload = {
@@ -580,14 +582,14 @@ export function AppProvider({ children }) {
       if (typeof navigator !== 'undefined' && navigator.onLine) {
         syncAllFull().then(syncedAll => {
           if (syncedAll) {
-            if (Array.isArray(syncedAll.products) && syncedAll.products.length > 0) setProducts(syncedAll.products);
-            if (Array.isArray(syncedAll.customers) && syncedAll.customers.length > 0) setCustomers(syncedAll.customers);
-            if (Array.isArray(syncedAll.suppliers) && syncedAll.suppliers.length > 0) setSuppliers(syncedAll.suppliers);
-            if (Array.isArray(syncedAll.sales) && syncedAll.sales.length > 0) setSales(syncedAll.sales);
-            if (Array.isArray(syncedAll.purchases) && syncedAll.purchases.length > 0) setPurchases(syncedAll.purchases);
-            if (Array.isArray(syncedAll.payments) && syncedAll.payments.length > 0) setPayments(syncedAll.payments);
-            if (Array.isArray(syncedAll.holdStock) && syncedAll.holdStock.length > 0) setHoldStock(syncedAll.holdStock);
-            if (Array.isArray(syncedAll.tempLedger) && syncedAll.tempLedger.length > 0) setTempLedger(syncedAll.tempLedger);
+            if (Array.isArray(syncedAll.products)) setProducts(filterOutDemo(syncedAll.products));
+            if (Array.isArray(syncedAll.customers)) setCustomers(filterOutDemo(syncedAll.customers));
+            if (Array.isArray(syncedAll.suppliers)) setSuppliers(filterOutDemo(syncedAll.suppliers));
+            if (Array.isArray(syncedAll.sales)) setSales(filterOutDemo(syncedAll.sales));
+            if (Array.isArray(syncedAll.purchases)) setPurchases(filterOutDemo(syncedAll.purchases));
+            if (Array.isArray(syncedAll.payments)) setPayments(filterOutDemo(syncedAll.payments));
+            if (Array.isArray(syncedAll.holdStock)) setHoldStock(filterOutDemo(syncedAll.holdStock));
+            if (Array.isArray(syncedAll.tempLedger)) setTempLedger(filterOutDemo(syncedAll.tempLedger));
           }
         }).catch(err => {
           console.warn('[AppContext] Periodic sync error:', err);
@@ -616,7 +618,7 @@ export function AppProvider({ children }) {
   // Load from LocalStorage and Cloud on mount
   useEffect(() => {
     try {
-      const legacyKeys = ['agrotrader_saas_v3_dynamic', 'agrotrader_saas_v2', 'agrotrader_v1', 'agrotrader_data'];
+      const legacyKeys = ['agrotrader_live_production_v1', 'agrotrader_saas_v3_dynamic', 'agrotrader_saas_v2', 'agrotrader_v1', 'agrotrader_data'];
       legacyKeys.forEach(k => {
         try { localStorage.removeItem(k); } catch (e) { }
       });
@@ -625,14 +627,14 @@ export function AppProvider({ children }) {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed.theme) setThemeState(parsed.theme);
-        if (Array.isArray(parsed.products)) setProducts(parsed.products);
-        if (Array.isArray(parsed.customers)) setCustomers(parsed.customers);
-        if (Array.isArray(parsed.suppliers)) setSuppliers(parsed.suppliers);
-        if (Array.isArray(parsed.sales)) setSales(parsed.sales);
-        if (Array.isArray(parsed.purchases)) setPurchases(parsed.purchases);
-        if (Array.isArray(parsed.payments)) setPayments(parsed.payments);
-        if (Array.isArray(parsed.holdStock)) setHoldStock(parsed.holdStock);
-        if (Array.isArray(parsed.tempLedger)) setTempLedger(parsed.tempLedger);
+        if (Array.isArray(parsed.products)) setProducts(filterOutDemo(parsed.products));
+        if (Array.isArray(parsed.customers)) setCustomers(filterOutDemo(parsed.customers));
+        if (Array.isArray(parsed.suppliers)) setSuppliers(filterOutDemo(parsed.suppliers));
+        if (Array.isArray(parsed.sales)) setSales(filterOutDemo(parsed.sales));
+        if (Array.isArray(parsed.purchases)) setPurchases(filterOutDemo(parsed.purchases));
+        if (Array.isArray(parsed.payments)) setPayments(filterOutDemo(parsed.payments));
+        if (Array.isArray(parsed.holdStock)) setHoldStock(filterOutDemo(parsed.holdStock));
+        if (Array.isArray(parsed.tempLedger)) setTempLedger(filterOutDemo(parsed.tempLedger));
         if (Array.isArray(parsed.branches)) setBranches(parsed.branches);
         if (parsed.activeBranchId) setActiveBranchId(parsed.activeBranchId);
         if (parsed.storeProfile) {
@@ -770,14 +772,14 @@ export function AppProvider({ children }) {
       if (typeof navigator !== 'undefined' && navigator.onLine) {
         syncAllFull().then(syncedAll => {
           if (syncedAll) {
-            if (Array.isArray(syncedAll.products) && syncedAll.products.length > 0) setProducts(syncedAll.products);
-            if (Array.isArray(syncedAll.customers) && syncedAll.customers.length > 0) setCustomers(syncedAll.customers);
-            if (Array.isArray(syncedAll.suppliers) && syncedAll.suppliers.length > 0) setSuppliers(syncedAll.suppliers);
-            if (Array.isArray(syncedAll.sales) && syncedAll.sales.length > 0) setSales(syncedAll.sales);
-            if (Array.isArray(syncedAll.purchases) && syncedAll.purchases.length > 0) setPurchases(syncedAll.purchases);
-            if (Array.isArray(syncedAll.payments) && syncedAll.payments.length > 0) setPayments(syncedAll.payments);
-            if (Array.isArray(syncedAll.holdStock) && syncedAll.holdStock.length > 0) setHoldStock(syncedAll.holdStock);
-            if (Array.isArray(syncedAll.tempLedger) && syncedAll.tempLedger.length > 0) setTempLedger(syncedAll.tempLedger);
+            if (Array.isArray(syncedAll.products)) setProducts(filterOutDemo(syncedAll.products));
+            if (Array.isArray(syncedAll.customers)) setCustomers(filterOutDemo(syncedAll.customers));
+            if (Array.isArray(syncedAll.suppliers)) setSuppliers(filterOutDemo(syncedAll.suppliers));
+            if (Array.isArray(syncedAll.sales)) setSales(filterOutDemo(syncedAll.sales));
+            if (Array.isArray(syncedAll.purchases)) setPurchases(filterOutDemo(syncedAll.purchases));
+            if (Array.isArray(syncedAll.payments)) setPayments(filterOutDemo(syncedAll.payments));
+            if (Array.isArray(syncedAll.holdStock)) setHoldStock(filterOutDemo(syncedAll.holdStock));
+            if (Array.isArray(syncedAll.tempLedger)) setTempLedger(filterOutDemo(syncedAll.tempLedger));
 
             setCloudConfig(prev => ({
               ...prev,
@@ -810,37 +812,45 @@ export function AppProvider({ children }) {
           if (Array.isArray(d.tenantUsers) && d.tenantUsers.length > 0) setTenantUsers(d.tenantUsers);
 
           // Dynamically populate store collections with live records from Neon DB
-          if (Array.isArray(d.products) && d.products.length > 0) {
-            setProducts(d.products);
-            saveLocalProductsBatch(d.products.map(p => ({ ...p, synced: true })));
+          if (Array.isArray(d.products)) {
+            const cleanP = filterOutDemo(d.products);
+            setProducts(cleanP);
+            saveLocalProductsBatch(cleanP.map(p => ({ ...p, synced: true })));
           }
-          if (Array.isArray(d.customers) && d.customers.length > 0) {
-            setCustomers(d.customers);
-            saveLocalCustomersBatch(d.customers.map(c => ({ ...c, synced: true })));
+          if (Array.isArray(d.customers)) {
+            const cleanC = filterOutDemo(d.customers);
+            setCustomers(cleanC);
+            saveLocalCustomersBatch(cleanC.map(c => ({ ...c, synced: true })));
           }
-          if (Array.isArray(d.suppliers) && d.suppliers.length > 0) {
-            setSuppliers(d.suppliers);
-            saveLocalSuppliersBatch(d.suppliers.map(s => ({ ...s, synced: true })));
+          if (Array.isArray(d.suppliers)) {
+            const cleanS = filterOutDemo(d.suppliers);
+            setSuppliers(cleanS);
+            saveLocalSuppliersBatch(cleanS.map(s => ({ ...s, synced: true })));
           }
-          if (Array.isArray(d.sales) && d.sales.length > 0) {
-            setSales(d.sales);
-            saveLocalSalesBatch(d.sales.map(s => ({ ...s, synced: true })));
+          if (Array.isArray(d.sales)) {
+            const cleanSales = filterOutDemo(d.sales);
+            setSales(cleanSales);
+            saveLocalSalesBatch(cleanSales.map(s => ({ ...s, synced: true })));
           }
-          if (Array.isArray(d.purchases) && d.purchases.length > 0) {
-            setPurchases(d.purchases);
-            saveLocalPurchasesBatch(d.purchases.map(p => ({ ...p, synced: true })));
+          if (Array.isArray(d.purchases)) {
+            const cleanPurchases = filterOutDemo(d.purchases);
+            setPurchases(cleanPurchases);
+            saveLocalPurchasesBatch(cleanPurchases.map(p => ({ ...p, synced: true })));
           }
-          if (Array.isArray(d.payments) && d.payments.length > 0) {
-            setPayments(d.payments);
-            saveLocalPaymentsBatch(d.payments.map(p => ({ ...p, synced: true })));
+          if (Array.isArray(d.payments)) {
+            const cleanPayments = filterOutDemo(d.payments);
+            setPayments(cleanPayments);
+            saveLocalPaymentsBatch(cleanPayments.map(p => ({ ...p, synced: true })));
           }
-          if (Array.isArray(d.holdStock) && d.holdStock.length > 0) {
-            setHoldStock(d.holdStock);
-            saveLocalHoldStockBatch(d.holdStock.map(h => ({ ...h, synced: true })));
+          if (Array.isArray(d.holdStock)) {
+            const cleanHold = filterOutDemo(d.holdStock);
+            setHoldStock(cleanHold);
+            saveLocalHoldStockBatch(cleanHold.map(h => ({ ...h, synced: true })));
           }
-          if (Array.isArray(d.tempLedger) && d.tempLedger.length > 0) {
-            setTempLedger(d.tempLedger);
-            saveLocalTempLedgerBatch(d.tempLedger.map(t => ({ ...t, synced: true })));
+          if (Array.isArray(d.tempLedger)) {
+            const cleanTemp = filterOutDemo(d.tempLedger);
+            setTempLedger(cleanTemp);
+            saveLocalTempLedgerBatch(cleanTemp.map(t => ({ ...t, synced: true })));
           }
 
           setCloudConfig(prev => ({

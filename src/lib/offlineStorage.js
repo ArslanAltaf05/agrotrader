@@ -1,7 +1,20 @@
 import { openDB } from 'idb';
 
-const DB_NAME = 'agrotrader_offline_v2';
+const DB_NAME = 'agrotrader_offline_v3';
 const DB_VERSION = 1;
+
+export const DEMO_IDS = new Set([
+  'prod-dap-01', 'prod-cartap-02', 'prod-urea-03', 'prod-tarzan-04',
+  'cust-bashir-01', 'cust-riaz-02', 'cust-akhtar-03',
+  'supp-ffc-01', 'supp-engro-02', 'supp-syngenta-03',
+  'INV-2024-0891', 'INV-2024-0890',
+  'PAY-OUT-701', 'PAY-IN-553', 'PAY-IN-990', 'PAY-IN-613', 'PAY-IN-699', 'PAY-IN-932', 'PAY-OUT-878'
+]);
+
+export function filterOutDemo(list) {
+  if (!Array.isArray(list)) return [];
+  return list.filter(item => item && !DEMO_IDS.has(item.id) && !String(item.id).startsWith('demo-') && !String(item.id).includes('demo'));
+}
 
 export const STORES = {
   products: 'products',
@@ -20,6 +33,13 @@ export function getDb() {
   if (typeof window === 'undefined') return null;
 
   if (!dbPromise) {
+    if (typeof indexedDB !== 'undefined') {
+      try {
+        indexedDB.deleteDatabase('agrotrader_offline_v2');
+        indexedDB.deleteDatabase('agrotrader_offline_v1');
+      } catch (e) { }
+    }
+
     dbPromise = openDB(DB_NAME, DB_VERSION, {
       upgrade(db) {
         Object.values(STORES).forEach(storeName => {
@@ -55,7 +75,7 @@ export async function getLocalItems(storeName) {
   if (!db) return [];
   try {
     const all = await db.getAll(storeName);
-    return all.filter(item => !item.deleted);
+    return filterOutDemo(all.filter(item => !item.deleted));
   } catch (err) {
     console.warn(`[IndexedDB] Error fetching ${storeName}:`, err);
     return [];
@@ -66,7 +86,8 @@ export async function getAllLocalItems(storeName) {
   const db = await getDb();
   if (!db) return [];
   try {
-    return await db.getAll(storeName);
+    const all = await db.getAll(storeName);
+    return filterOutDemo(all);
   } catch (err) {
     return [];
   }
@@ -74,7 +95,7 @@ export async function getAllLocalItems(storeName) {
 
 export async function saveLocalItem(storeName, item, synced = false) {
   const db = await getDb();
-  if (!db) return item;
+  if (!db || !item || DEMO_IDS.has(item.id)) return item;
 
   const record = {
     ...item,
@@ -107,10 +128,20 @@ export async function deleteLocalItem(storeName, id) {
 
 export async function saveLocalBatch(storeName, itemsList) {
   const db = await getDb();
-  if (!db || !Array.isArray(itemsList) || !itemsList.length) return;
+  if (!db || !Array.isArray(itemsList)) return;
 
+  const cleanList = filterOutDemo(itemsList);
   const tx = db.transaction(storeName, 'readwrite');
-  for (const item of itemsList) {
+  const allCurrent = await tx.store.getAll();
+  const newItemIds = new Set(cleanList.map(i => i?.id).filter(Boolean));
+
+  for (const cur of allCurrent) {
+    if ((cur.synced || DEMO_IDS.has(cur.id)) && !newItemIds.has(cur.id)) {
+      await tx.store.delete(cur.id);
+    }
+  }
+
+  for (const item of cleanList) {
     if (!item || !item.id) continue;
     await tx.store.put(item);
   }
