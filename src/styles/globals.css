@@ -2079,3 +2079,997 @@ html, body {
     color: #000;
   }
 }
+
+/* ========================================================
+   Mobile APK & Smartphone Dedicated Interface
+   Matches Asmat Agro Traders High-End Mobile Mockup
+   ======================================================== */
+.mobile-dashboard-container {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 4px 6px 36px 6px;
+}
+
+/* 1. Hero Store Cloud Active Card */
+.mobile-store-hero-card {
+  background: linear-gradient(145deg, #064e3b 0%, #065f46 60%, #043c2c 100%);
+  border-radius: 18px;
+  padding: 18px;
+  color: #ffffff;
+  box-shadow: 0 8px 24px rgba(6, 78, 59, 0.25);
+  position: relative;
+  overflow: hidden;
+}
+
+.mobile-store-hero-card::after {
+  content: '';
+  position: absolute;
+  top: -30%;
+  right: -20%;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(52, 211, 153, 0.18) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.mobile-hero-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mobile-cloud-active-pill {
+  background: rgba(16, 185, 129, 0.22);
+  border: 1px solid rgba(52, 211, 153, 0.4);
+  color: #6ee7b7;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mobile-pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #34d399;
+  box-shadow: 0 0 8px #34d399;
+  animation: pulse-dot 1.8s infinite ease-in-out;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.3); opacity: 0.6; }
+}
+
+.mobile-realtime-badge {
+  font-size: 11.5px;
+  opacity: 0.9;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #ecfdf5;
+  font-weight: 600;
+}
+
+.mobile-store-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.mobile-store-title {
+  font-size: 21px;
+  font-weight: 800;
+  margin: 0;
+  color: #ffffff;
+  letter-spacing: -0.3px;
+}
+
+.mobile-store-branch-pill {
+  background: rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(4px);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.mobile-store-subtitle {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.85);
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+.mobile-store-meta-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  gap: 8px;
+}
+
+.mobile-meta-chip {
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.95);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.mobile-phone-chip {
+  background: rgba(255, 255, 255, 0.12);
+  padding: 3px 8px;
+  border-radius: 6px;
+  transition: background 0.15s ease;
+}
+
+.mobile-phone-chip:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* 2. 4-Grid Dynamic Metrics Cards */
+.mobile-metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.mobile-metric-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 13px 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.mobile-metric-card:active {
+  transform: scale(0.98);
+}
+
+.mobile-metric-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mobile-metric-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #4b5563;
+}
+
+.mobile-metric-icon-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.green-circle { background: #dcfce7; }
+.red-circle { background: #fee2e2; }
+.blue-circle { background: #eff6ff; }
+.amber-circle { background: #fef3c7; }
+
+.mobile-metric-value {
+  font-size: 18px;
+  font-weight: 800;
+  margin-top: 8px;
+  letter-spacing: -0.3px;
+}
+
+.green-text { color: #111827; }
+.red-text { color: #dc2626; }
+.blue-text { color: #111827; }
+.amber-text { color: #b45309; }
+
+.mobile-metric-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10.5px;
+  font-weight: 700;
+  margin-top: 5px;
+}
+
+.green-badge {
+  color: #15803d;
+  background: #f0fdf4;
+  padding: 2px 7px;
+  border-radius: 6px;
+  width: fit-content;
+}
+
+.red-badge {
+  color: #b91c1c;
+  background: #fef2f2;
+  padding: 2px 7px;
+  border-radius: 6px;
+  width: fit-content;
+}
+
+.mobile-metric-subtext {
+  font-size: 11px;
+  color: #6b7280;
+  margin-top: 5px;
+  font-weight: 500;
+}
+
+/* 3. Section Blocks */
+.mobile-section-block {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mobile-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 2px;
+}
+
+.mobile-section-title {
+  font-size: 14.5px;
+  font-weight: 800;
+  color: #111827;
+  margin: 0;
+}
+
+.mobile-section-caption {
+  font-size: 11.5px;
+  color: #6b7280;
+  font-weight: 600;
+}
+
+.mobile-view-all-link {
+  background: transparent;
+  border: none;
+  font-size: 12px;
+  font-weight: 700;
+  color: #0d8a5e;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* 4. Quick Operations 4-Grid */
+.mobile-quick-ops-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.mobile-quick-op-btn {
+  aspect-ratio: 1 / 1;
+  border: none;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  transition: transform 0.15s ease;
+}
+
+.mobile-quick-op-btn:active {
+  transform: scale(0.94);
+}
+
+.op-green { background: #0d8a5e; }
+.op-crimson { background: #e11d48; }
+.op-blue { background: #2563eb; }
+.op-navy { background: #1e293b; }
+
+.mobile-op-icon {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.mobile-op-title {
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+}
+
+/* 5. Admin Quick Gate Card */
+.mobile-admin-gate-card {
+  background: #f5f3ff;
+  border: 1.5px solid #ddd6fe;
+  border-radius: 16px;
+  padding: 13px 15px;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.04);
+}
+
+.mobile-gate-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mobile-gate-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mobile-gate-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #ede9fe;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.mobile-gate-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: #4c1d95;
+}
+
+.mobile-gate-subtitle {
+  font-size: 11px;
+  color: #6d28d9;
+  font-weight: 500;
+}
+
+.mobile-gate-status-pill {
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.mobile-gate-status-pill.locked {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.mobile-gate-status-pill.unlocked {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.mobile-gate-form {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.mobile-gate-input-wrapper {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.mobile-gate-key-icon {
+  position: absolute;
+  left: 10px;
+  font-size: 13px;
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+.mobile-gate-pin-input {
+  width: 100%;
+  padding: 9px 12px 9px 32px;
+  border-radius: 8px;
+  border: 1.5px solid #c4b5fd;
+  background: #ffffff;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #111827;
+  outline: none;
+}
+
+.mobile-gate-pin-input:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+}
+
+.mobile-gate-pin-input.pin-error {
+  border-color: #ef4444;
+  background: #fef2f2;
+}
+
+.mobile-gate-unlock-btn {
+  background: #064e3b;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 9px 16px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease;
+}
+
+.mobile-gate-unlock-btn:hover {
+  background: #043c2c;
+}
+
+.mobile-gate-unlocked-actions {
+  margin-top: 10px;
+}
+
+.mobile-gate-alert {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #15803d;
+  margin-bottom: 8px;
+}
+
+.mobile-gate-shortcuts {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* 6. Fertilizer & Pesticides Low Stock Horizontal Scroll */
+.mobile-stock-cards-scroll {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding: 2px 0 6px 0;
+  scrollbar-width: none;
+}
+
+.mobile-stock-cards-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.mobile-stock-item-card {
+  flex: 0 0 178px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 12px;
+  scroll-snap-align: start;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+}
+
+.mobile-stock-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mobile-stock-badge {
+  font-size: 9.5px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+
+.mobile-stock-badge.warning {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.mobile-stock-badge.critical {
+  background: #fee2e2;
+  color: #dc2626;
+  border: 1px solid #fca5a5;
+}
+
+.mobile-stock-pack-label {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.mobile-stock-prod-name {
+  font-size: 12.5px;
+  font-weight: 800;
+  color: #111827;
+  margin-top: 8px;
+  line-height: 1.3;
+  min-height: 32px;
+}
+
+.mobile-stock-cost-sell {
+  font-size: 10px;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+.mobile-stock-card-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.mobile-stock-price {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: #111827;
+}
+
+.mobile-reorder-btn {
+  background: #064e3b;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.mobile-reorder-btn:hover {
+  background: #043c2c;
+}
+
+/* 7. Active Farmer Khata Ledgers List */
+.mobile-farmer-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mobile-farmer-item {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.mobile-farmer-item:active {
+  transform: scale(0.98);
+  background: #f9fafb;
+}
+
+.mobile-farmer-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #ecfdf5;
+  color: #064e3b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12.5px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.mobile-farmer-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.mobile-farmer-name-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mobile-farmer-name {
+  font-size: 13px;
+  font-weight: 800;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mobile-farmer-trust-pill {
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 6px;
+}
+
+.mobile-farmer-trust-pill.reliable { background: #ecfdf5; color: #059669; }
+.mobile-farmer-trust-pill.overdue { background: #fef2f2; color: #dc2626; }
+.mobile-farmer-trust-pill.cleared { background: #f0fdf4; color: #16a34a; }
+
+.mobile-farmer-location {
+  font-size: 10.5px;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+.mobile-farmer-balance-col {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.mobile-farmer-balance-val {
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.mobile-farmer-balance-val.negative { color: #dc2626; }
+.mobile-farmer-balance-val.cleared { color: #16a34a; }
+
+.mobile-farmer-due-date {
+  font-size: 10px;
+  color: #6b7280;
+  margin-top: 1px;
+}
+
+/* 8. Recent Counter Invoices List */
+.mobile-invoices-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mobile-invoice-item {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.mobile-invoice-item:active {
+  transform: scale(0.98);
+  background: #f9fafb;
+}
+
+.mobile-invoice-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  flex-shrink: 0;
+}
+
+.mobile-invoice-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.mobile-invoice-id {
+  font-size: 12.5px;
+  font-weight: 800;
+  color: #111827;
+}
+
+.mobile-invoice-summary {
+  font-size: 10.5px;
+  color: #6b7280;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mobile-invoice-amount-col {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.mobile-invoice-amount {
+  font-size: 13px;
+  font-weight: 800;
+  color: #111827;
+}
+
+.mobile-invoice-status {
+  font-size: 10px;
+  font-weight: 700;
+  margin-top: 1px;
+}
+
+.mobile-invoice-status.paid { color: #16a34a; }
+.mobile-invoice-status.udhar { color: #dc2626; }
+
+/* 9. Agro Cloud Guarantee Footer */
+.mobile-cloud-guarantee-card {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 16px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mobile-guarantee-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mobile-guarantee-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #dcfce7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.mobile-guarantee-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: #166534;
+}
+
+.mobile-guarantee-sub {
+  font-size: 11px;
+  color: #15803d;
+}
+
+.mobile-guarantee-help-btn {
+  background: #0f172a;
+  color: #ffffff;
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 11.5px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  text-decoration: none;
+  transition: opacity 0.15s ease;
+}
+
+.mobile-guarantee-help-btn:active {
+  opacity: 0.85;
+}
+
+/* 10. Mobile Top Bar */
+.mobile-top-bar {
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 900;
+}
+
+.mobile-brand-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.mobile-brand-icon-box {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #064e3b;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.mobile-brand-title {
+  font-size: 14.5px;
+  font-weight: 800;
+  color: #111827;
+  letter-spacing: -0.2px;
+}
+
+.mobile-brand-cloud-status {
+  font-size: 11px;
+  color: #059669;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.mobile-live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10b981;
+}
+
+.mobile-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mobile-top-action-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: #374151;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s ease;
+}
+
+.mobile-top-action-btn:active {
+  background: #f3f4f6;
+}
+
+.mobile-user-btn {
+  background: #064e3b;
+  color: #ffffff;
+  border: none;
+}
+
+/* 11. Modern Mobile Bottom Navigation */
+.mobile-bottom-nav {
+  background: #ffffff !important;
+  border-top: 1px solid #e5e7eb !important;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.06) !important;
+  height: calc(60px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+.mobile-nav-btn {
+  color: #6b7280 !important;
+  font-weight: 600;
+  transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.mobile-nav-btn.active {
+  color: #064e3b !important;
+  font-weight: 800;
+}
+
+.mobile-nav-btn.active .mobile-nav-icon-wrapper {
+  transform: translateY(-2px);
+  color: #064e3b;
+}
+
+.mobile-nav-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 19px;
+  margin-bottom: 2px;
+  transition: transform 0.15s ease;
+}
+
+/* 12. Slide-Up All Portals Modal Sheet */
+.mobile-portals-sheet {
+  background: #ffffff;
+  border-radius: 24px 24px 0 0;
+  width: 100%;
+  max-width: 520px;
+  margin: auto 0 0 0;
+  padding: 18px 20px 24px 20px;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.25);
+  animation: slideSheetUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideSheetUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.mobile-portals-sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #f3f4f6;
+  margin-bottom: 14px;
+}
+
+.mobile-portals-sheet-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.mobile-portal-sheet-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid #f3f4f6;
+  background: #f9fafb;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.mobile-portal-sheet-item:active,
+.mobile-portal-sheet-item.active {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+}
+
+.mobile-portal-item-icon {
+  font-size: 22px;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.mobile-portal-item-text {
+  flex: 1;
+}
+
+.mobile-portal-item-title {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: #111827;
+}
+
+.mobile-portal-item-desc {
+  font-size: 11px;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+.mobile-portals-sheet-footer {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #f3f4f6;
+}

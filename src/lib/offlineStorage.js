@@ -137,8 +137,12 @@ export async function markItemsSynced(storeName, ids) {
   for (const id of idSet) {
     const item = await tx.store.get(id);
     if (item) {
-      item.synced = true;
-      await tx.store.put(item);
+      if (item.deleted === true) {
+        await tx.store.delete(id);
+      } else {
+        item.synced = true;
+        await tx.store.put(item);
+      }
     }
   }
   await tx.done;

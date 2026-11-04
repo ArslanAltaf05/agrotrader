@@ -132,6 +132,10 @@ function MainApp() {
               setActiveReceiptSale(sale);
               setShowReceiptModal(true);
             }}
+            onOpenPaymentModal={(t) => {
+              setPaymentModalType(t || 'out');
+              setShowPaymentModal(true);
+            }}
           />
         );
       case 'inventory':

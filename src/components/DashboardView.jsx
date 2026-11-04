@@ -4,8 +4,9 @@ import React, { useState, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { icons } from '../utils/icons';
 import { formatCurrency, formatNumber, formatDateShort, getExpiryDetails } from '../utils/formatters';
+import MobileDashboardView from './MobileDashboardView';
 
-export default function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
+export default function DashboardView({ onOpenNewSale, onOpenInvoiceView, onOpenPaymentModal }) {
   const {
     metrics,
     criticalExpiryProducts,
@@ -262,9 +263,20 @@ export default function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
 
   return (
     <div className="page-body">
-      {/* Dynamic Date Filter & Period Control Bar */}
-      <div
-        className="card"
+      {/* Dedicated High-End Mobile APK View (Matching User Design) */}
+      <div className="mobile-only">
+        <MobileDashboardView
+          onOpenNewSale={onOpenNewSale}
+          onOpenAddUdhar={onOpenPaymentModal}
+          onOpenInvoiceView={onOpenInvoiceView}
+        />
+      </div>
+
+      {/* Desktop / Large Screen ERP Operations Dashboard */}
+      <div className="desktop-only">
+        {/* Dynamic Date Filter & Period Control Bar */}
+        <div
+          className="card"
         style={{
           padding: '12px 18px',
           marginBottom: '18px',
@@ -1027,5 +1039,6 @@ export default function DashboardView({ onOpenNewSale, onOpenInvoiceView }) {
         </div>
       </div>
     </div>
+  </div>
   );
 }

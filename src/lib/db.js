@@ -31,13 +31,13 @@ export function getSql() {
 export function mergeEntityLists(existingList = [], incomingList = []) {
   const mergedMap = new Map();
 
-  // 1. Load existing items from DB
+  // 1. Load existing items from DB (skip any item previously marked deleted)
   const existingArr = Array.isArray(existingList)
     ? existingList
     : (typeof existingList === 'string' ? JSON.parse(existingList || '[]') : []);
 
   for (const item of existingArr) {
-    if (item && item.id) {
+    if (item && item.id && !item.deleted) {
       mergedMap.set(String(item.id), item);
     }
   }
@@ -50,6 +50,13 @@ export function mergeEntityLists(existingList = [], incomingList = []) {
   for (const item of incomingArr) {
     if (!item || !item.id) continue;
     const strId = String(item.id);
+
+    // If incoming record is marked deleted, actively remove from map so it deletes from Neon DB!
+    if (item.deleted === true) {
+      mergedMap.delete(strId);
+      continue;
+    }
+
     const existingItem = mergedMap.get(strId);
 
     if (!existingItem) {
@@ -63,11 +70,11 @@ export function mergeEntityLists(existingList = [], incomingList = []) {
       if (incomingTime >= existingTime) {
         mergedMap.set(strId, { ...existingItem, ...item });
       }
-      // If DB already has newer timestamp, keep existingItem
     }
   }
 
-  return Array.from(mergedMap.values());
+  // Filter out any deleted items before returning
+  return Array.from(mergedMap.values()).filter(item => !item.deleted);
 }
 
 /**
@@ -420,7 +427,12 @@ export async function saveToNeon(payload) {
     // 4. Also upsert items into relational tables so SQL queries and individual table sync stay up-to-date
     const itemsToUpsert = (Array.isArray(products) && products.length > 0) ? products : mergedProducts;
     for (const p of itemsToUpsert) {
-      if (!p || !p.id || !p.name) continue;
+      if (!p || !p.id) continue;
+      if (p.deleted === true) {
+        await sql`DELETE FROM products WHERE id = ${p.id}`;
+        continue;
+      }
+      if (!p.name) continue;
       const flagsJson = JSON.stringify(p.flags || { active: true, narcotic: false, serialItem: false, keepRecord: true });
       await sql`
         INSERT INTO products (
@@ -453,7 +465,12 @@ export async function saveToNeon(payload) {
 
     const customersToUpsert = (Array.isArray(customers) && customers.length > 0) ? customers : mergedCustomers;
     for (const c of customersToUpsert) {
-      if (!c || !c.id || !c.name) continue;
+      if (!c || !c.id) continue;
+      if (c.deleted === true) {
+        await sql`DELETE FROM customers WHERE id = ${c.id}`;
+        continue;
+      }
+      if (!c.name) continue;
       await sql`
         INSERT INTO customers (
           id, branch_id, name, father_name, phone, cnic,
@@ -473,6 +490,48 @@ export async function saveToNeon(payload) {
           balance = EXCLUDED.balance, notes = EXCLUDED.notes, deleted = EXCLUDED.deleted,
           updated_at = EXCLUDED.updated_at;
       `;
+    }
+
+    // Suppliers
+    for (const s of (Array.isArray(suppliers) ? suppliers : [])) {
+      if (s?.id && s.deleted === true) {
+        await sql`DELETE FROM suppliers WHERE id = ${s.id}`;
+      }
+    }
+
+    // Sales
+    for (const sale of (Array.isArray(sales) ? sales : [])) {
+      if (sale?.id && sale.deleted === true) {
+        await sql`DELETE FROM sales WHERE id = ${sale.id}`;
+      }
+    }
+
+    // Purchases
+    for (const po of (Array.isArray(purchases) ? purchases : [])) {
+      if (po?.id && po.deleted === true) {
+        await sql`DELETE FROM purchases WHERE id = ${po.id}`;
+      }
+    }
+
+    // Payments
+    for (const pay of (Array.isArray(payments) ? payments : [])) {
+      if (pay?.id && pay.deleted === true) {
+        await sql`DELETE FROM payments WHERE id = ${pay.id}`;
+      }
+    }
+
+    // Hold Stock
+    for (const hs of (Array.isArray(holdStock) ? holdStock : [])) {
+      if (hs?.id && hs.deleted === true) {
+        await sql`DELETE FROM hold_stock WHERE id = ${hs.id}`;
+      }
+    }
+
+    // Temp Ledger
+    for (const tl of (Array.isArray(tempLedger) ? tempLedger : [])) {
+      if (tl?.id && tl.deleted === true) {
+        await sql`DELETE FROM temp_ledger WHERE id = ${tl.id}`;
+      }
     }
 
     // 5. Add audit log
@@ -606,5 +665,87 @@ export async function testNeonConnection() {
       connected: false,
       error: error.message
     };
+  }
+}
+
+/**
+ * Permanently deletes an entry from Neon Serverless PostgreSQL.
+ * Deletes from relational table and purges from agro_store_sync JSON snapshot.
+ */
+export async function deleteFromNeon(tableName, id, tenantId = 'tenant-1') {
+  if (!isNeonConfigured() || !id) {
+    return { success: false, configured: false };
+  }
+
+  const sql = getSql();
+  if (!sql) {
+    return { success: false, configured: false, error: 'Database client unavailable' };
+  }
+
+  try {
+    // 1. Delete from relational table
+    if (tableName === 'products') await sql`DELETE FROM products WHERE id = ${id}`;
+    else if (tableName === 'customers') await sql`DELETE FROM customers WHERE id = ${id}`;
+    else if (tableName === 'suppliers') await sql`DELETE FROM suppliers WHERE id = ${id}`;
+    else if (tableName === 'sales') await sql`DELETE FROM sales WHERE id = ${id}`;
+    else if (tableName === 'purchases') await sql`DELETE FROM purchases WHERE id = ${id}`;
+    else if (tableName === 'payments') await sql`DELETE FROM payments WHERE id = ${id}`;
+    else if (tableName === 'hold_stock' || tableName === 'holdStock') await sql`DELETE FROM hold_stock WHERE id = ${id}`;
+    else if (tableName === 'temp_ledger' || tableName === 'tempLedger') await sql`DELETE FROM temp_ledger WHERE id = ${id}`;
+
+    // 2. Also purge from agro_store_sync JSON snapshot so it never resurrects on subsequent pull
+    const rows = await sql`
+      SELECT * FROM agro_store_sync WHERE tenant_id = ${tenantId} LIMIT 1;
+    `;
+    if (rows && rows.length > 0) {
+      const row = rows[0];
+      const colMap = {
+        products: 'products',
+        customers: 'customers',
+        suppliers: 'suppliers',
+        sales: 'sales',
+        purchases: 'purchases',
+        payments: 'payments',
+        hold_stock: 'hold_stock',
+        holdStock: 'hold_stock',
+        temp_ledger: 'temp_ledger',
+        tempLedger: 'temp_ledger',
+        tenants: 'tenants',
+        tenant_users: 'tenant_users',
+        tenantUsers: 'tenant_users'
+      };
+
+      const col = colMap[tableName] || tableName;
+      let items = row[col] || [];
+      if (typeof items === 'string') {
+        try { items = JSON.parse(items); } catch (e) { items = []; }
+      }
+
+      if (Array.isArray(items)) {
+        const filtered = items.filter(x => String(x.id) !== String(id));
+        if (col === 'products') await sql`UPDATE agro_store_sync SET products = ${JSON.stringify(filtered)}::jsonb, last_synced_at = NOW() WHERE tenant_id = ${tenantId}`;
+        else if (col === 'customers') await sql`UPDATE agro_store_sync SET customers = ${JSON.stringify(filtered)}::jsonb, last_synced_at = NOW() WHERE tenant_id = ${tenantId}`;
+        else if (col === 'suppliers') await sql`UPDATE agro_store_sync SET suppliers = ${JSON.stringify(filtered)}::jsonb, last_synced_at = NOW() WHERE tenant_id = ${tenantId}`;
+        else if (col === 'sales') await sql`UPDATE agro_store_sync SET sales = ${JSON.stringify(filtered)}::jsonb, last_synced_at = NOW() WHERE tenant_id = ${tenantId}`;
+        else if (col === 'purchases') await sql`UPDATE agro_store_sync SET purchases = ${JSON.stringify(filtered)}::jsonb, last_synced_at = NOW() WHERE tenant_id = ${tenantId}`;
+        else if (col === 'payments') await sql`UPDATE agro_store_sync SET payments = ${JSON.stringify(filtered)}::jsonb, last_synced_at = NOW() WHERE tenant_id = ${tenantId}`;
+        else if (col === 'hold_stock') await sql`UPDATE agro_store_sync SET hold_stock = ${JSON.stringify(filtered)}::jsonb, last_synced_at = NOW() WHERE tenant_id = ${tenantId}`;
+        else if (col === 'temp_ledger') await sql`UPDATE agro_store_sync SET temp_ledger = ${JSON.stringify(filtered)}::jsonb, last_synced_at = NOW() WHERE tenant_id = ${tenantId}`;
+        else if (col === 'tenants') await sql`UPDATE agro_store_sync SET tenants = ${JSON.stringify(filtered)}::jsonb, last_synced_at = NOW() WHERE tenant_id = ${tenantId}`;
+        else if (col === 'tenant_users') await sql`UPDATE agro_store_sync SET tenant_users = ${JSON.stringify(filtered)}::jsonb, last_synced_at = NOW() WHERE tenant_id = ${tenantId}`;
+      }
+    }
+
+    // 3. Log audit event
+    await sql`
+      INSERT INTO agro_sync_logs (tenant_id, action, details)
+      VALUES (${tenantId}, 'DELETE_ENTRY', ${`Deleted ${tableName} entry ${id} from Neon DB`});
+    `;
+
+    console.log(`[Neon DB] Deleted ${tableName} record ${id}`);
+    return { success: true, deleted: true, id, tableName };
+  } catch (err) {
+    console.error(`[Neon DB] Error deleting ${tableName} record ${id}:`, err);
+    return { success: false, error: err.message };
   }
 }

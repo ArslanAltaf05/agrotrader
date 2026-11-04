@@ -1,3 +1,5 @@
+export const dynamic = 'force-static';
+
 import { neon } from '@neondatabase/serverless';
 
 function getDb() {
@@ -84,9 +86,36 @@ export async function POST(request) {
     const now = new Date().toISOString();
 
     for (const p of items) {
-      if (!p || !p.id || !p.name) continue;
+      if (!p || !p.id) continue;
 
       const isDeleted = Boolean(p.deleted);
+      if (isDeleted) {
+        // Permanently remove from relational table
+        await sql`DELETE FROM products WHERE id = ${p.id}`;
+
+        // Also purge from agro_store_sync snapshot table
+        try {
+          const syncRows = await sql`SELECT tenant_id, products FROM agro_store_sync LIMIT 10`;
+          for (const sRow of syncRows) {
+            let pList = sRow.products;
+            if (typeof pList === 'string') {
+              try { pList = JSON.parse(pList); } catch (e) { pList = []; }
+            }
+            if (Array.isArray(pList) && pList.some(item => String(item.id) === String(p.id))) {
+              const updatedList = pList.filter(item => String(item.id) !== String(p.id));
+              await sql`UPDATE agro_store_sync SET products = ${JSON.stringify(updatedList)}::jsonb WHERE tenant_id = ${sRow.tenant_id}`;
+            }
+          }
+        } catch (e) {
+          console.warn('[Sync API] error purging deleted product from agro_store_sync:', e);
+        }
+
+        syncedIds.push(p.id);
+        continue;
+      }
+
+      if (!p.name) continue;
+
       const flagsJson = JSON.stringify(p.flags || { active: true, narcotic: false, serialItem: false, keepRecord: true });
 
       await sql`
@@ -119,7 +148,7 @@ export async function POST(request) {
           ${p.location || 'Godown Main'},
           ${flagsJson}::jsonb,
           ${p.notes || ''},
-          ${isDeleted},
+          false,
           ${p.updatedAt || now}
         )
         ON CONFLICT (id) DO UPDATE SET
@@ -144,14 +173,14 @@ export async function POST(request) {
           location = EXCLUDED.location,
           flags = EXCLUDED.flags,
           notes = EXCLUDED.notes,
-          deleted = EXCLUDED.deleted,
+          deleted = false,
           updated_at = NOW();
       `;
 
       syncedIds.push(p.id);
     }
 
-    console.log(`[Sync] Upserted ${syncedIds.length} products, 0 deleted`);
+    console.log(`[Sync] Upserted/synced ${syncedIds.length} products to Neon DB`);
 
     return Response.json({
       success: true,
@@ -167,7 +196,7 @@ export async function POST(request) {
   }
 }
 
-// DELETE: Soft delete / tombstone product in Neon
+// DELETE: Permanently delete product from Neon database
 export async function DELETE(request) {
   try {
     const sql = getDb();
@@ -178,14 +207,27 @@ export async function DELETE(request) {
       return Response.json({ success: false, error: 'Product id is required' }, { status: 400 });
     }
 
-    const now = new Date().toISOString();
-    await sql`
-      UPDATE products
-      SET deleted = TRUE, updated_at = ${now}
-      WHERE id = ${id}
-    `;
+    // 1. Delete from products table
+    await sql`DELETE FROM products WHERE id = ${id}`;
 
-    return Response.json({ success: true, id, deleted: true });
+    // 2. Also purge from agro_store_sync JSON products array
+    try {
+      const syncRows = await sql`SELECT tenant_id, products FROM agro_store_sync LIMIT 10`;
+      for (const sRow of syncRows) {
+        let pList = sRow.products;
+        if (typeof pList === 'string') {
+          try { pList = JSON.parse(pList); } catch (e) { pList = []; }
+        }
+        if (Array.isArray(pList) && pList.some(item => String(item.id) === String(id))) {
+          const updatedList = pList.filter(item => String(item.id) !== String(id));
+          await sql`UPDATE agro_store_sync SET products = ${JSON.stringify(updatedList)}::jsonb WHERE tenant_id = ${sRow.tenant_id}`;
+        }
+      }
+    } catch (e) {
+      console.warn('[DELETE /api/products] error purging from agro_store_sync:', e);
+    }
+
+    return Response.json({ success: true, id, deleted: true, removedFromNeon: true });
   } catch (err) {
     console.error('DELETE /api/products error:', err);
     return Response.json(

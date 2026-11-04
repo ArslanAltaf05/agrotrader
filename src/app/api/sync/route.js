@@ -1,3 +1,5 @@
+export const dynamic = 'force-static';
+
 import { neon } from '@neondatabase/serverless';
 
 function getDb() {
@@ -291,7 +293,13 @@ export async function POST(request) {
     // 1. Products
     if (Array.isArray(body.products) && body.products.length > 0) {
       for (const p of body.products) {
-        if (!p.id || !p.name) continue;
+        if (!p || !p.id) continue;
+        if (p.deleted === true) {
+          await sql`DELETE FROM products WHERE id = ${p.id}`;
+          syncedIds.products.push(p.id);
+          continue;
+        }
+        if (!p.name) continue;
         const flagsJson = JSON.stringify(p.flags || { active: true, narcotic: false, serialItem: false, keepRecord: true });
         await sql`
           INSERT INTO products (
@@ -323,13 +331,18 @@ export async function POST(request) {
         syncedIds.products.push(p.id);
       }
       syncedCounts.products = syncedIds.products.length;
-      console.log(`[Sync] Upserted ${syncedCounts.products} products, 0 deleted`);
     }
 
     // 2. Customers
     if (Array.isArray(body.customers) && body.customers.length > 0) {
       for (const c of body.customers) {
-        if (!c.id || !c.name) continue;
+        if (!c || !c.id) continue;
+        if (c.deleted === true) {
+          await sql`DELETE FROM customers WHERE id = ${c.id}`;
+          syncedIds.customers.push(c.id);
+          continue;
+        }
+        if (!c.name) continue;
         await sql`
           INSERT INTO customers (
             id, branch_id, name, father_name, phone, cnic,
@@ -357,7 +370,13 @@ export async function POST(request) {
     // 3. Suppliers
     if (Array.isArray(body.suppliers) && body.suppliers.length > 0) {
       for (const s of body.suppliers) {
-        if (!s.id || !s.name) continue;
+        if (!s || !s.id) continue;
+        if (s.deleted === true) {
+          await sql`DELETE FROM suppliers WHERE id = ${s.id}`;
+          syncedIds.suppliers.push(s.id);
+          continue;
+        }
+        if (!s.name) continue;
         await sql`
           INSERT INTO suppliers (
             id, branch_id, name, company, phone, address, balance, notes, deleted, updated_at
@@ -379,7 +398,12 @@ export async function POST(request) {
     // 4. Sales
     if (Array.isArray(body.sales) && body.sales.length > 0) {
       for (const s of body.sales) {
-        if (!s.id) continue;
+        if (!s || !s.id) continue;
+        if (s.deleted === true) {
+          await sql`DELETE FROM sales WHERE id = ${s.id}`;
+          syncedIds.sales.push(s.id);
+          continue;
+        }
         const itemsJson = JSON.stringify(s.items || []);
         await sql`
           INSERT INTO sales (
@@ -410,7 +434,12 @@ export async function POST(request) {
     // 5. Purchases
     if (Array.isArray(body.purchases) && body.purchases.length > 0) {
       for (const po of body.purchases) {
-        if (!po.id) continue;
+        if (!po || !po.id) continue;
+        if (po.deleted === true) {
+          await sql`DELETE FROM purchases WHERE id = ${po.id}`;
+          syncedIds.purchases.push(po.id);
+          continue;
+        }
         const itemsJson = JSON.stringify(po.items || []);
         await sql`
           INSERT INTO purchases (
@@ -441,7 +470,12 @@ export async function POST(request) {
     // 6. Payments
     if (Array.isArray(body.payments) && body.payments.length > 0) {
       for (const pay of body.payments) {
-        if (!pay.id) continue;
+        if (!pay || !pay.id) continue;
+        if (pay.deleted === true) {
+          await sql`DELETE FROM payments WHERE id = ${pay.id}`;
+          syncedIds.payments.push(pay.id);
+          continue;
+        }
         await sql`
           INSERT INTO payments (
             id, branch_id, voucher_no, date, type, account_type, account_id,
@@ -468,7 +502,12 @@ export async function POST(request) {
     // 7. Hold Stock
     if (Array.isArray(body.holdStock) && body.holdStock.length > 0) {
       for (const h of body.holdStock) {
-        if (!h.id) continue;
+        if (!h || !h.id) continue;
+        if (h.deleted === true) {
+          await sql`DELETE FROM hold_stock WHERE id = ${h.id}`;
+          syncedIds.holdStock.push(h.id);
+          continue;
+        }
         await sql`
           INSERT INTO hold_stock (
             id, branch_id, booking_no, customer_id, customer_name,
@@ -502,7 +541,12 @@ export async function POST(request) {
     // 8. Temp Ledger
     if (Array.isArray(body.tempLedger) && body.tempLedger.length > 0) {
       for (const t of body.tempLedger) {
-        if (!t.id) continue;
+        if (!t || !t.id) continue;
+        if (t.deleted === true) {
+          await sql`DELETE FROM temp_ledger WHERE id = ${t.id}`;
+          syncedIds.tempLedger.push(t.id);
+          continue;
+        }
         await sql`
           INSERT INTO temp_ledger (
             id, branch_id, date, person_name, phone, description,
@@ -524,6 +568,57 @@ export async function POST(request) {
       syncedCounts.tempLedger = syncedIds.tempLedger.length;
     }
 
+    // Also purge any deleted items from agro_store_sync JSON snapshot
+    try {
+      const backupRows = await sql`SELECT * FROM agro_store_sync LIMIT 1`;
+      if (backupRows && backupRows.length > 0) {
+        const b = backupRows[0];
+        const delProd = new Set((body.products || []).filter(p => p.deleted).map(p => String(p.id)));
+        const delCust = new Set((body.customers || []).filter(c => c.deleted).map(c => String(c.id)));
+        const delSupp = new Set((body.suppliers || []).filter(s => s.deleted).map(s => String(s.id)));
+        const delSale = new Set((body.sales || []).filter(s => s.deleted).map(s => String(s.id)));
+        const delPurch = new Set((body.purchases || []).filter(p => p.deleted).map(p => String(p.id)));
+        const delPay = new Set((body.payments || []).filter(p => p.deleted).map(p => String(p.id)));
+        const delHold = new Set((body.holdStock || []).filter(h => h.deleted).map(h => String(h.id)));
+        const delTemp = new Set((body.tempLedger || []).filter(t => t.deleted).map(t => String(t.id)));
+
+        if (delProd.size > 0 && Array.isArray(b.products)) {
+          const f = b.products.filter(p => !delProd.has(String(p.id)));
+          await sql`UPDATE agro_store_sync SET products = ${JSON.stringify(f)}::jsonb WHERE tenant_id = ${b.tenant_id}`;
+        }
+        if (delCust.size > 0 && Array.isArray(b.customers)) {
+          const f = b.customers.filter(c => !delCust.has(String(c.id)));
+          await sql`UPDATE agro_store_sync SET customers = ${JSON.stringify(f)}::jsonb WHERE tenant_id = ${b.tenant_id}`;
+        }
+        if (delSupp.size > 0 && Array.isArray(b.suppliers)) {
+          const f = b.suppliers.filter(s => !delSupp.has(String(s.id)));
+          await sql`UPDATE agro_store_sync SET suppliers = ${JSON.stringify(f)}::jsonb WHERE tenant_id = ${b.tenant_id}`;
+        }
+        if (delSale.size > 0 && Array.isArray(b.sales)) {
+          const f = b.sales.filter(s => !delSale.has(String(s.id)));
+          await sql`UPDATE agro_store_sync SET sales = ${JSON.stringify(f)}::jsonb WHERE tenant_id = ${b.tenant_id}`;
+        }
+        if (delPurch.size > 0 && Array.isArray(b.purchases)) {
+          const f = b.purchases.filter(p => !delPurch.has(String(p.id)));
+          await sql`UPDATE agro_store_sync SET purchases = ${JSON.stringify(f)}::jsonb WHERE tenant_id = ${b.tenant_id}`;
+        }
+        if (delPay.size > 0 && Array.isArray(b.payments)) {
+          const f = b.payments.filter(p => !delPay.has(String(p.id)));
+          await sql`UPDATE agro_store_sync SET payments = ${JSON.stringify(f)}::jsonb WHERE tenant_id = ${b.tenant_id}`;
+        }
+        if (delHold.size > 0 && Array.isArray(b.hold_stock)) {
+          const f = b.hold_stock.filter(h => !delHold.has(String(h.id)));
+          await sql`UPDATE agro_store_sync SET hold_stock = ${JSON.stringify(f)}::jsonb WHERE tenant_id = ${b.tenant_id}`;
+        }
+        if (delTemp.size > 0 && Array.isArray(b.temp_ledger)) {
+          const f = b.temp_ledger.filter(t => !delTemp.has(String(t.id)));
+          await sql`UPDATE agro_store_sync SET temp_ledger = ${JSON.stringify(f)}::jsonb WHERE tenant_id = ${b.tenant_id}`;
+        }
+      }
+    } catch (purgeErr) {
+      console.warn('Purge error in POST /api/sync:', purgeErr);
+    }
+
     return Response.json({
       success: true,
       syncedCounts,
@@ -535,5 +630,60 @@ export async function POST(request) {
       { success: false, error: err.message || 'Failed to sync data to Neon database' },
       { status: 500 }
     );
+  }
+}
+
+// DELETE /api/sync: Direct hard deletion from Neon relational table and snapshot
+export async function DELETE(request) {
+  try {
+    const sql = getDb();
+    const { searchParams } = new URL(request.url);
+    const table = searchParams.get('table');
+    const id = searchParams.get('id');
+    const tenantId = searchParams.get('tenantId') || 'tenant-1';
+
+    if (!table || !id) {
+      return Response.json({ success: false, error: 'table and id parameters required' }, { status: 400 });
+    }
+
+    if (table === 'products') await sql`DELETE FROM products WHERE id = ${id}`;
+    else if (table === 'customers') await sql`DELETE FROM customers WHERE id = ${id}`;
+    else if (table === 'suppliers') await sql`DELETE FROM suppliers WHERE id = ${id}`;
+    else if (table === 'sales') await sql`DELETE FROM sales WHERE id = ${id}`;
+    else if (table === 'purchases') await sql`DELETE FROM purchases WHERE id = ${id}`;
+    else if (table === 'payments') await sql`DELETE FROM payments WHERE id = ${id}`;
+    else if (table === 'hold_stock' || table === 'holdStock') await sql`DELETE FROM hold_stock WHERE id = ${id}`;
+    else if (table === 'temp_ledger' || table === 'tempLedger') await sql`DELETE FROM temp_ledger WHERE id = ${id}`;
+
+    // Purge from agro_store_sync
+    try {
+      const rows = await sql`SELECT * FROM agro_store_sync WHERE tenant_id = ${tenantId} LIMIT 1`;
+      if (rows && rows.length > 0) {
+        const b = rows[0];
+        const col = table === 'holdStock' ? 'hold_stock' : table === 'tempLedger' ? 'temp_ledger' : table;
+        let items = b[col] || [];
+        if (typeof items === 'string') {
+          try { items = JSON.parse(items); } catch(e) { items = []; }
+        }
+        if (Array.isArray(items)) {
+          const filtered = items.filter(x => String(x.id) !== String(id));
+          if (col === 'products') await sql`UPDATE agro_store_sync SET products = ${JSON.stringify(filtered)}::jsonb WHERE tenant_id = ${tenantId}`;
+          else if (col === 'customers') await sql`UPDATE agro_store_sync SET customers = ${JSON.stringify(filtered)}::jsonb WHERE tenant_id = ${tenantId}`;
+          else if (col === 'suppliers') await sql`UPDATE agro_store_sync SET suppliers = ${JSON.stringify(filtered)}::jsonb WHERE tenant_id = ${tenantId}`;
+          else if (col === 'sales') await sql`UPDATE agro_store_sync SET sales = ${JSON.stringify(filtered)}::jsonb WHERE tenant_id = ${tenantId}`;
+          else if (col === 'purchases') await sql`UPDATE agro_store_sync SET purchases = ${JSON.stringify(filtered)}::jsonb WHERE tenant_id = ${tenantId}`;
+          else if (col === 'payments') await sql`UPDATE agro_store_sync SET payments = ${JSON.stringify(filtered)}::jsonb WHERE tenant_id = ${tenantId}`;
+          else if (col === 'hold_stock') await sql`UPDATE agro_store_sync SET hold_stock = ${JSON.stringify(filtered)}::jsonb WHERE tenant_id = ${tenantId}`;
+          else if (col === 'temp_ledger') await sql`UPDATE agro_store_sync SET temp_ledger = ${JSON.stringify(filtered)}::jsonb WHERE tenant_id = ${tenantId}`;
+        }
+      }
+    } catch (e) {
+      console.warn('agro_store_sync update error:', e);
+    }
+
+    return Response.json({ success: true, table, id, deleted: true });
+  } catch (err) {
+    console.error('DELETE /api/sync error:', err);
+    return Response.json({ success: false, error: err.message }, { status: 500 });
   }
 }

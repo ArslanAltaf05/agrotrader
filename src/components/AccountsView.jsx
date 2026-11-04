@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { formatCurrency, formatDate } from '../utils/formatters';
 
@@ -19,7 +19,9 @@ export default function AccountsView({ onOpenPaymentIn, onOpenPaymentOut }) {
     payments,
     hideAmounts,
     showToast,
-    auth
+    auth,
+    selectedAccountId,
+    setSelectedAccountId
   } = useApp();
 
   const isAdmin = auth.user?.role === 'admin' || auth.user?.role === 'superadmin';
@@ -29,6 +31,22 @@ export default function AccountsView({ onOpenPaymentIn, onOpenPaymentOut }) {
   const [selectedAccount, setSelectedAccount] = useState(null); // for statement modal
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingAccount, setEditingAccount] = useState(null); // for editing
+
+  // Auto-open statement modal if an account was clicked from Mobile Dashboard
+  useEffect(() => {
+    if (selectedAccountId) {
+      const match = customers.find(c => c.id === selectedAccountId) || suppliers.find(s => s.id === selectedAccountId);
+      if (match) {
+        setSelectedAccount(match);
+        if (suppliers.some(s => s.id === selectedAccountId)) {
+          setActiveTab('suppliers');
+        } else {
+          setActiveTab('customers');
+        }
+      }
+      setSelectedAccountId(null);
+    }
+  }, [selectedAccountId, customers, suppliers]);
 
   // New account form state
   const [newAcc, setNewAcc] = useState({

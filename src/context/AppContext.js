@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
-import { saveToNeon, loadFromNeon, isNeonConfigured } from '../lib/db';
+import { saveToNeon, loadFromNeon, isNeonConfigured, deleteFromNeon } from '../lib/db';
 import {
   getLocalProducts,
   saveLocalProduct,
@@ -145,11 +145,192 @@ const DEFAULT_UNITS = [
   'canister'
 ];
 
-// Clean Production Data (Zero Demo/Mock Records)
-const INITIAL_PRODUCTS = [];
-const INITIAL_CUSTOMERS = [];
-const INITIAL_SUPPLIERS = [];
-const INITIAL_SALES = [];
+// High-Quality Seed Data (Pre-configured for Asmat Agro Traders)
+const INITIAL_PRODUCTS = [
+  {
+    id: 'prod-dap-01',
+    branchId: 'branch-1',
+    name: 'Di-Ammonium (DAP)',
+    sku: 'DAP-50KG',
+    category: 'Fertilizers',
+    manufacturer: 'Fauji Fertilizer Company (FFC)',
+    unit: 'bag',
+    unitWeight: 50,
+    costPrice: 11200,
+    salePrice: 11800,
+    shopStock: 4,
+    storeStock: 0,
+    alertQty: 10,
+    location: 'Godown Main',
+    flags: { active: true, narcotic: false, serialItem: false, keepRecord: true },
+    notes: 'Primary Phosphate Fertilizer (Low Stock)',
+    deleted: false,
+    updatedAt: new Date().toISOString()
+  },
+  {
+    id: 'prod-cartap-02',
+    branchId: 'branch-1',
+    name: 'Cartap Insecticide 4G',
+    sku: 'CRT-1L',
+    category: 'Pesticides',
+    manufacturer: 'Kanzo AG',
+    unit: 'bottle',
+    unitWeight: 1,
+    costPrice: 1450,
+    salePrice: 1750,
+    shopStock: 3,
+    storeStock: 0,
+    alertQty: 5,
+    location: 'Shop Shelf A-2',
+    flags: { active: true, narcotic: false, serialItem: false, keepRecord: true },
+    notes: 'Paddy Rice Stem Borer Insecticide (Critical Stock)',
+    deleted: false,
+    updatedAt: new Date().toISOString()
+  },
+  {
+    id: 'prod-urea-03',
+    branchId: 'branch-1',
+    name: 'FFC Sona Urea Bag',
+    sku: 'UREA-50KG',
+    category: 'Fertilizers',
+    manufacturer: 'Fauji Fertilizer Company (FFC)',
+    unit: 'bag',
+    unitWeight: 50,
+    costPrice: 4100,
+    salePrice: 4250,
+    shopStock: 12,
+    storeStock: 25,
+    alertQty: 15,
+    location: 'Godown Main',
+    flags: { active: true, narcotic: false, serialItem: false, keepRecord: true },
+    notes: 'Prilled Urea Nitrogen',
+    deleted: false,
+    updatedAt: new Date().toISOString()
+  },
+  {
+    id: 'prod-tarzan-04',
+    branchId: 'branch-1',
+    name: 'Tarzan Cartap 4G',
+    sku: 'TRZ-6B',
+    category: 'Pesticides',
+    manufacturer: 'Syngenta Pakistan',
+    unit: 'bottle',
+    unitWeight: 1,
+    costPrice: 1500,
+    salePrice: 1750,
+    shopStock: 8,
+    storeStock: 14,
+    alertQty: 6,
+    location: 'Shop Shelf B-1',
+    flags: { active: true, narcotic: false, serialItem: false, keepRecord: true },
+    notes: 'Crop Protection Granules',
+    deleted: false,
+    updatedAt: new Date().toISOString()
+  }
+];
+
+const INITIAL_CUSTOMERS = [
+  {
+    id: 'cust-bashir-01',
+    branchId: 'branch-1',
+    name: 'Chaudhry Bashir',
+    fatherName: 'Muhammad Din',
+    phone: '0300-8841290',
+    village: 'Chak 42-RB',
+    cnic: '38403-1234567-1',
+    address: 'Chak 42-RB, Retra',
+    creditLimit: 300000,
+    openingBalance: 0,
+    balance: 48500,
+    notes: 'Reliable farmer, regular wheat and rice grower.',
+    deleted: false,
+    updatedAt: new Date().toISOString()
+  },
+  {
+    id: 'cust-riaz-02',
+    branchId: 'branch-1',
+    name: 'Malik Riaz Hussain',
+    fatherName: 'Haji Ghulam Rasool',
+    phone: '0301-4492103',
+    village: 'Retra Mor',
+    cnic: '38403-9876543-3',
+    address: 'Retra Mor, Main Highway',
+    creditLimit: 250000,
+    openingBalance: 0,
+    balance: 112000,
+    notes: 'Cotton & maize cultivator. Overdue balance recovery pending.',
+    deleted: false,
+    updatedAt: new Date().toISOString()
+  },
+  {
+    id: 'cust-akhtar-03',
+    branchId: 'branch-1',
+    name: 'Haji Akhtar Rasool',
+    fatherName: 'Chaudhry Noor Muhammad',
+    phone: '0313-7729910',
+    village: 'Basti Malana',
+    cnic: '38403-5566778-5',
+    address: 'Basti Malana, Near Canal Rest House',
+    creditLimit: 500000,
+    openingBalance: 0,
+    balance: 0,
+    notes: 'All dues cleared. Clean account.',
+    deleted: false,
+    updatedAt: new Date().toISOString()
+  }
+];
+
+const INITIAL_SUPPLIERS = [
+  {
+    id: 'supp-ffc-01',
+    branchId: 'branch-1',
+    name: 'Fauji Fertilizer Company (FFC)',
+    company: 'FFC Ltd',
+    phone: '042-35712345',
+    address: 'Regional Depot, Multan',
+    balance: 185000,
+    notes: 'Primary fertilizer manufacturer',
+    deleted: false,
+    updatedAt: new Date().toISOString()
+  }
+];
+
+const INITIAL_SALES = [
+  {
+    id: 'INV-2024-0891',
+    invoiceNo: 'INV-2024-0891',
+    branchId: 'branch-1',
+    date: new Date().toISOString(),
+    customerName: 'Walk-in Farmer',
+    paymentType: 'cash',
+    items: [
+      { id: 'prod-urea-03', name: 'FFC Sona Urea Bag', quantity: 4, price: 4100, costPrice: 4100, total: 16400 }
+    ],
+    subtotal: 16400,
+    discount: 0,
+    grandTotal: 16400,
+    paidAmount: 16400,
+    balanceAmount: 0
+  },
+  {
+    id: 'INV-2024-0890',
+    invoiceNo: 'INV-2024-0890',
+    branchId: 'branch-1',
+    date: new Date().toISOString(),
+    customerName: 'Chaudhry Bashir',
+    customerId: 'cust-bashir-01',
+    paymentType: 'ledger',
+    items: [
+      { id: 'prod-tarzan-04', name: 'Tarzan Cartap 4G (6 btls)', quantity: 6, price: 1750, costPrice: 1500, total: 10500 }
+    ],
+    subtotal: 10500,
+    discount: 0,
+    grandTotal: 10500,
+    paidAmount: 0,
+    balanceAmount: 10500
+  }
+];
+
 const INITIAL_PAYMENTS = [];
 const INITIAL_HOLD_STOCK = [];
 const INITIAL_TEMP_LEDGER = [];
@@ -163,6 +344,7 @@ export function AppProvider({ children }) {
   const [theme, setThemeState] = useState('theme-sapphire'); // NEW DEFAULT THEME
   const [hideAmounts, setHideAmounts] = useState(false);
   const [activeTab, setActiveTabState] = useState('dashboard');
+  const [selectedAccountId, setSelectedAccountId] = useState(null);
   const [activeBranchId, setActiveBranchId] = useState('branch-1');
   const [branches, setBranches] = useState(DEFAULT_BRANCHES);
 
@@ -254,9 +436,9 @@ export function AppProvider({ children }) {
 
   // Store Profile
   const [storeProfile, setStoreProfile] = useState({
-    name: 'Asmat Agro Traders Retra',
-    subtitle: 'Authorized Dealer - Quality Seeds, Fertilizers & Crop Protection',
-    phone: '',
+    name: 'Asmat Agro Traders',
+    subtitle: 'POS, Farmer Khata & Inventory Cloud System',
+    phone: '0312-5236040',
     website: '',
     address: 'Grain & Fertilizer Market, Retra',
     ntn: '',
@@ -1344,6 +1526,7 @@ export function AppProvider({ children }) {
     const t = tenants.find(item => item.id === tenantId);
     setTenants(prev => prev.filter(item => item.id !== tenantId));
     setTenantUsers(prev => prev.filter(u => u.tenantId !== tenantId));
+    deleteFromNeon('tenants', tenantId, activeTenantId).catch(e => console.warn('[Neon DB] deleteTenant error:', e));
     addLog('SaaS Tenant Deleted', `Removed tenant: ${t?.name || tenantId}`);
     showToast(`Tenant removed`, 'warning');
   };
@@ -1443,6 +1626,7 @@ export function AppProvider({ children }) {
 
   const deleteTenantUser = (userId) => {
     setTenantUsers(prev => prev.filter(u => u.id !== userId));
+    deleteFromNeon('tenant_users', userId, activeTenantId).catch(e => console.warn('[Neon DB] deleteTenantUser error:', e));
     showToast('User account removed', 'info');
   };
 
@@ -1589,7 +1773,8 @@ export function AppProvider({ children }) {
     addLog('Delete Product', `Deleted ${prod?.name || id}`);
     showToast('Product deleted', 'warning');
 
-    // 3. Push delete to Neon
+    // 3. Push delete to Neon Serverless PostgreSQL
+    deleteFromNeon('products', id, activeTenantId).catch(e => console.warn('[Neon DB] deleteProduct error:', e));
     flushQueue();
   };
 
@@ -1863,6 +2048,7 @@ export function AppProvider({ children }) {
     const cust = customers.find(c => c.id === id);
     deleteLocalCustomer(id).catch(e => console.warn(e));
     setCustomers(prev => prev.filter(c => c.id !== id));
+    deleteFromNeon('customers', id, activeTenantId).catch(e => console.warn('[Neon DB] deleteCustomer error:', e));
     addLog('Delete Customer', `Removed customer ${cust?.name || id}`);
     showToast('Customer account removed', 'warning');
     flushAllQueues();
@@ -1895,6 +2081,7 @@ export function AppProvider({ children }) {
     const sup = suppliers.find(s => s.id === id);
     deleteLocalSupplier(id).catch(e => console.warn(e));
     setSuppliers(prev => prev.filter(s => s.id !== id));
+    deleteFromNeon('suppliers', id, activeTenantId).catch(e => console.warn('[Neon DB] deleteSupplier error:', e));
     addLog('Delete Supplier', `Removed supplier ${sup?.name || id}`);
     showToast('Supplier account removed', 'warning');
     flushAllQueues();
@@ -1910,6 +2097,7 @@ export function AppProvider({ children }) {
     if (!sale) return;
 
     deleteLocalSale(saleId).catch(e => console.warn(e));
+    deleteFromNeon('sales', saleId, activeTenantId).catch(e => console.warn('[Neon DB] deleteSale error:', e));
 
     // 1. Revert product inventory
     setProducts(prev => prev.map(prod => {
@@ -1959,6 +2147,7 @@ export function AppProvider({ children }) {
     if (!pay) return;
 
     deleteLocalPayment(payId).catch(e => console.warn(e));
+    deleteFromNeon('payments', payId, activeTenantId).catch(e => console.warn('[Neon DB] deletePayment error:', e));
 
     // Revert balance change
     if (pay.type === 'in') {
@@ -1992,6 +2181,7 @@ export function AppProvider({ children }) {
     if (!po) return;
 
     deleteLocalPurchase(poId).catch(e => console.warn(e));
+    deleteFromNeon('purchases', poId, activeTenantId).catch(e => console.warn('[Neon DB] deletePurchase error:', e));
 
     // Deduct received stock from product
     setProducts(prev => prev.map(prod => {
@@ -2034,8 +2224,9 @@ export function AppProvider({ children }) {
     const item = holdStock.find(h => h.id === id);
     deleteLocalHoldStock(id).catch(e => console.warn(e));
     setHoldStock(prev => prev.filter(h => h.id !== id));
+    deleteFromNeon('hold_stock', id, activeTenantId).catch(e => console.warn('[Neon DB] deleteHoldStock error:', e));
     addLog('Delete Custody Record', `Removed customer custody ${id} (${item?.customerName || id})`);
-    showToast('Customer custody record removed', 'info');
+    showToast('Customer custody record removed', 'warning');
     flushAllQueues();
   };
 
@@ -2255,6 +2446,7 @@ export function AppProvider({ children }) {
   const deleteTempLedger = (id) => {
     deleteLocalTempLedger(id).catch(e => console.warn(e));
     setTempLedger(prev => prev.filter(t => t.id !== id));
+    deleteFromNeon('temp_ledger', id, activeTenantId).catch(e => console.warn('[Neon DB] deleteTempLedger error:', e));
     showToast('Temp entry removed', 'info');
     flushAllQueues();
   };
@@ -2412,6 +2604,8 @@ export function AppProvider({ children }) {
         toggleHideAmounts: () => setHideAmounts(prev => !prev),
         activeTab,
         setActiveTab,
+        selectedAccountId,
+        setSelectedAccountId,
         activeBranchId,
         switchBranch,
         branches,

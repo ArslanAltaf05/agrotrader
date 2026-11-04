@@ -23,6 +23,7 @@ export default function Header({ onToggleMobileMenu, onOpenDownloadApp, onOpenEx
   } = useApp();
 
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [showProfileModal, setShowProfileModal] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -49,18 +50,53 @@ export default function Header({ onToggleMobileMenu, onOpenDownloadApp, onOpenEx
 
   return (
     <>
-      {/* SaaS Status & Realtime Cloud Bar */}
-      <div className="saas-top-strip">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, flex: 1, overflow: 'hidden' }}>
-          <div className="saas-badge-plan" style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            <span>🌾</span>
-            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {storeProfile.name || 'AgroTrader Pro'} ({saasPlan.name})
-            </span>
+      {/* 1. Dedicated Mobile APK Top Bar (Matches User Screenshot) */}
+      <div className="mobile-top-bar mobile-only">
+        <div className="mobile-brand-wrapper" onClick={() => setActiveTab('dashboard')}>
+          <div className="mobile-brand-icon-box">
+            🍃
+          </div>
+          <div className="mobile-brand-text">
+            <div className="mobile-brand-title">{storeProfile?.name || 'Asmat Agro Traders'}</div>
+            <div className="mobile-brand-cloud-status">
+              <span className="mobile-live-dot" />
+              <span>Cloud Active</span>
+            </div>
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+        <div className="mobile-top-actions">
+          <a
+            href={`tel:${storeProfile?.phone || '0312-5236040'}`}
+            className="mobile-top-action-btn"
+            title="Call Store / Manager"
+          >
+            📞
+          </a>
+          <button
+            type="button"
+            className="mobile-top-action-btn mobile-user-btn"
+            onClick={() => setShowProfileModal(true)}
+            title="Store Account &amp; Profile"
+          >
+            👤
+          </button>
+        </div>
+      </div>
+
+      {/* 2. Desktop SaaS Strip & Standard Header */}
+      <div className="desktop-only">
+        <div className="saas-top-strip">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, flex: 1, overflow: 'hidden' }}>
+            <div className="saas-badge-plan" style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <span>🌾</span>
+              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {storeProfile.name || 'AgroTrader Pro'} ({saasPlan.name})
+              </span>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
           {/* Download App / Software Hub */}
           <button
             type="button"
@@ -248,6 +284,108 @@ export default function Header({ onToggleMobileMenu, onOpenDownloadApp, onOpenEx
           </button>
         </div>
       </header>
+    </div>
+
+      {/* Mobile Profile & User Quick Modal */}
+      {showProfileModal && (
+        <div className="modal-overlay" onClick={() => setShowProfileModal(false)} style={{ zIndex: 3500 }}>
+          <div
+            className="modal-card"
+            onClick={(e) => e.stopPropagation()}
+            style={{ maxWidth: '380px', width: '92%', borderRadius: '20px', padding: '20px' }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: '#064e3b', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }}>
+                👤
+              </div>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#111827' }}>
+                  {auth.user?.name || 'Ahmed Raza Malik'}
+                </h3>
+                <div style={{ fontSize: '12px', color: '#6b7280' }}>
+                  Role: <strong style={{ color: '#064e3b' }}>{auth.user?.role?.toUpperCase() || 'STORE ADMIN'}</strong>
+                </div>
+              </div>
+              <button
+                type="button"
+                className="btn btn-icon-only"
+                style={{ marginLeft: 'auto', border: 'none', background: '#f3f4f6', borderRadius: '50%' }}
+                onClick={() => setShowProfileModal(false)}
+              >
+                &times;
+              </button>
+            </div>
+
+            <div style={{ background: '#f9fafb', borderRadius: '12px', padding: '12px', marginBottom: '16px', fontSize: '12.5px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+                <span style={{ color: '#6b7280' }}>Branch:</span>
+                <strong>{storeProfile?.name} (Retra)</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+                <span style={{ color: '#6b7280' }}>Counter:</span>
+                <strong>Counter #01 (Main Gate)</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: '#6b7280' }}>Cloud Sync:</span>
+                <span style={{ color: '#16a34a', fontWeight: 700 }}>● Active &amp; Synced</span>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <button
+                type="button"
+                className="btn btn-outline"
+                style={{ width: '100%', justifyContent: 'flex-start', gap: '8px', fontSize: '13px' }}
+                onClick={() => {
+                  toggleHideAmounts();
+                  setShowProfileModal(false);
+                }}
+              >
+                <span>{hideAmounts ? '👁️' : '🙈'}</span>
+                <span>{hideAmounts ? 'Show Financial Balances' : 'Privacy Mode (Hide Amounts)'}</span>
+              </button>
+
+              <button
+                type="button"
+                className="btn btn-outline"
+                style={{ width: '100%', justifyContent: 'flex-start', gap: '8px', fontSize: '13px' }}
+                onClick={() => {
+                  setActiveTab('settings');
+                  setShowProfileModal(false);
+                }}
+              >
+                <span>⚙️</span>
+                <span>Store System Settings</span>
+              </button>
+
+              <button
+                type="button"
+                className="btn btn-outline"
+                style={{ width: '100%', justifyContent: 'flex-start', gap: '8px', fontSize: '13px' }}
+                onClick={() => {
+                  onOpenDownloadApp && onOpenDownloadApp();
+                  setShowProfileModal(false);
+                }}
+              >
+                <span>📲</span>
+                <span>Download APK &amp; Desktop ERP</span>
+              </button>
+
+              <button
+                type="button"
+                className="btn btn-danger"
+                style={{ width: '100%', marginTop: '8px', justifyContent: 'center', fontSize: '13px' }}
+                onClick={() => {
+                  setShowProfileModal(false);
+                  logout();
+                }}
+              >
+                🚪 Logout &amp; Switch Account
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
