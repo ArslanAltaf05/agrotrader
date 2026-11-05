@@ -41,27 +41,6 @@ export default function MobileDashboardView({
     }
   };
 
-  // Admin Quick Gate State
-  const [pinInput, setPinInput] = useState('');
-  const [isAdminUnlocked, setIsAdminUnlocked] = useState(false);
-  const [pinError, setPinError] = useState(false);
-
-  // Handle PIN unlock
-  const handleUnlockPin = (e) => {
-    e.preventDefault();
-    const correctPin = auth?.adminPin || storeProfile?.adminPin || '1234';
-    if (pinInput.trim() === correctPin || pinInput.trim() === '1234' || pinInput.trim() === '9999') {
-      setIsAdminUnlocked(true);
-      setPinError(false);
-      setPinInput('');
-      showToast('🔓 Admin Gate Unlocked! Counter overrides & settings enabled.', 'success');
-    } else {
-      setPinError(true);
-      showToast('❌ Incorrect 4-Digit PIN. Default is 1234.', 'warning');
-      setTimeout(() => setPinError(false), 2000);
-    }
-  };
-
   // Farmer total udhar calculation (dynamic from live customers)
   const totalUdhar = useMemo(() => {
     const sum = customers.reduce((acc, c) => acc + (Number(c.balance) > 0 ? Number(c.balance) : 0), 0);
@@ -297,28 +276,28 @@ export default function MobileDashboardView({
             className="mobile-quick-op-btn op-green"
             onClick={onOpenNewSale}
           >
-            <div className="mobile-op-icon">🛒</div>
+            <div className="mobile-op-icon">⚡</div>
             <span className="mobile-op-title">New Sale</span>
           </button>
 
-          {/* Add Udhar Button */}
-          <button
-            type="button"
-            className="mobile-quick-op-btn op-crimson"
-            onClick={onOpenAddUdhar || (() => setActiveTab('payments'))}
-          >
-            <div className="mobile-op-icon">📝</div>
-            <span className="mobile-op-title">Add Udhar</span>
-          </button>
-
-          {/* Inward Button */}
+          {/* Sales History & Invoices Tab */}
           <button
             type="button"
             className="mobile-quick-op-btn op-blue"
-            onClick={() => setActiveTab('purchases')}
+            onClick={() => setActiveTab('sales')}
+          >
+            <div className="mobile-op-icon">🛒</div>
+            <span className="mobile-op-title">Sales</span>
+          </button>
+
+          {/* Inward / Stock Button */}
+          <button
+            type="button"
+            className="mobile-quick-op-btn op-crimson"
+            onClick={() => setActiveTab('inventory')}
           >
             <div className="mobile-op-icon">📦</div>
-            <span className="mobile-op-title">Inward</span>
+            <span className="mobile-op-title">Stock</span>
           </button>
 
           {/* Ledger Button */}
@@ -333,81 +312,7 @@ export default function MobileDashboardView({
         </div>
       </div>
 
-      {/* 4. Admin Quick Gate */}
-      <div className="mobile-admin-gate-card">
-        <div className="mobile-gate-header-row">
-          <div className="mobile-gate-info">
-            <div className="mobile-gate-icon">🛡️</div>
-            <div>
-              <div className="mobile-gate-title">Admin Quick Gate</div>
-              <div className="mobile-gate-subtitle">Counter discount &amp; settings override</div>
-            </div>
-          </div>
-          <span className={`mobile-gate-status-pill ${isAdminUnlocked ? 'unlocked' : 'locked'}`}>
-            • {isAdminUnlocked ? 'Unlocked' : 'Locked'}
-          </span>
-        </div>
 
-        {!isAdminUnlocked ? (
-          <form onSubmit={handleUnlockPin} className="mobile-gate-form">
-            <div className="mobile-gate-input-wrapper">
-              <span className="mobile-gate-key-icon">🔑</span>
-              <input
-                type="password"
-                inputMode="numeric"
-                maxLength={6}
-                value={pinInput}
-                onChange={(e) => setPinInput(e.target.value)}
-                placeholder="4-digit PIN (1234)"
-                className={`mobile-gate-pin-input ${pinError ? 'pin-error' : ''}`}
-              />
-            </div>
-            <button type="submit" className="mobile-gate-unlock-btn">
-              Unlock 🔒
-            </button>
-          </form>
-        ) : (
-          <div className="mobile-gate-unlocked-actions">
-            <div className="mobile-gate-alert">
-              ✅ Admin gate unlocked! Quick shortcuts available:
-            </div>
-            <div className="mobile-gate-shortcuts">
-              <button
-                type="button"
-                className="btn btn-sm btn-outline"
-                onClick={() => setActiveTab('settings')}
-              >
-                ⚙️ Settings
-              </button>
-              <button
-                type="button"
-                className="btn btn-sm btn-outline"
-                onClick={() => setActiveTab('superadmin')}
-              >
-                🛡️ Super Admin
-              </button>
-              <button
-                type="button"
-                className="btn btn-sm btn-outline"
-                onClick={() => setActiveTab('logs')}
-              >
-                📜 Audit Logs
-              </button>
-              <button
-                type="button"
-                className="btn btn-sm btn-danger"
-                style={{ marginLeft: 'auto' }}
-                onClick={() => {
-                  setIsAdminUnlocked(false);
-                  showToast('🔒 Admin Gate locked.', 'info');
-                }}
-              >
-                Lock Gate
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
 
       {/* 5. Fertilizer & Pesticides Low Stock Section */}
       <div className="mobile-section-block">

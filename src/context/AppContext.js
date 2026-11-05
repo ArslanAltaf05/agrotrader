@@ -63,16 +63,16 @@ const DEFAULT_TENANTS = [
     id: 'tenant-1',
     name: 'Asmat Agro Traders Retra',
     subtitle: 'Authorized Dealer - Quality Seeds, Fertilizers & Crop Protection',
-    ownerName: 'Ahmed Raza Malik',
+    ownerName: 'Mr. Asmat Ullah',
     username: 'admin',
-    email: 'ahmed@ahmedagri.pk',
-    phone: '',
-    city: 'Mandi Bahauddin',
+    email: 'asmat@asmatagro.pk',
+    phone: '0312-5236040',
+    city: 'Retra',
     plan: 'Pro Enterprise Plan',
     monthlyFee: 12000,
     status: 'Active',
     maxBranches: 5,
-    activeBranchesCount: 3,
+    activeBranchesCount: 1,
     totalInvoicesCount: 0,
     adminPin: '1234',
     joinedDate: '2026-01-15',
@@ -88,11 +88,11 @@ const INITIAL_TENANT_USERS = [
     id: 'user-1',
     tenantId: 'tenant-1',
     tenantName: 'Asmat Agro Traders Retra',
-    name: 'Doctor Asmat Ullah (Administrator)',
+    name: 'Mr. Asmat Ullah (Administrator)',
     username: 'admin',
     role: 'Store Admin',
     branchId: 'branch-1',
-    phone: '0300-6737953',
+    phone: '0312-5236040',
     pin: '1234',
     status: 'Active',
     lastActive: 'Just now'
@@ -368,12 +368,8 @@ export function AppProvider({ children }) {
       }));
 
       addLog('Cloud Sync', isNeon ? 'Saved data to Neon Serverless PostgreSQL' : 'Saved data to local offline storage');
-      if (isAuto) {
-        if (isNeon) {
-          showToast('🌐 Internet Connected: Synced with Neon PostgreSQL!', 'success');
-        }
-      } else {
-        showToast(isNeon ? '☁️ All store ledgers saved to Neon PostgreSQL (Preserved across all devices)!' : '💾 Saved to local database (configure Neon credentials in .env)!', 'success');
+      if (!isAuto) {
+        showToast(isNeon ? '☁️ All store ledgers saved to Neon PostgreSQL!' : '💾 Saved to local database!', 'success');
       }
       return true;
     } catch (err) {
@@ -553,8 +549,6 @@ export function AppProvider({ children }) {
     const handleOnline = async () => {
       setIsOnline(true);
       addLog('Network Status', 'Internet connection restored - synchronizing offline database with cloud');
-      showToast('🌐 Internet Connected: Syncing records with Neon...', 'info');
-
       try {
         await syncWithCloud(true);
       } catch (err) {
@@ -566,7 +560,6 @@ export function AppProvider({ children }) {
       setIsOnline(false);
       setCloudConfig(prev => ({ ...prev, syncStatus: 'offline' }));
       addLog('Network Status', 'Internet disconnected - switched to local offline database mode');
-      showToast('📡 You are offline. Changes are saved locally and will auto-sync when connected to internet.', 'info');
     };
 
     window.addEventListener('online', handleOnline);
@@ -917,13 +910,24 @@ export function AppProvider({ children }) {
     }
   }, [theme]);
 
-  // Toast Helper
+  // Toast Helper with Deduplication & Throttling
+  const lastToastRef = useRef({ message: '', time: 0 });
+
   const showToast = (message, type = 'info') => {
-    const id = Date.now() + Math.random();
-    setToasts(prev => [...prev, { id, message, type }]);
+    if (!message) return;
+    const now = Date.now();
+    // Suppress identical messages within 3 seconds
+    if (lastToastRef.current.message === message && now - lastToastRef.current.time < 3000) {
+      return;
+    }
+    lastToastRef.current = { message, time: now };
+
+    const id = now + Math.random();
+    // Keep max 1 toast at a time to prevent UI flooding
+    setToasts([{ id, message, type }]);
     setTimeout(() => {
       setToasts(prev => prev.filter(t => t.id !== id));
-    }, 3500);
+    }, 2200);
   };
 
   const addLog = (action, details) => {
@@ -1042,7 +1046,7 @@ export function AppProvider({ children }) {
           }));
           const adminUser = {
             username: rawUser,
-            name: matchedUser?.name || `${targetTenant.ownerName} (Admin)`,
+            name: matchedUser?.name || 'Mr. Asmat Ullah',
             role: 'admin',
             tenantId: targetTenant.id,
             storeName: targetTenant.name

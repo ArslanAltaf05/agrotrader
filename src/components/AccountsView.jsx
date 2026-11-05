@@ -127,19 +127,27 @@ export default function AccountsView({ onOpenPaymentIn, onOpenPaymentOut }) {
 
   // Generate statement for selected customer
   const getCustomerStatement = (custId) => {
-    const custSales = sales.filter(s => s.customerId === custId).map(s => ({
-      date: s.date,
-      type: 'Sale Invoice',
-      ref: s.id,
-      debit: s.grandTotal,
-      credit: s.paidAmount,
-      balanceChange: s.balanceAmount
-    }));
+    const custSales = sales.filter(s => s.customerId === custId).map(s => {
+      const items = Array.isArray(s.items) ? s.items : [];
+      const productSummary = items.length > 0
+        ? items.map(item => `${item.name || item.productName || 'Product'} (${item.qty || 1} ${item.unit || ''})`).join(', ')
+        : 'Sale Invoice';
+      return {
+        date: s.date,
+        type: productSummary,
+        items,
+        ref: s.invoiceNo || s.id,
+        debit: s.grandTotal,
+        credit: s.paidAmount,
+        balanceChange: s.balanceAmount
+      };
+    });
 
     const custPayments = payments.filter(p => p.accountId === custId && p.type === 'in').map(p => ({
       date: p.date,
-      type: `Payment In (${p.mode})`,
-      ref: p.id,
+      type: `Payment In (${p.mode || p.paymentMode || 'Cash'})`,
+      items: [],
+      ref: p.voucherNo || p.id,
       debit: 0,
       credit: p.amount,
       balanceChange: -p.amount
@@ -458,7 +466,7 @@ export default function AccountsView({ onOpenPaymentIn, onOpenPaymentOut }) {
                   <thead>
                     <tr>
                       <th>DATE</th>
-                      <th>PARTICULARS</th>
+                      <th>PRODUCTS</th>
                       <th>REF #</th>
                       <th style={{ textAlign: 'right' }}>
                         {selectedAccount.accountType === 'customer' ? 'DEBIT (SALE)' : 'DEBIT (WE PAID)'}
@@ -475,7 +483,22 @@ export default function AccountsView({ onOpenPaymentIn, onOpenPaymentOut }) {
                     ).map((entry, i) => (
                       <tr key={i}>
                         <td>{formatDate(entry.date)}</td>
-                        <td style={{ fontWeight: 600 }}>{entry.type}</td>
+                        <td style={{ fontWeight: 600 }}>
+                          {entry.items && entry.items.length > 0 ? (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                              {entry.items.map((item, idx) => (
+                                <div key={idx} style={{ fontSize: '13px', lineHeight: 1.35 }}>
+                                  <span style={{ color: 'var(--text-main)', fontWeight: 700 }}>• {item.name || item.productName}</span>{' '}
+                                  <span style={{ color: 'var(--text-muted)', fontSize: '12px' }}>
+                                    ({item.qty} {item.unit || 'qty'}{item.salePrice ? ` @ Rs ${item.salePrice}` : ''})
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <span>{entry.type}</span>
+                          )}
+                        </td>
                         <td>{entry.ref}</td>
                         <td style={{ textAlign: 'right', color: entry.debit > 0 ? (selectedAccount.accountType === 'customer' ? '#b91c1c' : '#16a34a') : undefined, fontWeight: entry.debit > 0 ? 700 : 400 }}>
                           {entry.debit > 0 ? formatCurrency(entry.debit, hideAmounts) : '-'}

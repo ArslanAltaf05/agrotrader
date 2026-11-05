@@ -318,10 +318,10 @@ export default function Header({ onToggleMobileMenu, onOpenDownloadApp, onOpenEx
               </div>
               <div>
                 <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#111827' }}>
-                  {auth.user?.name || 'Ahmed Raza Malik'}
+                  {auth.user?.name || 'Mr. Asmat Ullah'}
                 </h3>
                 <div style={{ fontSize: '12px', color: '#6b7280' }}>
-                  Role: <strong style={{ color: '#064e3b' }}>{auth.user?.role?.toUpperCase() || 'STORE ADMIN'}</strong>
+                  Role: <strong style={{ color: '#064e3b' }}>{auth.user?.role === 'staff' ? 'COUNTER STAFF' : 'ADMINISTRATOR'}</strong>
                 </div>
               </div>
               <button

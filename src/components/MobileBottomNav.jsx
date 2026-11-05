@@ -33,30 +33,39 @@ export default function MobileBottomNav({ onOpenNewSale, onToggleMobileMenu }) {
 
   const handlePortalSelect = (id) => {
     setShowPortalsModal(false);
-    if (id === 'sales') {
-      onOpenNewSale();
-    } else {
-      setActiveTab(id);
-    }
+    setActiveTab(id);
   };
 
   return (
     <>
       <nav className="mobile-bottom-nav">
-        {/* 1. POS */}
+        {/* 1. Home / Dashboard */}
+        <button
+          type="button"
+          className={`mobile-nav-btn ${activeTab === 'dashboard' ? 'active' : ''}`}
+          onClick={() => setActiveTab('dashboard')}
+          title="Home Dashboard"
+        >
+          <div className="mobile-nav-icon-wrapper">
+            <span style={{ fontSize: '19px', lineHeight: 1 }}>🏠</span>
+          </div>
+          <span>Home</span>
+        </button>
+
+        {/* 2. Sales Tab */}
         <button
           type="button"
           className={`mobile-nav-btn ${activeTab === 'sales' ? 'active' : ''}`}
-          onClick={onOpenNewSale}
-          title="Open POS Counter"
+          onClick={() => setActiveTab('sales')}
+          title="Sales Invoices & POS"
         >
           <div className="mobile-nav-icon-wrapper">
             <span style={{ fontSize: '19px', lineHeight: 1 }}>🛒</span>
           </div>
-          <span>POS</span>
+          <span>Sales</span>
         </button>
 
-        {/* 2. Khata */}
+        {/* 3. Khata */}
         <button
           type="button"
           className={`mobile-nav-btn ${activeTab === 'accounts' ? 'active' : ''}`}
@@ -69,7 +78,7 @@ export default function MobileBottomNav({ onOpenNewSale, onToggleMobileMenu }) {
           <span>Khata</span>
         </button>
 
-        {/* 3. Stock */}
+        {/* 4. Stock */}
         <button
           type="button"
           className={`mobile-nav-btn ${activeTab === 'inventory' ? 'active' : ''}`}
@@ -81,19 +90,6 @@ export default function MobileBottomNav({ onOpenNewSale, onToggleMobileMenu }) {
             {metrics.lowStockCount > 0 && <span className="mobile-nav-badge-dot" />}
           </div>
           <span>Stock</span>
-        </button>
-
-        {/* 4. Recovery */}
-        <button
-          type="button"
-          className={`mobile-nav-btn ${activeTab === 'payments' ? 'active' : ''}`}
-          onClick={() => setActiveTab('payments')}
-          title="Udhar Recovery & Vouchers"
-        >
-          <div className="mobile-nav-icon-wrapper">
-            <span style={{ fontSize: '19px', lineHeight: 1 }}>💰</span>
-          </div>
-          <span>Recovery</span>
         </button>
 
         {/* 5. All Portals Sheet Trigger */}
